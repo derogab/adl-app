@@ -1,4 +1,4 @@
-package com.derogab.adlanalyzer.ui.dashboard;
+package com.derogab.adlanalyzer.ui.personal;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.derogab.adlanalyzer.R;
 
-public class DashboardFragment extends Fragment {
+public class PersonalFragment extends Fragment {
 
-    private DashboardViewModel dashboardViewModel;
+    private PersonalViewModel personalViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        dashboardViewModel =
-                ViewModelProviders.of(this).get(DashboardViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_dashboard, container, false);
-        final TextView textView = root.findViewById(R.id.text_dashboard);
-        dashboardViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        personalViewModel =
+                ViewModelProviders.of(this).get(PersonalViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_personal, container, false);
+        final TextView textView = root.findViewById(R.id.text_personal);
+        personalViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

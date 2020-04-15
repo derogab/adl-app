@@ -3,23 +3,23 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_analyzer">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.derogab.adlanalyzer.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/navigation_analyzer"
+        android:name="com.derogab.adlanalyzer.ui.analyzer.AnalyzerFragment"
+        android:label="@string/title_analyzer"
+        tools:layout="@layout/fragment_analyzer" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.derogab.adlanalyzer.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_learning"
+        android:name="com.derogab.adlanalyzer.ui.learning.LearningFragment"
+        android:label="@string/title_learning"
+        tools:layout="@layout/fragment_learning" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.derogab.adlanalyzer.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_personal"
+        android:name="com.derogab.adlanalyzer.ui.personal.PersonalFragment"
+        android:label="@string/title_personal"
+        tools:layout="@layout/fragment_personal" />
 </navigation>

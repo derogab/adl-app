@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">ADL Analyzer</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_analyzer">Analyzer</string>
+    <string name="title_learning">Learning</string>
+    <string name="title_personal">Personal</string>
 </resources>

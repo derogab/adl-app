@@ -1,4 +1,4 @@
-package com.derogab.adlanalyzer.ui.home;
+package com.derogab.adlanalyzer.ui.learning;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,17 +14,17 @@ import androidx.lifecycle.ViewModelProviders;
 
 import com.derogab.adlanalyzer.R;
 
-public class HomeFragment extends Fragment {
+public class LearningFragment extends Fragment {
 
-    private HomeViewModel homeViewModel;
+    private LearningViewModel learningViewModel;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        homeViewModel =
-                ViewModelProviders.of(this).get(HomeViewModel.class);
-        View root = inflater.inflate(R.layout.fragment_home, container, false);
-        final TextView textView = root.findViewById(R.id.text_home);
-        homeViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
+        learningViewModel =
+                ViewModelProviders.of(this).get(LearningViewModel.class);
+        View root = inflater.inflate(R.layout.fragment_learning, container, false);
+        final TextView textView = root.findViewById(R.id.text_learning);
+        learningViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(@Nullable String s) {
                 textView.setText(s);

@@ -1,16 +1,16 @@
-package com.derogab.adlanalyzer.ui.dashboard;
+package com.derogab.adlanalyzer.ui.analyzer;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-public class DashboardViewModel extends ViewModel {
+public class AnalyzerViewModel extends ViewModel {
 
     private MutableLiveData<String> mText;
 
-    public DashboardViewModel() {
+    public AnalyzerViewModel() {
         mText = new MutableLiveData<>();
-        mText.setValue("This is dashboard fragment");
+        mText.setValue("This is analyzer fragment");
     }
 
     public LiveData<String> getText() {
