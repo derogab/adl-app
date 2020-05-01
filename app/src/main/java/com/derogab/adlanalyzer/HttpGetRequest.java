@@ -1,4 +1,4 @@
-package com.derogab.adlanalyzer.ui.personal;
+package com.derogab.adlanalyzer;
 
 import android.os.AsyncTask;
 
