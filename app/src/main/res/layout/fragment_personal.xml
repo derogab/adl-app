@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     tools:context=".ui.personal.PersonalFragment">
 
-    <LinearLayout
+    <com.derogab.adlanalyzer.ui.personal.PersonalContainerLayout
         android:id="@+id/personalFormContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,9 +21,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-    </LinearLayout>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
