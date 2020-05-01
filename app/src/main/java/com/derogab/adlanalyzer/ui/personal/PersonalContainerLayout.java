@@ -10,6 +10,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.derogab.adlanalyzer.ui.CustomLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -19,7 +20,7 @@ import org.json.JSONObject;
 
 import androidx.annotation.Nullable;
 
-public class PersonalContainerLayout extends LinearLayout {
+public class PersonalContainerLayout extends CustomLayout {
 
     public PersonalContainerLayout(Context context) {
         super(context);
@@ -32,6 +33,8 @@ public class PersonalContainerLayout extends LinearLayout {
     public PersonalContainerLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
+
+    public void generate(String url) { generate(getTemplate(url)); }
 
     public void generate(JSONObject json){
 

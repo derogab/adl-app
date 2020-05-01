@@ -47,29 +47,7 @@ public class PersonalFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         PersonalContainerLayout personalFormContent = view.findViewById(R.id.personalFormContent);
-
-        String url = "https://pastebin.com/raw/xGFK8TvB";
-
-
-        String json_str = null;
-        try {
-            json_str = new HttpGetRequest().execute(url).get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        Log.d(TAG, json_str);
-
-        JSONObject config = null;
-        try {
-            config = new JSONObject(json_str);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        personalFormContent.generate(config);
+            personalFormContent.generate("https://pastebin.com/raw/xGFK8TvB");
 
     }
 
