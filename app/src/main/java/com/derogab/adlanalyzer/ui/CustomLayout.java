@@ -6,10 +6,13 @@ import android.util.Log;
 import android.widget.LinearLayout;
 
 import com.derogab.adlanalyzer.HttpGetRequest;
+import com.derogab.adlanalyzer.JsonSource;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 import androidx.annotation.Nullable;
@@ -28,29 +31,15 @@ public abstract class CustomLayout extends LinearLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    protected JSONObject getTemplate(String url) {
+    public static JSONObject getTemplate(String url) { return new JsonSource(url).getJSON(); }
 
-        String json_str = null;
-        try {
-            json_str = new HttpGetRequest().execute(url).get();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public abstract void setSource(String url) throws JSONException;
+    public abstract void setSource(JSONObject jsonObject) throws JSONException;
+    public abstract void setSource(JSONArray jsonArray);
 
-        JSONObject template = null;
-        try {
-            template = new JSONObject(json_str);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public abstract void generate() throws JSONException;
 
-        return template;
+    public abstract ArrayList getData() throws JSONException;
 
-    }
-
-    public abstract void generate(String url);
-    public abstract void generate(JSONObject json);
 
 }
