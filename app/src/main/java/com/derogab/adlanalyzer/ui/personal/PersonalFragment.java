@@ -41,15 +41,9 @@ public class PersonalFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        return inflater.inflate(R.layout.fragment_personal, container, false);
+        View root = inflater.inflate(R.layout.fragment_personal, container, false);
 
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        personalFormContent = view.findViewById(R.id.personalFormContent);
+        personalFormContent = root.findViewById(R.id.personalFormContent);
         try {
             personalFormContent.setSource("https://pastebin.com/raw/xGFK8TvB");
             personalFormContent.generate();
@@ -63,6 +57,8 @@ public class PersonalFragment extends Fragment {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        return root;
 
     }
 
