@@ -2,6 +2,7 @@ package com.derogab.adlanalyzer.ui.personal;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
@@ -18,9 +19,15 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 import androidx.annotation.Nullable;
 
 public class PersonalContainerLayout extends CustomLayout {
+
+    private static final String TAG = "PersonalContainerLayout";
+
+    private JSONArray contents;
 
     public PersonalContainerLayout(Context context) {
         super(context);
@@ -34,18 +41,35 @@ public class PersonalContainerLayout extends CustomLayout {
         super(context, attrs, defStyleAttr);
     }
 
-    public void generate(String url) { generate(getTemplate(url)); }
 
-    public void generate(JSONObject json){
+    /**
+     * setSource()
+     *
+     * Set the JSON Array of contents
+     * */
+    public void setSource(String url) throws JSONException {
+        setSource(getTemplate(url));
+    }
+    public void setSource(JSONObject jsonObject) throws JSONException {
+        setSource(jsonObject.getJSONArray("contents"));
+    }
+    public void setSource(JSONArray jsonArray){
+        contents = jsonArray;
+    }
 
-        JSONArray array = null;
-        try {
-            array = json.getJSONArray("inputs");
+    /**
+     * generate()
+     *
+     * Generate the layout contents
+     * */
+    public void generate() throws JSONException {
 
-            for(int i = 0 ; i < array.length() ; i++){
+        if (contents != null) {
+
+            for(int i = 0 ; i < contents.length() ; i++){
 
                 // Get params
-                JSONObject params = array.getJSONObject(i);
+                JSONObject params = contents.getJSONObject(i);
 
                 // Create custom view
                 View customView = null;
@@ -88,7 +112,7 @@ public class PersonalContainerLayout extends CustomLayout {
 
                         // Set the id
                         if (params.has("id"))
-                            customView.setId(params.getInt("id"));
+                            input_text.setId(params.getInt("id"));
 
                         // Set label
                         if (params.has("label"))
@@ -203,10 +227,61 @@ public class PersonalContainerLayout extends CustomLayout {
 
             }
 
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
 
     }
+
+    public ArrayList getData() throws JSONException {
+
+        ArrayList list = new ArrayList();
+
+        if (contents != null) {
+
+            for(int i = 0 ; i < contents.length() ; i++){
+
+                // Get params
+                JSONObject params = contents.getJSONObject(i);
+
+                // Create custom view
+                View customView = null;
+
+                // Generate the view
+                switch (params.getString("class")){
+
+                    case "input-text":
+
+
+                        break;
+
+                    case "check-group":
+
+
+                        break;
+
+
+                    case "radio-group":
+
+
+                        break;
+                }
+
+            }
+
+        }
+
+
+
+
+
+
+
+
+
+        return list;
+
+    }
+
+
+
 
 }

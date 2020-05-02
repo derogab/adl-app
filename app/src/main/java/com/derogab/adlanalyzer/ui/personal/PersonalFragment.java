@@ -28,11 +28,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
 public class PersonalFragment extends Fragment {
 
     private static final String TAG = "MainActivity";
+
+    PersonalContainerLayout personalFormContent;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -46,9 +49,35 @@ public class PersonalFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        PersonalContainerLayout personalFormContent = view.findViewById(R.id.personalFormContent);
-            personalFormContent.generate("https://pastebin.com/raw/xGFK8TvB");
+        personalFormContent = view.findViewById(R.id.personalFormContent);
+        try {
+            personalFormContent.setSource("https://pastebin.com/raw/xGFK8TvB");
+            personalFormContent.generate();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            ArrayList l = personalFormContent.getData();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        ArrayList backup = new ArrayList();
+        try {
+            backup = personalFormContent.getData();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+
+    }
 }
