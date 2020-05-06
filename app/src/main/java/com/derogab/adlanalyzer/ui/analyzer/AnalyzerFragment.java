@@ -16,20 +16,10 @@ import com.derogab.adlanalyzer.R;
 
 public class AnalyzerFragment extends Fragment {
 
-    private AnalyzerViewModel analyzerViewModel;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        analyzerViewModel =
-                ViewModelProviders.of(this).get(AnalyzerViewModel.class);
         View root = inflater.inflate(R.layout.fragment_analyzer, container, false);
-        final TextView textView = root.findViewById(R.id.text_analyzer);
-        analyzerViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+
         return root;
     }
 }
