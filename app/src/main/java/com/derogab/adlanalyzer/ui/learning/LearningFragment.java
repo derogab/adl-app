@@ -12,24 +12,53 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import com.derogab.adlanalyzer.JsonSource;
 import com.derogab.adlanalyzer.R;
+import com.google.android.material.snackbar.Snackbar;
+import com.jaredrummler.materialspinner.MaterialSpinner;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class LearningFragment extends Fragment {
 
-    private LearningViewModel learningViewModel;
-
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        learningViewModel =
-                ViewModelProviders.of(this).get(LearningViewModel.class);
+
         View root = inflater.inflate(R.layout.fragment_learning, container, false);
-        final TextView textView = root.findViewById(R.id.text_learning);
-        learningViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
+        MaterialSpinner spinner = (MaterialSpinner) root.findViewById(R.id.spinner);
+
+        JSONArray activities;
+        ArrayList<String> act_list = new ArrayList<>();
+        try {
+
+            activities = new JsonSource("https://pastebin.com/raw/bs6RK1Wv")
+                                    .getJSON()
+                                    .getJSONArray("activities");
+
+            if (activities != null) {
+
+                for(int i = 0 ; i < activities.length() ; i++) {
+
+                    // Get params
+                    JSONObject params = activities.getJSONObject(i);
+
+                    // Add activities to  Spinner list
+                    act_list.add(params.getString("name"));
+                }
+
             }
-        });
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+        spinner.setItems(act_list);
+
         return root;
     }
 }

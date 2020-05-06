@@ -102,7 +102,7 @@ public class PersonalContainerLayout extends CustomLayout {
 
                         // Set attributes
                         ((TextInputLayout)customView).setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
-                        ((TextInputLayout)customView).setBoxCornerRadii((float)10.0, (float)10.0, (float)10.0, (float)10.0);
+
 
                         // Create TextInputEditText
                         TextInputEditText input_text = new TextInputEditText(getContext());
