@@ -2,6 +2,9 @@ package com.derogab.adlanalyzer.ui.learning;
 
 public class Activity {
 
+    public static final String SENSOR_GYROSCOPE = "gyroscope";
+    public static final String SENSOR_ACCELEROMETER = "accelerometer";
+
     private String name;
     private int seconds;
     private double frequency;
@@ -33,7 +36,7 @@ public class Activity {
     }
 
     public double getFrequency() {
-        return seconds;
+        return frequency;
     }
 
     public void setFrequency(double frequency) {

@@ -1,12 +1,14 @@
 <resources>
+    <string name="current_lang">en</string>
     <string name="app_name">ADL Analyzer</string>
     <string name="title_analyzer">Analyzer</string>
     <string name="title_learning">Learning</string>
     <string name="title_personal">Personal</string>
     <string name="fragment_learning_selector_textview">Select an activity…</string>
     <string name="fragment_learning_selected_configuration_textview">Selected configuration</string>
-    <string name="fragment_learning_config_seconds">Times: </string>
+    <string name="fragment_learning_config_seconds">Time: </string>
     <string name="fragment_learning_config_frequency">Frequency: </string>
     <string name="fragment_learning_start_button">Start learning</string>
     <string name="fragment_learning_config_sensors">"Sensors: "</string>
+    <string name="learning_fragment_tts_activity_started">Activity just started</string>
 </resources>
