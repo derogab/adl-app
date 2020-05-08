@@ -7,13 +7,13 @@
     tools:context=".ui.learning.LearningFragment">
 
     <TextView
-        android:id="@+id/fragment_learning_selector_textview"
+        android:id="@+id/fragment_learning_activity_selector_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="@string/fragment_learning_selector_textview"
+        android:text="@string/fragment_learning_activity_selector_textview"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -30,7 +30,7 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/fragment_learning_selector_textview" />
+        app:layout_constraintTop_toBottomOf="@+id/fragment_learning_activity_selector_textview" />
 
     <TextView
         android:id="@+id/fragment_learning_selected_configuration_textview"
@@ -45,7 +45,7 @@
         app:layout_constraintTop_toBottomOf="@id/activity_selector" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView"
+        android:id="@+id/activity_configurations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -146,6 +146,32 @@
 
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/fragment_learning_phone_position_selector_textview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="@string/fragment_learning_phone_position_selector_textview"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activity_configurations" />
+
+    <com.jaredrummler.materialspinner.MaterialSpinner
+        android:id="@+id/phone_position_selector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/fragment_learning_phone_position_selector_textview" />
+
     <Button
         android:id="@+id/fragment_learning_start_button"
         android:layout_width="match_parent"
@@ -159,7 +185,7 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView" />
+        app:layout_constraintTop_toBottomOf="@+id/phone_position_selector" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,7 +2,6 @@ package com.derogab.adlanalyzer.ui.learning;
 
 import android.content.Context;
 import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
@@ -16,18 +15,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 
 import com.derogab.adlanalyzer.JsonSource;
+import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
+
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import org.json.JSONArray;
@@ -36,8 +30,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Locale;
-
-import static android.content.Context.SENSOR_SERVICE;
 
 public class LearningFragment extends Fragment {
 
@@ -54,7 +46,7 @@ public class LearningFragment extends Fragment {
 
     private SensorManager sensorManager;
 
-    FragmentActivity mContext;
+    private FragmentActivity mContext;
 
 
 
@@ -66,13 +58,22 @@ public class LearningFragment extends Fragment {
         // Layout elements
         final View root = inflater.inflate(R.layout.fragment_learning, container, false);
         final MaterialSpinner activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
+        final MaterialSpinner phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
         final Button startLearning = root.findViewById(R.id.fragment_learning_start_button);
-
-
-
 
         // SensorManager init
         sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+
+        // Phone position init
+        phonePositionSelector.setItems("In hand", "In the pocket");
+        phonePositionSelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+
+                ((MainActivity) mContext).setHeaders(item);
+
+            }
+        });
 
         // Get activities list
         JSONArray activities;
@@ -268,6 +269,7 @@ public class LearningFragment extends Fragment {
             public void onFinish() {
                 Log.d(TAG, "activity timer done!");
 
+                // Stop Sensors listener
                 sensorManager.unregisterListener((SensorEventListener) mContext);
 
                 int speechStatus = textToSpeech.speak("done!", TextToSpeech.QUEUE_FLUSH, null);

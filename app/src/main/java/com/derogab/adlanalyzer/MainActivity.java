@@ -18,6 +18,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private static final String TAG = "MainActivity";
 
+    private String positionPhone;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         }
 
+    }
+
+    public void setHeaders(String positionPhone) {
+        Log.d(TAG, "header set to "+positionPhone);
+        this.positionPhone = positionPhone;
     }
 
 }
