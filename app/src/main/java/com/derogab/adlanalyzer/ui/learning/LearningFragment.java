@@ -44,7 +44,7 @@ public class LearningFragment extends Fragment {
     private TextToSpeech textToSpeech;
     private CountDownTimer preparationTimer, activityTimer;
 
-    private TextView timeValue, frequencyValue, sensorsValue;
+    private TextView timeValue, sensorsValue;
 
     private int activitySelectedIndex;
 
@@ -203,11 +203,10 @@ public class LearningFragment extends Fragment {
     private void initConfig(View v, Activity item){
 
         timeValue = v.findViewById(R.id.fragment_learning_config_seconds_value);
-        frequencyValue = v.findViewById(R.id.fragment_learning_config_frequency_value);
         sensorsValue = v.findViewById(R.id.fragment_learning_config_sensors_value);
 
         timeValue.setText(item.getSeconds() + " sec");
-        frequencyValue.setText(item.getFrequency() + " bit/s");
+
 
         String[] sensors = item.getSensors();
         String sensorsStr = "";

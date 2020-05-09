@@ -11,6 +11,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.derogab.adlanalyzer.JsonSource;
 import com.derogab.adlanalyzer.ui.CustomLayout;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 
 import androidx.annotation.Nullable;
 
-public class PersonalContainerLayout extends CustomLayout {
+public class PersonalContainerLayout extends LinearLayout {
 
     private static final String TAG = "PersonalContainerLayout";
 
@@ -41,6 +42,12 @@ public class PersonalContainerLayout extends CustomLayout {
         super(context, attrs, defStyleAttr);
     }
 
+    /**
+     * getTemplate()
+     *
+     * Get JSON of contents
+     * */
+    public static JSONObject getTemplate(String url) { return new JsonSource(url).getJSON(); }
 
     /**
      * setSource()
