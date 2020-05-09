@@ -6,6 +6,8 @@ import android.hardware.SensorEventListener;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.derogab.adlanalyzer.utils.Activity;
+import com.derogab.adlanalyzer.utils.PhonePosition;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,7 +20,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private static final String TAG = "MainActivity";
 
-    private String positionPhone;
+    private String phonePosition;
+    private String activityToAnalyze;
+    private String sendingMode;
+    private String sendingArchive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +38,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
+
+        // Set default headers
+        phonePosition = PhonePosition.IN_HAND;
+
     }
 
     @Override
@@ -47,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = event.values[1];
             float z = event.values[2];
 
-            Log.d(TAG, "[GYROSCOPE] X: "+x+", Y: "+y+", Z: "+z);
+            Log.d(TAG, "[GYROSCOPE] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", MODE: "+sendingMode+", X: "+x+", Y: "+y+", Z: "+z);
 
             // @TODO: send gyroscope data to server
 
@@ -58,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             float y = event.values[1];
             float z = event.values[2];
 
-            Log.d(TAG, "[ACCELEROMETER] X: "+x+", Y: "+y+", Z: "+z);
+            Log.d(TAG, "[ACCELEROMETER] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", MODE: "+sendingMode+", X: "+x+", Y: "+y+", Z: "+z);
 
             // @TODO: send accelerometer data to server
 
@@ -66,9 +75,29 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     }
 
-    public void setHeaders(String positionPhone) {
-        Log.d(TAG, "header set to "+positionPhone);
-        this.positionPhone = positionPhone;
+    public void setPhonePosition(PhonePosition phonePosition) {
+        this.phonePosition = phonePosition.getPosition();
+    }
+
+    public void setActivityToAnalyze(Activity activityToAnalyze) {
+        this.activityToAnalyze = activityToAnalyze.toString();
+    }
+
+    public void setSendingMode(String sendingMode) {
+        this.sendingMode = sendingMode;
+    }
+
+    public void setSendingArchive(String sendingArchive) {
+        this.sendingArchive = sendingArchive;
+    }
+
+    public void setHeaders(String id, Activity activity, PhonePosition positionPhone, String sendingMode) {
+
+        setSendingArchive(id);
+        setActivityToAnalyze(activity);
+        setPhonePosition(positionPhone);
+        setSendingMode(sendingMode);
+
     }
 
 }

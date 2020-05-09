@@ -10,6 +10,8 @@
     <string name="fragment_learning_config_frequency">Frequency: </string>
     <string name="fragment_learning_start_button">Start learning</string>
     <string name="fragment_learning_config_sensors">"Sensors: "</string>
-    <string name="learning_fragment_tts_activity_started">Activity just started</string>
+    <string name="fragment_learning_tts_activity_started">Activity just started</string>
     <string name="fragment_learning_phone_position_selector_textview">Where is the phone?</string>
+    <string name="phone_position_in_hand">In hand</string>
+    <string name="phone_position_in_the_pocket">In the pocket</string>
 </resources>

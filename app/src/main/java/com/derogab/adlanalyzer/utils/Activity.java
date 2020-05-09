@@ -1,4 +1,4 @@
-package com.derogab.adlanalyzer.ui.learning;
+package com.derogab.adlanalyzer.utils;
 
 public class Activity {
 

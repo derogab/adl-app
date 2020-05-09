@@ -22,6 +22,9 @@ import com.derogab.adlanalyzer.JsonSource;
 import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
 
+import com.derogab.adlanalyzer.utils.Activity;
+import com.derogab.adlanalyzer.utils.Constants;
+import com.derogab.adlanalyzer.utils.PhonePosition;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import org.json.JSONArray;
@@ -30,6 +33,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.UUID;
 
 public class LearningFragment extends Fragment {
 
@@ -65,12 +69,12 @@ public class LearningFragment extends Fragment {
         sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
 
         // Phone position init
-        phonePositionSelector.setItems("In hand", "In the pocket");
-        phonePositionSelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<String>() {
+        phonePositionSelector.setItems(PhonePosition.getAll(mContext));
+        phonePositionSelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<PhonePosition>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, String item) {
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, PhonePosition item) {
 
-                ((MainActivity) mContext).setHeaders(item);
+                ((MainActivity) mContext).setPhonePosition(item);
 
             }
         });
@@ -129,6 +133,7 @@ public class LearningFragment extends Fragment {
         // First selected config
         Activity first_selected = (Activity) activitySelector.getItems().get(activitySelectedIndex);
         initConfig(root, first_selected);
+        ((MainActivity) mContext).setActivityToAnalyze(first_selected);
 
         // Set listener on Spinner select change
         activitySelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Activity>() {
@@ -137,6 +142,7 @@ public class LearningFragment extends Fragment {
 
             activitySelectedIndex = position;
             initConfig(root, item);
+            ((MainActivity) mContext).setActivityToAnalyze(item);
 
             }
 
@@ -242,6 +248,10 @@ public class LearningFragment extends Fragment {
 
                 sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
                 sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+
+                ((MainActivity) mContext).setSendingArchive(UUID.randomUUID().toString());
+                ((MainActivity) mContext).setSendingMode(Constants.SENDING_MODE_LEARN);
+
                 activityTimer.start();
             }
         };
