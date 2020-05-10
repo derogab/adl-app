@@ -14,4 +14,7 @@
     <string name="fragment_learning_phone_position_selector_textview">Where is the phone?</string>
     <string name="phone_position_in_hand">In hand</string>
     <string name="phone_position_in_the_pocket">In the pocket</string>
+    <string name="fragment_personal_save_button">Save</string>
+    <string name="fragment_personal_saved">Data saved successfully.</string>
+    <string name="fragment_personal_not_saved">Error: data not saved.</string>
 </resources>
