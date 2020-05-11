@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Theme.MaterialComponents.Light"
+    android:paddingBottom="8dp"
     tools:context=".ui.learning.LearningFragment">
 
     <TextView
@@ -44,7 +46,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/activity_selector" />
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/activity_configurations"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -53,6 +55,10 @@
         android:layout_marginRight="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginTop="8dp"
+        android:theme="@style/Theme.MaterialComponents.Light"
+        app:strokeWidth="1dp"
+        app:strokeColor="@android:color/white"
+        app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_learning_selected_configuration_textview">
@@ -117,7 +123,7 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
         android:id="@+id/fragment_learning_phone_position_selector_textview"
@@ -135,6 +141,7 @@
         android:id="@+id/phone_position_selector"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -145,7 +152,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/fragment_learning_phone_position_selector_textview" />
 
-    <Button
+    <!--<com.google.android.material.button.MaterialButton
         android:id="@+id/fragment_learning_start_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -158,7 +165,26 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/phone_position_selector" />
+        app:layout_constraintTop_toBottomOf="@+id/phone_position_selector" />-->
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fragment_learning_start_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:foregroundGravity="right|bottom"
+        android:layout_margin="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_directions_run_black_24dp"
+        android:contentDescription="@string/fragment_learning_start_button"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.material.card.MaterialCardView;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -25,6 +27,7 @@ import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.utils.Activity;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.PhonePosition;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import org.json.JSONArray;
@@ -63,7 +66,8 @@ public class LearningFragment extends Fragment {
         final View root = inflater.inflate(R.layout.fragment_learning, container, false);
         final MaterialSpinner activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
         final MaterialSpinner phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
-        final Button startLearning = root.findViewById(R.id.fragment_learning_start_button);
+        //final Button startLearning = root.findViewById(R.id.fragment_learning_start_button);
+        final FloatingActionButton fab = root.findViewById(R.id.fragment_learning_start_button);
 
         // SensorManager init
         sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
@@ -172,11 +176,20 @@ public class LearningFragment extends Fragment {
         });
 
         // Set listener
-        startLearning.setOnClickListener(new View.OnClickListener() {
+        /*startLearning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
             Log.d(TAG, "button clicked. ");
             preparationTimer.start();
+            }
+        });*/
+
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "fab clicked. ");
+                preparationTimer.start();
             }
         });
 
