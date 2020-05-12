@@ -5,10 +5,12 @@ public class Activity {
     public static final String SENSOR_GYROSCOPE = "gyroscope";
     public static final String SENSOR_ACCELEROMETER = "accelerometer";
 
+    // Activity Info
     private String name;
     private int seconds;
-    private double frequency;
-    private String[] sensors;
+    // Usable sensors
+    private boolean accelerometer;
+    private boolean gyroscope;
 
     public Activity(String name) {
         this.name = name;
@@ -17,6 +19,8 @@ public class Activity {
     public Activity(String name, int seconds) {
         this.name = name;
         this.seconds = seconds;
+        accelerometer = true; // true by default
+        gyroscope = true;  // true by default
     }
 
     public String getName() {
@@ -35,20 +39,23 @@ public class Activity {
         this.seconds = seconds;
     }
 
-    public double getFrequency() {
-        return frequency;
+    public boolean canUse(String sensor) {
+
+        switch (sensor) {
+            case SENSOR_ACCELEROMETER: return accelerometer;
+            case SENSOR_GYROSCOPE: return gyroscope;
+            default: return false;
+        }
+
     }
 
-    public void setFrequency(double frequency) {
-        this.frequency = frequency;
-    }
+    public void canUse(String sensor, boolean use) {
 
-    public String[] getSensors() {
-        return sensors;
-    }
+        switch (sensor) {
+            case SENSOR_ACCELEROMETER: accelerometer = use; break;
+            case SENSOR_GYROSCOPE: gyroscope = use; break;
+        }
 
-    public void setSensors(String[] sensors) {
-        this.sensors = sensors;
     }
 
     @Override

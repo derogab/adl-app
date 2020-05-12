@@ -47,7 +47,8 @@ public class LearningFragment extends Fragment {
     private TextToSpeech textToSpeech;
     private CountDownTimer preparationTimer, activityTimer;
 
-    private TextView timeValue, sensorsValue;
+
+    private TextView accelerometerValue, gyroscopeValue, countdownValue;
 
     private int activitySelectedIndex;
 
@@ -66,8 +67,12 @@ public class LearningFragment extends Fragment {
         final View root = inflater.inflate(R.layout.fragment_learning, container, false);
         final MaterialSpinner activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
         final MaterialSpinner phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
-        //final Button startLearning = root.findViewById(R.id.fragment_learning_start_button);
-        final FloatingActionButton fab = root.findViewById(R.id.fragment_learning_start_button);
+        final FloatingActionButton startLearning = root.findViewById(R.id.fragment_learning_start_button);
+
+        // Dynamic values
+        countdownValue = root.findViewById(R.id.fragment_learning_countdown_timer);
+        accelerometerValue = root.findViewById(R.id.fragment_learning_sensors_accelerometer_value);
+        gyroscopeValue = root.findViewById(R.id.fragment_learning_sensors_gyroscope_value);
 
         // SensorManager init
         sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
@@ -102,12 +107,12 @@ public class LearningFragment extends Fragment {
                                             params.getInt("time"));
 
                 // Convert data sensors format
-                JSONArray sensorsJson = params.getJSONArray("sensors");
-                String sensorsArray[] = new String[sensorsJson.length()];
-                for (int j = 0; j < sensorsJson.length(); j++) {
-                    sensorsArray[j] = sensorsJson.getString(j);
-                }
-                tmp.setSensors(sensorsArray);
+                JSONObject sensorsJson = params.getJSONObject("sensors");
+
+                tmp.canUse(Activity.SENSOR_ACCELEROMETER,
+                            sensorsJson.getBoolean(Activity.SENSOR_ACCELEROMETER));
+                tmp.canUse(Activity.SENSOR_GYROSCOPE,
+                            sensorsJson.getBoolean(Activity.SENSOR_GYROSCOPE));
 
                 // Add activities to  Spinner list
                 activitiesList.add(tmp);
@@ -176,16 +181,7 @@ public class LearningFragment extends Fragment {
         });
 
         // Set listener
-        /*startLearning.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            Log.d(TAG, "button clicked. ");
-            preparationTimer.start();
-            }
-        });*/
-
-
-        fab.setOnClickListener(new View.OnClickListener() {
+        startLearning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
@@ -213,27 +209,23 @@ public class LearningFragment extends Fragment {
         textToSpeech = null;
     }
 
+    private void infoSensor(TextView sensorValue, boolean isActive) {
+
+        if (isActive) {
+            sensorValue.setText("ON");
+        }
+        else {
+            sensorValue.setText("OFF");
+        }
+
+    }
+
     private void initConfig(View v, Activity item){
 
-        timeValue = v.findViewById(R.id.fragment_learning_config_seconds_value);
-        sensorsValue = v.findViewById(R.id.fragment_learning_config_sensors_value);
+        countdownValue.setText(item.getSeconds() + " sec");
 
-        timeValue.setText(item.getSeconds() + " sec");
-
-
-        String[] sensors = item.getSensors();
-        String sensorsStr = "";
-
-        if(sensors != null){
-
-            for (int i = 0; i < sensors.length; i++) {
-                sensorsStr += sensors[i];
-
-                if (i != sensors.length-1) sensorsStr += ", ";
-
-            }
-            sensorsValue.setText(sensorsStr);
-        }
+        infoSensor(accelerometerValue, item.canUse(Activity.SENSOR_ACCELEROMETER));
+        infoSensor(gyroscopeValue, item.canUse(Activity.SENSOR_GYROSCOPE));
 
         preparationTimer = new CountDownTimer(10000, 1000) {
             @Override
@@ -250,7 +242,7 @@ public class LearningFragment extends Fragment {
 
                 }
 
-                timeValue.setText("-" + (millisUntilFinished / 1000) + " sec");
+                countdownValue.setText("-" + (millisUntilFinished / 1000) + " sec");
 
             }
 
@@ -283,7 +275,7 @@ public class LearningFragment extends Fragment {
 
                 }
 
-                timeValue.setText("" + (millisUntilFinished / 1000) + " sec");
+                countdownValue.setText("" + (millisUntilFinished / 1000) + " sec");
 
             }
 
