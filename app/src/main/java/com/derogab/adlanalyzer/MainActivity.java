@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         NavigationUI.setupWithNavController(navView, navController);
 
         // Set default headers
-        phonePosition = PhonePosition.IN_HAND;
+        phonePosition = PhonePosition.IN_RIGHT_HAND;
 
     }
 

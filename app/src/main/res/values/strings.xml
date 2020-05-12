@@ -17,4 +17,10 @@
     <string name="fragment_personal_save_button">Save</string>
     <string name="fragment_personal_saved">Data saved successfully.</string>
     <string name="fragment_personal_not_saved">Error: data not saved.</string>
+    <string name="phone_position_in_the_front_left_pocket">In the front left pocket</string>
+    <string name="phone_position_in_the_front_right_pocket">In the front right pocket</string>
+    <string name="phone_position_in_the_back_left_pocket">In the back left pocket</string>
+    <string name="phone_position_in_the_back_right_pocket">In the back right pocket</string>
+    <string name="phone_position_in_left_hand">In left hand</string>
+    <string name="phone_position_in_right_hand">In right hand</string>
 </resources>
