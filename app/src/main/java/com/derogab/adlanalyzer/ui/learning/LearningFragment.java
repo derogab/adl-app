@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.derogab.adlanalyzer.utils.CountDown;
 import com.google.android.material.card.MaterialCardView;
 
 import androidx.annotation.NonNull;
@@ -222,7 +223,7 @@ public class LearningFragment extends Fragment {
 
     private void initConfig(View v, Activity item){
 
-        countdownValue.setText(item.getSeconds() + " sec");
+        countdownValue.setText(CountDown.get(item.getSeconds()));
 
         infoSensor(accelerometerValue, item.canUse(Activity.SENSOR_ACCELEROMETER));
         infoSensor(gyroscopeValue, item.canUse(Activity.SENSOR_GYROSCOPE));
@@ -242,7 +243,7 @@ public class LearningFragment extends Fragment {
 
                 }
 
-                countdownValue.setText("-" + (millisUntilFinished / 1000) + " sec");
+                countdownValue.setText("-" + CountDown.get(millisUntilFinished / 1000));
 
             }
 
@@ -275,7 +276,7 @@ public class LearningFragment extends Fragment {
 
                 }
 
-                countdownValue.setText("" + (millisUntilFinished / 1000) + " sec");
+                countdownValue.setText(CountDown.get((millisUntilFinished / 1000)));
 
             }
 
