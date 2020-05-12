@@ -6,6 +6,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Parcelable;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ import com.derogab.adlanalyzer.utils.Activity;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.PhonePosition;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import org.json.JSONArray;
@@ -186,6 +188,7 @@ public class LearningFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
+                Snackbar.make(view, "Starting in 10 seconds", Snackbar.LENGTH_SHORT).show();
                 preparationTimer.start();
             }
         });
@@ -221,7 +224,7 @@ public class LearningFragment extends Fragment {
 
     }
 
-    private void initConfig(View v, Activity item){
+    private void initConfig(final View v, Activity item){
 
         countdownValue.setText(CountDown.get(item.getSeconds()));
 
@@ -256,6 +259,14 @@ public class LearningFragment extends Fragment {
 
                 ((MainActivity) mContext).setSendingArchive(UUID.randomUUID().toString());
                 ((MainActivity) mContext).setSendingMode(Constants.SENDING_MODE_LEARN);
+
+                int speechStatus = textToSpeech.speak("Activity started.", TextToSpeech.QUEUE_FLUSH, null);
+
+                if (speechStatus == TextToSpeech.ERROR) {
+                    Log.e(TAG, "[TTS] Error in converting Text to Speech!");
+                }
+
+                Snackbar.make(v, "Activity started.", Snackbar.LENGTH_SHORT).show();
 
                 activityTimer.start();
             }
@@ -296,6 +307,5 @@ public class LearningFragment extends Fragment {
         };
 
     }
-
 
 }
