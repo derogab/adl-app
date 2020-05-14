@@ -15,5 +15,9 @@ public class Constants {
 
     public static final String PERSONAL_DATA_INFORMATION_FILE_NAME = "personal-data-information";
 
+    public static final String SENSOR_ACCELEROMETER = "accelerometer";
+    public static final String SENSOR_GYROSCOPE = "gyroscope";
 
+
+    public static final String API_BASE_URL = "https://pastebin.com/raw/";
 }

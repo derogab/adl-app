@@ -6,7 +6,7 @@ import android.hardware.SensorEventListener;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.derogab.adlanalyzer.utils.Activity;
+import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.utils.PhonePosition;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 

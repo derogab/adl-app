@@ -6,27 +6,27 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Parcelable;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.derogab.adlanalyzer.utils.CountDown;
-import com.google.android.material.card.MaterialCardView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.lifecycle.ViewModelProviders;
 
 import com.derogab.adlanalyzer.JsonSource;
 import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
 
-import com.derogab.adlanalyzer.utils.Activity;
+import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.PhonePosition;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -38,6 +38,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -53,12 +54,19 @@ public class LearningFragment extends Fragment {
 
     private TextView accelerometerValue, gyroscopeValue, countdownValue;
 
-    private int activitySelectedIndex;
+    private int activitySelectedIndex = 0;
 
     private SensorManager sensorManager;
 
     private FragmentActivity mContext;
 
+
+    private LearningViewModel learningViewModel;
+
+    private MaterialSpinner activitySelector, phonePositionSelector;
+    private FloatingActionButton startLearning;
+
+    private View root;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -67,10 +75,10 @@ public class LearningFragment extends Fragment {
         mContext = this.getActivity();
 
         // Layout elements
-        final View root = inflater.inflate(R.layout.fragment_learning, container, false);
-        final MaterialSpinner activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
-        final MaterialSpinner phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
-        final FloatingActionButton startLearning = root.findViewById(R.id.fragment_learning_start_button);
+        root = inflater.inflate(R.layout.fragment_learning, container, false);
+        activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
+        phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
+        startLearning = root.findViewById(R.id.fragment_learning_start_button);
 
         // Dynamic values
         countdownValue = root.findViewById(R.id.fragment_learning_countdown_timer);
@@ -91,70 +99,41 @@ public class LearningFragment extends Fragment {
             }
         });
 
-        // Get activities list
-        JSONArray activities;
-        ArrayList<Activity> activitiesList = new ArrayList<>();
-        try {
+        learningViewModel = new ViewModelProvider(this).get(LearningViewModel.class);
 
-            activities = new JsonSource("https://pastebin.com/raw/bs6RK1Wv")
-                                    .getJSON()
-                                    .getJSONArray("activities");
+        learningViewModel.getActivities().observe(getViewLifecycleOwner(), new Observer<List<Activity>>() {
+            @Override
+            public void onChanged(List<Activity> activities) {
 
-            for(int i = 0 ; i < activities.length(); i++) {
+                activitySelector.setItems(activities);
+                updateInfo();
 
-                // Get params
-                JSONObject params = activities.getJSONObject(i);
-
-                // Create activity
-                Activity tmp = new Activity(params.getString("name"),
-                                            params.getInt("time"));
-
-                // Convert data sensors format
-                JSONObject sensorsJson = params.getJSONObject("sensors");
-
-                tmp.canUse(Activity.SENSOR_ACCELEROMETER,
-                            sensorsJson.getBoolean(Activity.SENSOR_ACCELEROMETER));
-                tmp.canUse(Activity.SENSOR_GYROSCOPE,
-                            sensorsJson.getBoolean(Activity.SENSOR_GYROSCOPE));
-
-                // Add activities to  Spinner list
-                activitiesList.add(tmp);
             }
 
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        });
 
-        // Add activities list to the spinner list
-        activitySelector.setItems(activitiesList);
 
         // Set all saved data
         if(savedInstanceState != null){
             Log.d(TAG, "Restore InstanceState...");
             activitySelectedIndex = savedInstanceState.getInt(ACTIVITY_SELECTED_INDEX);
 
-            if (activitySelectedIndex < activitySelector.getItems().size()) {
-                activitySelector.setSelectedIndex(activitySelectedIndex);
-            }
 
         }
 
-        // Get first activity selected index
-        activitySelectedIndex = activitySelector.getSelectedIndex();
 
-        // First selected config
-        Activity first_selected = (Activity) activitySelector.getItems().get(activitySelectedIndex);
-        initConfig(root, first_selected);
-        ((MainActivity) mContext).setActivityToAnalyze(first_selected);
+
 
         // Set listener on Spinner select change
         activitySelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Activity>() {
 
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, Activity item) {
 
-            activitySelectedIndex = position;
-            initConfig(root, item);
-            ((MainActivity) mContext).setActivityToAnalyze(item);
+                activitySelectedIndex = position;
+
+                ((MainActivity) mContext).setActivityToAnalyze(item);
+
+                updateInfo();
 
             }
 
@@ -183,6 +162,7 @@ public class LearningFragment extends Fragment {
             }
         });
 
+
         // Set listener
         startLearning.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -204,15 +184,6 @@ public class LearningFragment extends Fragment {
         outState.putInt(ACTIVITY_SELECTED_INDEX, activitySelectedIndex);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        textToSpeech.stop();
-        textToSpeech.shutdown();
-        textToSpeech = null;
-    }
-
     private void infoSensor(TextView sensorValue, boolean isActive) {
 
         if (isActive) {
@@ -224,13 +195,35 @@ public class LearningFragment extends Fragment {
 
     }
 
-    private void initConfig(final View v, Activity item){
+    private void updateInfo() {
 
-        countdownValue.setText(CountDown.get(item.getSeconds()));
+        Log.d(TAG, "Updating info...");
 
-        infoSensor(accelerometerValue, item.canUse(Activity.SENSOR_ACCELEROMETER));
-        infoSensor(gyroscopeValue, item.canUse(Activity.SENSOR_GYROSCOPE));
+        // Select previously
+        if (activitySelectedIndex != 0
+                && activitySelectedIndex < activitySelector.getItems().size()) {
 
+            activitySelector.setSelectedIndex(activitySelectedIndex);
+
+        }
+
+        // Get the selected activity index
+        activitySelectedIndex = activitySelector.getSelectedIndex();
+
+        // Get the selected activity
+        Activity activitySelected = (Activity) activitySelector.getItems().get(activitySelectedIndex);
+
+        // Set header in the MainActivity
+        ((MainActivity) mContext).setActivityToAnalyze(activitySelected);
+
+        // Write time in the countdown
+        countdownValue.setText(CountDown.get(activitySelected.getTime()));
+
+        // Write sensors status
+        infoSensor(accelerometerValue, activitySelected.isSensorActive(Constants.SENSOR_ACCELEROMETER));
+        infoSensor(gyroscopeValue, activitySelected.isSensorActive(Constants.SENSOR_GYROSCOPE));
+
+        // Set preparation timer
         preparationTimer = new CountDownTimer(10000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -266,13 +259,14 @@ public class LearningFragment extends Fragment {
                     Log.e(TAG, "[TTS] Error in converting Text to Speech!");
                 }
 
-                Snackbar.make(v, "Activity started.", Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(root, "Activity started.", Snackbar.LENGTH_SHORT).show();
 
                 activityTimer.start();
             }
         };
 
-        activityTimer = new CountDownTimer(item.getSeconds() * 1000, 1000) {
+        // Set activity timer
+        activityTimer = new CountDownTimer(activitySelected.getTime() * 1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 Log.d(TAG, "seconds remaining: " + millisUntilFinished / 1000);
@@ -306,6 +300,47 @@ public class LearningFragment extends Fragment {
             }
         };
 
+
+
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "onStop");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "onDestroyView");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
+
+        /*textToSpeech.stop();
+        textToSpeech.shutdown();
+        textToSpeech = null;*/
+    }
 }
