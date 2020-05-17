@@ -1,6 +1,10 @@
 package com.derogab.adlanalyzer.ui.learning;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
@@ -13,9 +17,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.derogab.adlanalyzer.services.LearningService;
 import com.derogab.adlanalyzer.utils.CountDown;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -42,6 +48,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+
 public class LearningFragment extends Fragment {
 
     private static final String TAG = "LearningFragment";
@@ -51,12 +58,11 @@ public class LearningFragment extends Fragment {
     private TextToSpeech textToSpeech;
     private CountDownTimer preparationTimer, activityTimer;
 
+    BroadcastReceiver learningServiceReceiver;
 
     private TextView accelerometerValue, gyroscopeValue, countdownValue;
 
     private int activitySelectedIndex = 0;
-
-    private SensorManager sensorManager;
 
     private FragmentActivity mContext;
 
@@ -67,6 +73,12 @@ public class LearningFragment extends Fragment {
     private FloatingActionButton startLearning;
 
     private View root;
+
+    private Intent learningIntent;
+
+    private Activity activitySelected;
+    private String learningArchive;
+    private PhonePosition phonePosition;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -85,16 +97,13 @@ public class LearningFragment extends Fragment {
         accelerometerValue = root.findViewById(R.id.fragment_learning_sensors_accelerometer_value);
         gyroscopeValue = root.findViewById(R.id.fragment_learning_sensors_gyroscope_value);
 
-        // SensorManager init
-        sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
-
         // Phone position init
         phonePositionSelector.setItems(PhonePosition.getAll(mContext));
         phonePositionSelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<PhonePosition>() {
 
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, PhonePosition item) {
 
-                ((MainActivity) mContext).setPhonePosition(item);
+                phonePosition = item;
 
             }
         });
@@ -112,6 +121,9 @@ public class LearningFragment extends Fragment {
 
         });
 
+        // Init service
+        if (learningIntent == null)
+            learningIntent = new Intent(mContext, LearningService.class);
 
         // Set all saved data
         if(savedInstanceState != null){
@@ -130,8 +142,7 @@ public class LearningFragment extends Fragment {
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, Activity item) {
 
                 activitySelectedIndex = position;
-
-                ((MainActivity) mContext).setActivityToAnalyze(item);
+                activitySelected = item;
 
                 updateInfo();
 
@@ -169,7 +180,18 @@ public class LearningFragment extends Fragment {
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
                 Snackbar.make(view, "Starting in 10 seconds", Snackbar.LENGTH_SHORT).show();
-                preparationTimer.start();
+
+                Log.d(TAG, "getSelectedActivity().getTime(): " + getSelectedActivity().getTime());
+
+
+
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, "Swim");
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, PhonePosition.IN_RIGHT_HAND);
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
+
+                mContext.startService(learningIntent);
+
             }
         });
 
@@ -195,6 +217,16 @@ public class LearningFragment extends Fragment {
 
     }
 
+    private Activity getSelectedActivity() {
+
+        // Get the selected activity index
+        int index = activitySelector.getSelectedIndex();
+
+        // Get the selected activity
+        return (Activity) activitySelector.getItems().get(index);
+
+    }
+
     private void updateInfo() {
 
         Log.d(TAG, "Updating info...");
@@ -211,10 +243,7 @@ public class LearningFragment extends Fragment {
         activitySelectedIndex = activitySelector.getSelectedIndex();
 
         // Get the selected activity
-        Activity activitySelected = (Activity) activitySelector.getItems().get(activitySelectedIndex);
-
-        // Set header in the MainActivity
-        ((MainActivity) mContext).setActivityToAnalyze(activitySelected);
+        activitySelected = (Activity) activitySelector.getItems().get(activitySelectedIndex);
 
         // Write time in the countdown
         countdownValue.setText(CountDown.get(activitySelected.getTime()));
@@ -223,84 +252,85 @@ public class LearningFragment extends Fragment {
         infoSensor(accelerometerValue, activitySelected.isSensorActive(Constants.SENSOR_ACCELEROMETER));
         infoSensor(gyroscopeValue, activitySelected.isSensorActive(Constants.SENSOR_GYROSCOPE));
 
-        // Set preparation timer
-        preparationTimer = new CountDownTimer(10000, 1000) {
+        // Set information receiver from service
+        learningServiceReceiver = new BroadcastReceiver() {
             @Override
-            public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "seconds remaining before start: " + millisUntilFinished / 1000);
+            public void onReceive(Context context, Intent intent) {
 
-                if ((millisUntilFinished / 1000) == 3) {
+                if(intent.getAction().equals("GET_ACTIVITY_COUNTDOWN")) {
 
-                    int speechStatus = textToSpeech.speak("The activity is about to begin", TextToSpeech.QUEUE_FLUSH, null);
+                    long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN",0);
+                    Log.d(TAG, "Activity countdown received: " + activityCountdown);
+
+                    if (activityCountdown % 5 == 0) {
+
+                        int speechStatus = textToSpeech.speak(""+activityCountdown, TextToSpeech.QUEUE_FLUSH, null);
+
+                        if (speechStatus == TextToSpeech.ERROR) {
+                            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
+                        }
+
+                    }
+
+                    countdownValue.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                    countdownValue.setText(CountDown.get(activityCountdown));
+
+                }
+                else if(intent.getAction().equals("GET_PREPARATION_COUNTDOWN")) {
+
+                    long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN",0);
+                    Log.d(TAG, "Preparation countdown received: " + preparationCountdown);
+
+                    if (preparationCountdown == 3) {
+
+                        int speechStatus = textToSpeech.speak("The activity is about to begin", TextToSpeech.QUEUE_FLUSH, null);
+
+                        if (speechStatus == TextToSpeech.ERROR) {
+                            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
+                        }
+
+                    }
+
+                    countdownValue.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+                    countdownValue.setText(CountDown.get(preparationCountdown));
+
+                }
+                else if(intent.getAction().equals("GET_ACTIVITY_START")) {
+                    Log.d(TAG, "Activity started");
+
+                    int speechStatus = textToSpeech.speak("Activity started.", TextToSpeech.QUEUE_FLUSH, null);
 
                     if (speechStatus == TextToSpeech.ERROR) {
                         Log.e(TAG, "[TTS] Error in converting Text to Speech!");
                     }
 
+                    Snackbar.make(root, "Activity started.", Snackbar.LENGTH_SHORT).show();
                 }
+                else if(intent.getAction().equals("GET_ACTIVITY_END")) {
+                    Log.d(TAG, "Activity stop");
 
-                countdownValue.setText("-" + CountDown.get(millisUntilFinished / 1000));
-
-            }
-
-            @Override
-            public void onFinish() {
-                Log.d(TAG, "preparation timer done!");
-
-                sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-                sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-
-                ((MainActivity) mContext).setSendingArchive(UUID.randomUUID().toString());
-                ((MainActivity) mContext).setSendingMode(Constants.SENDING_MODE_LEARN);
-
-                int speechStatus = textToSpeech.speak("Activity started.", TextToSpeech.QUEUE_FLUSH, null);
-
-                if (speechStatus == TextToSpeech.ERROR) {
-                    Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-                }
-
-                Snackbar.make(root, "Activity started.", Snackbar.LENGTH_SHORT).show();
-
-                activityTimer.start();
-            }
-        };
-
-        // Set activity timer
-        activityTimer = new CountDownTimer(activitySelected.getTime() * 1000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "seconds remaining: " + millisUntilFinished / 1000);
-
-                if (millisUntilFinished / 1000 % 5 == 0) {
-
-                    int speechStatus = textToSpeech.speak(""+(millisUntilFinished / 1000), TextToSpeech.QUEUE_FLUSH, null);
+                    int speechStatus = textToSpeech.speak("done!", TextToSpeech.QUEUE_FLUSH, null);
 
                     if (speechStatus == TextToSpeech.ERROR) {
                         Log.e(TAG, "[TTS] Error in converting Text to Speech!");
                     }
 
+                    countdownValue.setText(CountDown.get(getSelectedActivity().getTime()));
+
+                    Snackbar.make(root, "Done.", Snackbar.LENGTH_SHORT).show();
+
+                    mContext.stopService(learningIntent);
                 }
 
-                countdownValue.setText(CountDown.get((millisUntilFinished / 1000)));
 
-            }
-
-            @Override
-            public void onFinish() {
-                Log.d(TAG, "activity timer done!");
-
-                // Stop Sensors listener
-                sensorManager.unregisterListener((SensorEventListener) mContext);
-
-                int speechStatus = textToSpeech.speak("done!", TextToSpeech.QUEUE_FLUSH, null);
-
-                if (speechStatus == TextToSpeech.ERROR) {
-                    Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-                }
             }
         };
 
-
+        // Init receiver
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_COUNTDOWN"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_PREPARATION_COUNTDOWN"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_START"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_END"));
 
     }
 
@@ -314,12 +344,15 @@ public class LearningFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop");
+        mContext.unregisterReceiver(learningServiceReceiver);
     }
 
     @Override
     public void onStart() {
         super.onStart();
         Log.d(TAG, "onStart");
+
+
     }
 
     @Override
@@ -339,8 +372,8 @@ public class LearningFragment extends Fragment {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
 
-        /*textToSpeech.stop();
+        textToSpeech.stop();
         textToSpeech.shutdown();
-        textToSpeech = null;*/
+        textToSpeech = null;
     }
 }

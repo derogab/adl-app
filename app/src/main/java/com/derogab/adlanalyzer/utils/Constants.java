@@ -20,4 +20,9 @@ public class Constants {
 
 
     public static final String API_BASE_URL = "https://pastebin.com/raw/";
+
+    public static final String LEARNING_SERVICE_ARCHIVE = "learning_service_archive";
+    public static final String LEARNING_SERVICE_ACTIVITY = "learning_service_activity";
+    public static final String LEARNING_SERVICE_PHONE_POSITION = "learning_service_phone_position";
+    public static final String LEARNING_SERVICE_ACTIVITY_TIMER = "learning_service_activity_timer";
 }
