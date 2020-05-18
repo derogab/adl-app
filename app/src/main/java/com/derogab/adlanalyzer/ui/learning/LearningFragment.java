@@ -28,6 +28,8 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.preference.PreferenceFragmentCompat;
+
 import android.preference.PreferenceManager;
 
 import com.derogab.adlanalyzer.JsonSource;
@@ -77,6 +79,8 @@ public class LearningFragment extends Fragment {
     private View root;
 
     private Intent learningIntent;
+
+
 
     private Activity activitySelected;
     private String learningArchive;
@@ -182,23 +186,16 @@ public class LearningFragment extends Fragment {
                 Log.d(TAG, "getSelectedActivity().getTime(): " + getSelectedActivity().getTime());
 
 
-
-
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
                     learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
                     learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, "Swim");
                     learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, PhonePosition.IN_RIGHT_HAND);
                     learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
-                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION, preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
-                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION, Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
-
-
-
-
-
-
+                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
+                            preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
+                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_PORT,
+                            Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
 
                 mContext.startService(learningIntent);
 
@@ -407,4 +404,5 @@ public class LearningFragment extends Fragment {
         textToSpeech.shutdown();
         textToSpeech = null;
     }
+
 }

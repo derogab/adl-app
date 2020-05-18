@@ -231,7 +231,7 @@ public class LearningService extends Service implements SensorEventListener {
 
                 Socket socket = null;
                 try {
-                    socket = new Socket(host, 8090);
+                    socket = new Socket(host, port);
                     PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
                     printWriter.write(dataToSend);
                     printWriter.flush();
