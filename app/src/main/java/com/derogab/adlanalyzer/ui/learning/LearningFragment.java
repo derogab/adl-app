@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEventListener;
@@ -27,6 +28,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import android.preference.PreferenceManager;
 
 import com.derogab.adlanalyzer.JsonSource;
 import com.derogab.adlanalyzer.MainActivity;
@@ -121,10 +123,6 @@ public class LearningFragment extends Fragment {
 
         });
 
-        // Init service
-        if (learningIntent == null)
-            learningIntent = new Intent(mContext, LearningService.class);
-
         // Set all saved data
         if(savedInstanceState != null){
             Log.d(TAG, "Restore InstanceState...");
@@ -185,10 +183,22 @@ public class LearningFragment extends Fragment {
 
 
 
-                learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
-                learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, "Swim");
-                learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, PhonePosition.IN_RIGHT_HAND);
-                learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+
+                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
+                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, "Swim");
+                    learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, PhonePosition.IN_RIGHT_HAND);
+                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
+                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION, preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
+                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION, Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
+
+
+
+
+
+
 
                 mContext.startService(learningIntent);
 
@@ -251,6 +261,30 @@ public class LearningFragment extends Fragment {
         // Write sensors status
         infoSensor(accelerometerValue, activitySelected.isSensorActive(Constants.SENSOR_ACCELEROMETER));
         infoSensor(gyroscopeValue, activitySelected.isSensorActive(Constants.SENSOR_GYROSCOPE));
+
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+
+        mContext.unregisterReceiver(learningServiceReceiver);
+
+        Log.d(TAG, "onStop");
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
 
         // Set information receiver from service
         learningServiceReceiver = new BroadcastReceiver() {
@@ -326,30 +360,17 @@ public class LearningFragment extends Fragment {
             }
         };
 
+
+
+
         // Init receiver
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_COUNTDOWN"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_PREPARATION_COUNTDOWN"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_START"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_END"));
 
-    }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause");
-    }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-        mContext.unregisterReceiver(learningServiceReceiver);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         Log.d(TAG, "onStart");
 
 
@@ -358,6 +379,16 @@ public class LearningFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        learningIntent = new Intent(mContext, LearningService.class);
+
+
+
+
+
+
+
+
         Log.d(TAG, "onResume");
     }
 

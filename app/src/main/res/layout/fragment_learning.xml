@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.MaterialComponents.Light"
     android:paddingBottom="8dp"
+    android:theme="@style/Theme.MaterialComponents.Light"
     tools:context=".ui.learning.LearningFragment">
 
     <TextView

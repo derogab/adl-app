@@ -1,9 +1,7 @@
 package com.derogab.adlanalyzer.services;
 
-import android.app.IntentService;
 import android.app.Service;
-import android.app.job.JobParameters;
-import android.app.job.JobService;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -12,24 +10,20 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import com.derogab.adlanalyzer.utils.Constants;
-import com.derogab.adlanalyzer.utils.CountDown;
-import com.derogab.adlanalyzer.utils.PhonePosition;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.util.Objects;
-import java.util.Timer;
-import java.util.UUID;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-import androidx.annotation.NonNull;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+
 import androidx.annotation.Nullable;
-import androidx.core.app.JobIntentService;
+import androidx.preference.PreferenceManager;
 
 public class LearningService extends Service implements SensorEventListener {
 
@@ -46,6 +40,9 @@ public class LearningService extends Service implements SensorEventListener {
     private String activityToAnalyze;
     private String phonePosition;
 
+    private String host;
+    private int port;
+
     @Override
     public void onSensorChanged(SensorEvent event) {
 
@@ -58,6 +55,7 @@ public class LearningService extends Service implements SensorEventListener {
             Log.d(TAG, "[GYROSCOPE] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
             // @TODO: send gyroscope data to server
+            sendData(sendingArchive, activityToAnalyze, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z);
 
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -69,6 +67,7 @@ public class LearningService extends Service implements SensorEventListener {
             Log.d(TAG, "[ACCELEROMETER] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
             // @TODO: send accelerometer data to server
+            sendData(sendingArchive, activityToAnalyze, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z);
 
         }
 
@@ -97,6 +96,8 @@ public class LearningService extends Service implements SensorEventListener {
         activityToAnalyze = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
         phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
         long activityTime = (long) intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
+        host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
+        port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
 
         Log.d(TAG, "activityTime: " + activityTime);
 
@@ -132,8 +133,8 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Send data
                 Intent sendTime = new Intent();
-                sendTime.setAction("GET_ACTIVITY_START");
-                sendTime.putExtra( "ACTIVITY_START", true);
+                    sendTime.setAction("GET_ACTIVITY_START");
+                    sendTime.putExtra( "ACTIVITY_START", true);
                 sendBroadcast(sendTime);
 
                 // Start activity timer
@@ -162,8 +163,8 @@ public class LearningService extends Service implements SensorEventListener {
                 sensorManager.unregisterListener((SensorEventListener) mContext);
 
                 Intent sendTime = new Intent();
-                sendTime.setAction("GET_ACTIVITY_END");
-                sendTime.putExtra( "ACTIVITY_END", true);
+                    sendTime.setAction("GET_ACTIVITY_END");
+                    sendTime.putExtra( "ACTIVITY_END", true);
                 sendBroadcast(sendTime);
             }
         };
@@ -181,7 +182,6 @@ public class LearningService extends Service implements SensorEventListener {
 
         Log.d(TAG, "onDestroy(): stop sensors...");
 
-
         super.onDestroy();
     }
 
@@ -189,6 +189,63 @@ public class LearningService extends Service implements SensorEventListener {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+
+
+    private void sendData(String id,
+                          String activity,
+                          String sensor,
+                          String phonePosition,
+                          float x,
+                          float y,
+                          float z){
+
+        // Create data
+        String jsonData = "{'error': true, 'cause': 'no data'}";
+        try {
+
+            jsonData = new JSONObject()
+                    .put("id", id)
+                    .put("activity", activity)
+                    .put("sensor", sensor)
+                    .put("position", phonePosition)
+                    .put("coords", new JSONObject()
+                            .put("x", x)
+                            .put("y", y)
+                            .put("z", z))
+                    .toString();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "host: " + host);
+        Log.d(TAG, "port: " + port);
+
+        // Send data
+        String dataToSend = jsonData;
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+
+                Socket socket = null;
+                try {
+                    socket = new Socket(host, 8090);
+                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+                    printWriter.write(dataToSend);
+                    printWriter.flush();
+                    printWriter.close();
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        };
+        new Thread(runnable).start();
+
+
     }
 
 
