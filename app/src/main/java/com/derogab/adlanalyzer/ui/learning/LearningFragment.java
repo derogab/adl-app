@@ -183,14 +183,11 @@ public class LearningFragment extends Fragment {
                 Log.d(TAG, "fab clicked. ");
                 Snackbar.make(view, "Starting in 10 seconds", Snackbar.LENGTH_SHORT).show();
 
-                Log.d(TAG, "getSelectedActivity().getTime(): " + getSelectedActivity().getTime());
-
-
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
                     learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
-                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, "Swim");
-                    learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, PhonePosition.IN_RIGHT_HAND);
+                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, getSelectedActivity().getActivity());
+                    learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
                     learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
                     learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
                             preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
@@ -231,6 +228,16 @@ public class LearningFragment extends Fragment {
 
         // Get the selected activity
         return (Activity) activitySelector.getItems().get(index);
+
+    }
+
+    private PhonePosition getSelectedPosition() {
+
+        // Get the selected activity index
+        int index = phonePositionSelector.getSelectedIndex();
+
+        // Get the selected activity
+        return (PhonePosition) phonePositionSelector.getItems().get(index);
 
     }
 
