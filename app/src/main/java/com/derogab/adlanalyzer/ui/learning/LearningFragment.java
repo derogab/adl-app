@@ -22,6 +22,7 @@ import com.derogab.adlanalyzer.services.LearningService;
 import com.derogab.adlanalyzer.utils.CountDown;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -66,8 +67,6 @@ public class LearningFragment extends Fragment {
 
     private TextView accelerometerValue, gyroscopeValue, countdownValue;
 
-    private int activitySelectedIndex = 0;
-
     private FragmentActivity mContext;
 
 
@@ -82,18 +81,65 @@ public class LearningFragment extends Fragment {
 
 
 
-    private Activity activitySelected;
-    private String learningArchive;
-    private PhonePosition phonePosition;
 
+    private String learningArchive;
+
+
+
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        Log.d(TAG, "Creating...");
+
+        // Get main context
+        mContext = this.getActivity();
+
+        // Set TTS object
+        textToSpeech = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    Log.d(TAG, "Current Locale: "+getString(R.string.current_lang));
+
+                    int ttsLang = textToSpeech.setLanguage(new Locale(getString(R.string.current_lang)));
+
+                    if (ttsLang == TextToSpeech.LANG_MISSING_DATA
+                            || ttsLang == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "[TTS] The Language is not supported!");
+                    } else {
+                        Log.i(TAG, "[TTS] Language Supported.");
+                    }
+                    Log.i(TAG, "[TTS] Initialization success.");
+                } else {
+
+                    Log.e(TAG, "[TTS] Initialization failed!");
+                }
+            }
+        });
+
+        // Create service
+        learningIntent = new Intent(mContext, LearningService.class);
+
+        // Create ViewModel
+        learningViewModel = new ViewModelProvider(this).get(LearningViewModel.class);
+
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        mContext = this.getActivity();
+        if (root == null) {
+            Log.d(TAG, "Creating View...");
+            root = inflater.inflate(R.layout.fragment_learning, container, false);
+        }
+        else {
+            Log.d(TAG, "Restoring View...");
+        }
+
 
         // Layout elements
-        root = inflater.inflate(R.layout.fragment_learning, container, false);
         activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
         phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
         startLearning = root.findViewById(R.id.fragment_learning_start_button);
@@ -103,19 +149,10 @@ public class LearningFragment extends Fragment {
         accelerometerValue = root.findViewById(R.id.fragment_learning_sensors_accelerometer_value);
         gyroscopeValue = root.findViewById(R.id.fragment_learning_sensors_gyroscope_value);
 
-        // Phone position init
+        // Insert phone positions
         phonePositionSelector.setItems(PhonePosition.getAll(mContext));
-        phonePositionSelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<PhonePosition>() {
 
-            @Override public void onItemSelected(MaterialSpinner view, int position, long id, PhonePosition item) {
-
-                phonePosition = item;
-
-            }
-        });
-
-        learningViewModel = new ViewModelProvider(this).get(LearningViewModel.class);
-
+        // Insert activities
         learningViewModel.getActivities().observe(getViewLifecycleOwner(), new Observer<List<Activity>>() {
             @Override
             public void onChanged(List<Activity> activities) {
@@ -127,24 +164,10 @@ public class LearningFragment extends Fragment {
 
         });
 
-        // Set all saved data
-        if(savedInstanceState != null){
-            Log.d(TAG, "Restore InstanceState...");
-            activitySelectedIndex = savedInstanceState.getInt(ACTIVITY_SELECTED_INDEX);
-
-
-        }
-
-
-
-
         // Set listener on Spinner select change
         activitySelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Activity>() {
 
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, Activity item) {
-
-                activitySelectedIndex = position;
-                activitySelected = item;
 
                 updateInfo();
 
@@ -152,31 +175,7 @@ public class LearningFragment extends Fragment {
 
         });
 
-        // Set TTS object
-        textToSpeech = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-            if (status == TextToSpeech.SUCCESS) {
-                Log.d(TAG, "Current Locale: "+getString(R.string.current_lang));
-
-                int ttsLang = textToSpeech.setLanguage(new Locale(getString(R.string.current_lang)));
-
-                if (ttsLang == TextToSpeech.LANG_MISSING_DATA
-                        || ttsLang == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e(TAG, "[TTS] The Language is not supported!");
-                } else {
-                    Log.i(TAG, "[TTS] Language Supported.");
-                }
-                Log.i(TAG, "[TTS] Initialization success.");
-            } else {
-
-                Log.e(TAG, "[TTS] Initialization failed!");
-            }
-            }
-        });
-
-
-        // Set listener
+        // Set button start listener
         startLearning.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -185,40 +184,22 @@ public class LearningFragment extends Fragment {
 
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
-                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, getSelectedActivity().getActivity());
-                    learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
-                    learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
-                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
-                            preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
-                    learningIntent.putExtra(Constants.PREFERENCE_SERVER_PORT,
-                            Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, getSelectedActivity().getActivity());
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
+                learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
+                        preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
+                learningIntent.putExtra(Constants.PREFERENCE_SERVER_PORT,
+                        Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
 
                 mContext.startService(learningIntent);
 
             }
         });
 
+        // Return view
         return root;
-    }
-
-    @Override
-    public void onSaveInstanceState(@NonNull Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        Log.d(TAG, "Saving InstanceState...");
-        outState.putInt(ACTIVITY_SELECTED_INDEX, activitySelectedIndex);
-    }
-
-    private void infoSensor(TextView sensorValue, boolean isActive) {
-
-        if (isActive) {
-            sensorValue.setText("ON");
-        }
-        else {
-            sensorValue.setText("OFF");
-        }
-
     }
 
     private Activity getSelectedActivity() {
@@ -241,54 +222,35 @@ public class LearningFragment extends Fragment {
 
     }
 
-    private void updateInfo() {
+    private int getSensorStatusText(boolean isActive) {
 
+        if (isActive) return R.string.fragment_learning_sensor_status_active;
+        else return R.string.fragment_learning_sensor_status_not_active;
+
+    }
+
+    private void updateInfo() {
         Log.d(TAG, "Updating info...");
 
-        // Select previously
-        if (activitySelectedIndex != 0
-                && activitySelectedIndex < activitySelector.getItems().size()) {
+        Activity as = getSelectedActivity();
 
-            activitySelector.setSelectedIndex(activitySelectedIndex);
+        if (as != null) {
+
+            // Write time in the countdown
+            countdownValue.setText(CountDown.get(as.getTime()));
+
+            // Write sensors status
+            accelerometerValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_ACCELEROMETER)));
+            gyroscopeValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_GYROSCOPE)));
 
         }
-
-        // Get the selected activity index
-        activitySelectedIndex = activitySelector.getSelectedIndex();
-
-        // Get the selected activity
-        activitySelected = (Activity) activitySelector.getItems().get(activitySelectedIndex);
-
-        // Write time in the countdown
-        countdownValue.setText(CountDown.get(activitySelected.getTime()));
-
-        // Write sensors status
-        infoSensor(accelerometerValue, activitySelected.isSensorActive(Constants.SENSOR_ACCELEROMETER));
-        infoSensor(gyroscopeValue, activitySelected.isSensorActive(Constants.SENSOR_GYROSCOPE));
-
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-
-        mContext.unregisterReceiver(learningServiceReceiver);
-
-        Log.d(TAG, "onStop");
 
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(TAG, "Starting...");
 
         // Set information receiver from service
         learningServiceReceiver = new BroadcastReceiver() {
@@ -357,14 +319,12 @@ public class LearningFragment extends Fragment {
 
                     Snackbar.make(root, "Done.", Snackbar.LENGTH_SHORT).show();
 
-                    mContext.stopService(learningIntent);
+                    //mContext.stopService(learningIntent);
                 }
 
 
             }
         };
-
-
 
 
         // Init receiver
@@ -375,41 +335,45 @@ public class LearningFragment extends Fragment {
 
 
 
-        Log.d(TAG, "onStart");
-
-
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "Resuming...");
+    }
 
-        learningIntent = new Intent(mContext, LearningService.class);
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "Pausing...");
+    }
 
-
-
-
-
-
-
-
-        Log.d(TAG, "onResume");
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "Stopping...");
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        Log.d(TAG, "onDestroyView");
+        Log.d(TAG, "Destroying View...");
+
+        // Destroy the broadcast receiver
+        mContext.unregisterReceiver(learningServiceReceiver);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        Log.d(TAG, "Destroying...");
 
+        // Destroy TTS
         textToSpeech.stop();
         textToSpeech.shutdown();
         textToSpeech = null;
     }
+
 
 }

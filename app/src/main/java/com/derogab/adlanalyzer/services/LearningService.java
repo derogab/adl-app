@@ -29,6 +29,8 @@ public class LearningService extends Service implements SensorEventListener {
 
     private static final String TAG = "LearningService";
 
+    private int count;
+
     private CountDownTimer preparationTimer;
     private CountDownTimer activityTimer;
 
@@ -56,7 +58,7 @@ public class LearningService extends Service implements SensorEventListener {
             Log.d(TAG, "[GYROSCOPE] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
             // @TODO: send gyroscope data to server
-            sendData(sendingArchive, activityToAnalyze, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z);
+            sendCollectedData(sendingArchive, activityToAnalyze, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z);
 
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -68,7 +70,7 @@ public class LearningService extends Service implements SensorEventListener {
             Log.d(TAG, "[ACCELEROMETER] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
             // @TODO: send accelerometer data to server
-            sendData(sendingArchive, activityToAnalyze, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z);
+            sendCollectedData(sendingArchive, activityToAnalyze, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z);
 
         }
 
@@ -79,8 +81,9 @@ public class LearningService extends Service implements SensorEventListener {
 
     @Override
     public void onCreate() {
-        Log.d(TAG, "onCreate(): start sensors...");
         super.onCreate();
+
+        Log.d(TAG, "Creating...");
     }
 
     @Override
@@ -164,6 +167,10 @@ public class LearningService extends Service implements SensorEventListener {
                 // Stop Sensors listener
                 sensorManager.unregisterListener((SensorEventListener) mContext);
 
+                // Send close to server
+                sendClose(sendingArchive);
+
+                // Send end to UI
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_ACTIVITY_END");
                     sendTime.putExtra( "ACTIVITY_END", true);
@@ -177,16 +184,6 @@ public class LearningService extends Service implements SensorEventListener {
         return super.onStartCommand(intent, flags, startId);
     }
 
-
-
-    @Override
-    public void onDestroy() {
-
-        Log.d(TAG, "onDestroy(): stop sensors...");
-
-        super.onDestroy();
-    }
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -195,7 +192,7 @@ public class LearningService extends Service implements SensorEventListener {
 
 
 
-    private void sendData(String id,
+    private void sendCollectedData(String id,
                           String activity,
                           String sensor,
                           String phonePosition,
@@ -203,12 +200,15 @@ public class LearningService extends Service implements SensorEventListener {
                           float y,
                           float z){
 
+        count++;
+
         // Create data
         String jsonData = "{'error': true, 'cause': 'no data'}";
         try {
 
             jsonData = new JSONObject()
                     .put("id", id)
+                    .put("count", count)
                     .put("activity", activity)
                     .put("sensor", sensor)
                     .put("position", phonePosition)
@@ -222,11 +222,13 @@ public class LearningService extends Service implements SensorEventListener {
             e.printStackTrace();
         }
 
-        Log.d(TAG, "host: " + host);
-        Log.d(TAG, "port: " + port);
-
         // Send data
-        String dataToSend = jsonData;
+        sendData(jsonData);
+
+    }
+
+    private void sendData(String dataToSend) {
+
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -247,6 +249,22 @@ public class LearningService extends Service implements SensorEventListener {
         };
         new Thread(runnable).start();
 
+    }
+
+    private void sendClose(String id) {
+
+        String jsonData = null;
+        try {
+            jsonData = new JSONObject()
+                    .put("id", id)
+                    .put("close", true)
+                    .toString();
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        sendData(jsonData);
 
     }
 

@@ -28,4 +28,6 @@
     <string name="settings_server_destination_title">Destination</string>
     <string name="settings_server_port_title">Port</string>
     <string name="settings_server_category_title">Server</string>
+    <string name="fragment_learning_sensor_status_active">ON</string>
+    <string name="fragment_learning_sensor_status_not_active">OFF</string>
 </resources>
