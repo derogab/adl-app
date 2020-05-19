@@ -39,6 +39,7 @@ public class LearningService extends Service implements SensorEventListener {
     private String sendingArchive;
     private String activityToAnalyze;
     private String phonePosition;
+    private long activityTime;
 
     private String host;
     private int port;
@@ -95,7 +96,8 @@ public class LearningService extends Service implements SensorEventListener {
         sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
         activityToAnalyze = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
         phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
-        long activityTime = (long) intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
+        activityTime = (long) intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
+
         host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
         port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
 
