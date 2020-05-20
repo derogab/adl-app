@@ -180,7 +180,7 @@ public class LearningFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
-                Snackbar.make(view, "Starting in 10 seconds", Snackbar.LENGTH_SHORT).show();
+                alert(view, "Starting in 10 seconds");
 
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
@@ -264,11 +264,7 @@ public class LearningFragment extends Fragment {
 
                     if (activityCountdown % 5 == 0) {
 
-                        int speechStatus = textToSpeech.speak(""+activityCountdown, TextToSpeech.QUEUE_FLUSH, null);
-
-                        if (speechStatus == TextToSpeech.ERROR) {
-                            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-                        }
+                        speak(""+activityCountdown);
 
                     }
 
@@ -283,11 +279,7 @@ public class LearningFragment extends Fragment {
 
                     if (preparationCountdown == 3) {
 
-                        int speechStatus = textToSpeech.speak("The activity is about to begin", TextToSpeech.QUEUE_FLUSH, null);
-
-                        if (speechStatus == TextToSpeech.ERROR) {
-                            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-                        }
+                        speak("The activity is about to begin");
 
                     }
 
@@ -298,28 +290,18 @@ public class LearningFragment extends Fragment {
                 else if(intent.getAction().equals("GET_ACTIVITY_START")) {
                     Log.d(TAG, "Activity started");
 
-                    int speechStatus = textToSpeech.speak("Activity started.", TextToSpeech.QUEUE_FLUSH, null);
+                    speak("Activity started.");
 
-                    if (speechStatus == TextToSpeech.ERROR) {
-                        Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-                    }
-
-                    Snackbar.make(root, "Activity started.", Snackbar.LENGTH_SHORT).show();
+                    alert(root, "Activity started.");
                 }
                 else if(intent.getAction().equals("GET_ACTIVITY_END")) {
                     Log.d(TAG, "Activity stop");
 
-                    int speechStatus = textToSpeech.speak("done!", TextToSpeech.QUEUE_FLUSH, null);
-
-                    if (speechStatus == TextToSpeech.ERROR) {
-                        Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-                    }
+                    speak("done!");
 
                     countdownValue.setText(CountDown.get(getSelectedActivity().getTime()));
 
-                    Snackbar.make(root, "Done.", Snackbar.LENGTH_SHORT).show();
-
-                    //mContext.stopService(learningIntent);
+                    alert(root, "Done.");
                 }
 
 
@@ -373,6 +355,30 @@ public class LearningFragment extends Fragment {
         textToSpeech.stop();
         textToSpeech.shutdown();
         textToSpeech = null;
+    }
+
+    private boolean speak(String tts) {
+
+        if (textToSpeech == null) return false;
+
+        int speechStatus = textToSpeech.speak(tts, TextToSpeech.QUEUE_FLUSH, null);
+
+        if (speechStatus == TextToSpeech.ERROR) {
+            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean alert(View view, String text) {
+        return alert(view, text, Snackbar.LENGTH_SHORT);
+    }
+
+    private boolean alert(View view, String text, int duration) {
+        if (view == null) return false;
+        Snackbar.make(view, text, duration).show();
+        return true;
     }
 
 
