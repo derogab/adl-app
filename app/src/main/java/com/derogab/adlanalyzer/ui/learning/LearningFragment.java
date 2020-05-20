@@ -80,8 +80,6 @@ public class LearningFragment extends Fragment {
     private Intent learningIntent;
 
 
-
-
     private String learningArchive;
 
 
@@ -386,7 +384,15 @@ public class LearningFragment extends Fragment {
 
     private boolean alert(View view, String text, int duration) {
         if (view == null) return false;
-        Snackbar.make(view, text, duration).show();
+
+        try {
+            Snackbar.make(view, text, duration).show();
+        }
+        catch (Exception e) {
+            Log.d(TAG, "[Error] No alert showed.");
+            return false;
+        }
+
         return true;
     }
 
