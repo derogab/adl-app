@@ -23,7 +23,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManager;
 
 public class LearningService extends Service implements SensorEventListener {
 
@@ -35,14 +34,17 @@ public class LearningService extends Service implements SensorEventListener {
     private CountDownTimer activityTimer;
 
     private SensorManager sensorManager;
-
     private Context mContext;
 
+    // Activity info
     private String sendingArchive;
     private String activityToAnalyze;
     private String phonePosition;
     private long activityTime;
-
+    // Sensors status
+    private boolean isSensorAccelerometerActive;
+    private boolean isSensorGyroscopeActive;
+    // Destination server
     private String host;
     private int port;
 
@@ -99,13 +101,16 @@ public class LearningService extends Service implements SensorEventListener {
         sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
         activityToAnalyze = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
         phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
-        activityTime = (long) intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
+        activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
+
+        isSensorAccelerometerActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER, true);
+        isSensorGyroscopeActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE, true);
 
         host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
         port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
 
-        Log.d(TAG, "activityTime: " + activityTime);
 
+        Log.d(TAG, "activityTime: " + activityTime);
 
         // Init sensor manager
         sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
@@ -131,9 +136,9 @@ public class LearningService extends Service implements SensorEventListener {
                 Log.d(TAG, "preparation timer done!");
 
                 // Start sensors
-                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER))
+                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && isSensorAccelerometerActive)
                     sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
+                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
                     sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
                 // Send data

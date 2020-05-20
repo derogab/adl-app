@@ -21,7 +21,10 @@ public class Constants {
     public static final String LEARNING_SERVICE_ACTIVITY = "learning_service_activity";
     public static final String LEARNING_SERVICE_PHONE_POSITION = "learning_service_phone_position";
     public static final String LEARNING_SERVICE_ACTIVITY_TIMER = "learning_service_activity_timer";
+    public static final String LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER = "learning_service_sensor_status_accelerometer";
+    public static final String LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE = "learning_service_sensor_status_gyroscope";
 
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";
+
 }

@@ -182,17 +182,26 @@ public class LearningFragment extends Fragment {
                 Log.d(TAG, "fab clicked. ");
                 alert(view, "Starting in 10 seconds");
 
+                // Get SharedPreferences file for settings preferences
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
+                // Activity info
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, getSelectedActivity().getActivity());
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
+                // Destination server info
                 learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
                         preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
                 learningIntent.putExtra(Constants.PREFERENCE_SERVER_PORT,
                         Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
+                // Sensors status
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER,
+                        getSelectedActivity().isSensorActive(Constants.SENSOR_ACCELEROMETER));
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE,
+                        getSelectedActivity().isSensorActive(Constants.SENSOR_GYROSCOPE));
 
+                // Start the service
                 mContext.startService(learningIntent);
 
             }
