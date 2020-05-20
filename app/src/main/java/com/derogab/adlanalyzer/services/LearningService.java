@@ -28,7 +28,7 @@ public class LearningService extends Service implements SensorEventListener {
 
     private static final String TAG = "LearningService";
 
-    private int count;
+    private int index;
 
     private CountDownTimer preparationTimer;
     private CountDownTimer activityTimer;
@@ -94,8 +94,7 @@ public class LearningService extends Service implements SensorEventListener {
 
         mContext = this;
 
-        Log.d(TAG, "onStartJob");
-        Log.d(TAG, "intent: " + intent);
+        index = 0; // init counter
 
         // Get input data from fragment
         sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
@@ -195,43 +194,11 @@ public class LearningService extends Service implements SensorEventListener {
         return null;
     }
 
-
-
-    private void sendCollectedData(String id,
-                          String activity,
-                          String sensor,
-                          String phonePosition,
-                          float x,
-                          float y,
-                          float z){
-
-        count++;
-
-        // Create data
-        String jsonData = "{'error': true, 'cause': 'no data'}";
-        try {
-
-            jsonData = new JSONObject()
-                    .put("id", id)
-                    .put("count", count)
-                    .put("activity", activity)
-                    .put("sensor", sensor)
-                    .put("position", phonePosition)
-                    .put("coords", new JSONObject()
-                            .put("x", x)
-                            .put("y", y)
-                            .put("z", z))
-                    .toString();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Send data
-        sendData(jsonData);
-
-    }
-
+    /**
+     * Send data to Server
+     *
+     * @param dataToSend data to send to the server
+     * */
     private void sendData(String dataToSend) {
 
         Runnable runnable = new Runnable() {
@@ -256,14 +223,59 @@ public class LearningService extends Service implements SensorEventListener {
 
     }
 
+    private void sendCollectedData(String id,
+                          String activity,
+                          String sensor,
+                          String phonePosition,
+                          float x,
+                          float y,
+                          float z){
+
+        index++;
+
+        // Create data
+        String jsonData = null;
+        try {
+
+            jsonData = new JSONObject()
+                    .put("status", "OK")
+                    .put("error", false)
+                    .put("response", new JSONObject()
+                            .put("archive", id)
+                            .put("type", "data")
+                            .put("info", new JSONObject()
+                                .put("index", index)
+                                .put("activity", activity)
+                                .put("sensor", sensor)
+                                .put("position", phonePosition))
+                            .put("data", new JSONObject()
+                                .put("x", x)
+                                .put("y", y)
+                                .put("z", z))).toString();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        // Send data
+        sendData(jsonData);
+
+    }
+
+
+
     private void sendClose(String id) {
 
         String jsonData = null;
         try {
+
             jsonData = new JSONObject()
-                    .put("id", id)
-                    .put("close", true)
-                    .toString();
+                    .put("status", "OK")
+                    .put("error", false)
+                    .put("response", new JSONObject()
+                            .put("archive", id)
+                            .put("type", "close")).toString();
+
         }
         catch (JSONException e) {
             e.printStackTrace();
