@@ -121,11 +121,13 @@ public class LearningService extends Service implements SensorEventListener {
         preparationTimer = new CountDownTimer(10000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "seconds remaining before start: " + millisUntilFinished / 1000);
+                long secondsUntilFinished = millisUntilFinished / 1000;
+
+                Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
 
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_PREPARATION_COUNTDOWN");
-                    sendTime.putExtra( "PREPARATION_COUNTDOWN",millisUntilFinished / 1000);
+                    sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
             }
@@ -155,11 +157,13 @@ public class LearningService extends Service implements SensorEventListener {
         activityTimer = new CountDownTimer(activityTime * 1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.d(TAG, "seconds remaining: " + millisUntilFinished / 1000);
+                long secondsUntilFinished = millisUntilFinished / 1000;
+
+                Log.d(TAG, "seconds remaining: " + secondsUntilFinished);
 
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_ACTIVITY_COUNTDOWN");
-                    sendTime.putExtra( "ACTIVITY_COUNTDOWN", millisUntilFinished / 1000);
+                    sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
             }
@@ -179,6 +183,9 @@ public class LearningService extends Service implements SensorEventListener {
                     sendTime.setAction("GET_ACTIVITY_END");
                     sendTime.putExtra( "ACTIVITY_END", true);
                 sendBroadcast(sendTime);
+
+                // Stop service
+                stopSelf();
             }
         };
 

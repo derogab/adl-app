@@ -82,7 +82,7 @@ public class LearningFragment extends Fragment {
 
     private String learningArchive;
 
-
+    private boolean isLearningInProgress = false;
 
 
 
@@ -157,6 +157,7 @@ public class LearningFragment extends Fragment {
 
                 activitySelector.setItems(activities);
                 updateInfo();
+                if(!isLearningInProgress) startLearning.show();
 
             }
 
@@ -179,6 +180,9 @@ public class LearningFragment extends Fragment {
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
                 alert(view, "Starting in 10 seconds");
+
+                startLearning.hide();
+                isLearningInProgress = true;
 
                 // Get SharedPreferences file for settings preferences
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -264,6 +268,8 @@ public class LearningFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
 
+                startLearning.hide();
+
                 if(intent.getAction().equals("GET_ACTIVITY_COUNTDOWN")) {
 
                     long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN",0);
@@ -277,6 +283,7 @@ public class LearningFragment extends Fragment {
 
                     countdownValue.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
                     countdownValue.setText(CountDown.get(activityCountdown));
+
 
                 }
                 else if(intent.getAction().equals("GET_PREPARATION_COUNTDOWN")) {
@@ -309,6 +316,8 @@ public class LearningFragment extends Fragment {
                     countdownValue.setText(CountDown.get(getSelectedActivity().getTime()));
 
                     alert(root, "Done.");
+
+                    startLearning.show();
                 }
 
 
