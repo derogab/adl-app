@@ -13,6 +13,7 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.derogab.adlanalyzer.connections.Connection;
 import com.derogab.adlanalyzer.utils.Constants;
 
 import org.json.JSONException;
@@ -35,6 +36,8 @@ public class LearningService extends Service implements SensorEventListener {
 
     private SensorManager sensorManager;
     private Context mContext;
+
+    private Connection conn;
 
     // Activity info
     private String sendingArchive;
@@ -84,8 +87,16 @@ public class LearningService extends Service implements SensorEventListener {
     @Override
     public void onCreate() {
         super.onCreate();
-
         Log.d(TAG, "Creating...");
+
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        if (conn != null) conn.stop();
+
     }
 
     @Override
@@ -189,6 +200,18 @@ public class LearningService extends Service implements SensorEventListener {
             }
         };
 
+        // Connect to the server
+        conn = new Connection(host, port, new Connection.OnMessageReceived() {
+            @Override
+            //here the messageReceived method is implemented
+            public void messageReceived(String message) {
+
+                Log.d(TAG, "response " + message);
+
+            }
+        });
+        conn.run();
+
         // Start service task
         preparationTimer.start();
 
@@ -208,7 +231,7 @@ public class LearningService extends Service implements SensorEventListener {
      * */
     private void sendData(String dataToSend) {
 
-        Runnable runnable = new Runnable() {
+        /*Runnable runnable = new Runnable() {
             @Override
             public void run() {
 
@@ -226,7 +249,15 @@ public class LearningService extends Service implements SensorEventListener {
 
             }
         };
-        new Thread(runnable).start();
+        new Thread(runnable).start();*/
+
+        //sends the message to the server
+        if (conn != null) {
+            conn.sendMessage(dataToSend);
+        }
+
+
+
 
     }
 
