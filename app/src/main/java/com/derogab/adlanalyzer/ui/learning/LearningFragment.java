@@ -63,7 +63,7 @@ public class LearningFragment extends Fragment {
     private TextToSpeech textToSpeech;
     private CountDownTimer preparationTimer, activityTimer;
 
-    BroadcastReceiver learningServiceReceiver;
+    private BroadcastReceiver learningServiceReceiver;
 
     private TextView accelerometerValue, gyroscopeValue, countdownValue;
 
@@ -121,13 +121,14 @@ public class LearningFragment extends Fragment {
         learningIntent = new Intent(mContext, LearningService.class);
 
         // Create ViewModel
-        learningViewModel = new ViewModelProvider(this).get(LearningViewModel.class);
+        learningViewModel = new ViewModelProvider(requireActivity()).get(LearningViewModel.class);
 
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
+        // Generate view
         if (root == null) {
             Log.d(TAG, "Creating View...");
             root = inflater.inflate(R.layout.fragment_learning, container, false);
@@ -136,16 +137,23 @@ public class LearningFragment extends Fragment {
             Log.d(TAG, "Restoring View...");
         }
 
+        // Return view
+        return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
         // Layout elements
-        activitySelector = (MaterialSpinner) root.findViewById(R.id.activity_selector);
-        phonePositionSelector = (MaterialSpinner) root.findViewById(R.id.phone_position_selector);
-        startLearning = root.findViewById(R.id.fragment_learning_start_button);
+        activitySelector = (MaterialSpinner) view.findViewById(R.id.activity_selector);
+        phonePositionSelector = (MaterialSpinner) view.findViewById(R.id.phone_position_selector);
+        startLearning = view.findViewById(R.id.fragment_learning_start_button);
 
         // Dynamic values
-        countdownValue = root.findViewById(R.id.fragment_learning_countdown_timer);
-        accelerometerValue = root.findViewById(R.id.fragment_learning_sensors_accelerometer_value);
-        gyroscopeValue = root.findViewById(R.id.fragment_learning_sensors_gyroscope_value);
+        countdownValue = view.findViewById(R.id.fragment_learning_countdown_timer);
+        accelerometerValue = view.findViewById(R.id.fragment_learning_sensors_accelerometer_value);
+        gyroscopeValue = view.findViewById(R.id.fragment_learning_sensors_gyroscope_value);
 
         // Insert phone positions
         phonePositionSelector.setItems(PhonePosition.getAll(mContext));
@@ -209,8 +217,6 @@ public class LearningFragment extends Fragment {
             }
         });
 
-        // Return view
-        return root;
     }
 
     private Activity getSelectedActivity() {
