@@ -12,7 +12,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
-import com.derogab.adlanalyzer.JsonSource;
 import com.derogab.adlanalyzer.models.FormElement;
 import com.derogab.adlanalyzer.models.FormSubElement;
 import com.derogab.adlanalyzer.utils.Constants;
@@ -22,10 +21,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
