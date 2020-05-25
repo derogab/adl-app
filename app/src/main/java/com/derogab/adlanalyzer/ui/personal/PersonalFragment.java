@@ -19,6 +19,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.models.FormElement;
 import com.derogab.adlanalyzer.utils.Constants;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -51,6 +52,7 @@ public class PersonalFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         PersonalContainerLayout personalFormContent = view.findViewById(R.id.personalFormContent);
+        FloatingActionButton saveButton = view.findViewById(R.id.fragment_personal_save_button);
         TextView loader = view.findViewById(R.id.loader);
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
@@ -64,6 +66,7 @@ public class PersonalFragment extends Fragment {
 
                 setElements(elements);
                 loader.setVisibility(View.GONE);
+                saveButton.show();
                 personalFormContent.generate(elements, sharedPreferences);
 
             }
@@ -71,8 +74,6 @@ public class PersonalFragment extends Fragment {
         });
 
         // Saving button to save info
-        Button saveButton = view.findViewById(R.id.personalSaveButton);
-
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
