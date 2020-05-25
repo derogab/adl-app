@@ -26,7 +26,7 @@ import java.util.List;
 
 public class PersonalFragment extends Fragment {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "PersonalFragment";
 
     private PersonalViewModel personalViewModel;
     private List<FormElement> elements;
