@@ -30,4 +30,5 @@
     <string name="settings_server_category_title">Server</string>
     <string name="fragment_learning_sensor_status_active">ON</string>
     <string name="fragment_learning_sensor_status_not_active">OFF</string>
+    <string name="fragment_personal_loader">Loading...</string>
 </resources>

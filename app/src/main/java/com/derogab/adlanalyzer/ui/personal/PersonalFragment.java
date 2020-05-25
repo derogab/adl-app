@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -50,6 +51,7 @@ public class PersonalFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         PersonalContainerLayout personalFormContent = view.findViewById(R.id.personalFormContent);
+        TextView loader = view.findViewById(R.id.loader);
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
 
@@ -61,6 +63,7 @@ public class PersonalFragment extends Fragment {
                 Log.d(TAG, "Elements: " + elements);
 
                 setElements(elements);
+                loader.setVisibility(View.GONE);
                 personalFormContent.generate(elements, sharedPreferences);
 
             }
