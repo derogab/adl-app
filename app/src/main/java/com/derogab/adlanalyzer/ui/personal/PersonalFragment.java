@@ -21,10 +21,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.derogab.adlanalyzer.HttpGetRequest;
 import com.derogab.adlanalyzer.R;
+import com.derogab.adlanalyzer.models.FormElement;
+import com.derogab.adlanalyzer.ui.learning.LearningViewModel;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -35,57 +38,75 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class PersonalFragment extends Fragment {
 
     private static final String TAG = "MainActivity";
 
-    PersonalContainerLayout personalFormContent;
-    private FragmentActivity mContext;
+    private PersonalViewModel personalViewModel;
+    private List<FormElement> elements;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Create ViewModel
+        personalViewModel = new ViewModelProvider(requireActivity()).get(PersonalViewModel.class);
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        mContext = this.getActivity();
+        return inflater.inflate(R.layout.fragment_personal, container, false);
 
-        View root = inflater.inflate(R.layout.fragment_personal, container, false);
+    }
 
-        personalFormContent = root.findViewById(R.id.personalFormContent);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
 
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
-            personalFormContent.setStorage(sharedPreferences);
+        PersonalContainerLayout personalFormContent = view.findViewById(R.id.personalFormContent);
 
-        try {
-            personalFormContent.setSource("https://pastebin.com/raw/xGFK8TvB");
-            personalFormContent.generate();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
 
+        // Get elements for form
+        personalViewModel.getFormElements().observe(getViewLifecycleOwner(), new Observer<List<FormElement>>() {
+            @Override
+            public void onChanged(List<FormElement> elements) {
 
-        Button saveButton = root.findViewById(R.id.personalSaveButton);
+                Log.d(TAG, "Elements: " + elements);
+
+                setElements(elements);
+                personalFormContent.generate(elements, sharedPreferences);
+
+            }
+
+        });
+
+        // Saving button to save info
+        Button saveButton = view.findViewById(R.id.personalSaveButton);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                try {
-                    personalFormContent.saveData();
-                    Snackbar.make(v, R.string.fragment_personal_saved, Snackbar.LENGTH_SHORT).show();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Snackbar.make(v, R.string.fragment_personal_not_saved, Snackbar.LENGTH_SHORT).show();
-                }
+                personalFormContent.save(elements, sharedPreferences);
+                Snackbar.make(v, R.string.fragment_personal_saved, Snackbar.LENGTH_SHORT).show();
 
             }
         });
 
-
-
-        return root;
-
     }
 
+    /**
+     * setElements()
+     *
+     * Set the current form elements
+     * */
+    public void setElements(List<FormElement> elements) {
+        this.elements = elements;
+    }
 }
