@@ -95,8 +95,10 @@ public class LearningService extends Service implements SensorEventListener {
     public void onDestroy() {
         super.onDestroy();
 
-        if (conn != null) conn.stop();
-
+        if (conn != null) {
+            conn.close();
+            Log.d(TAG, "Connection closed.");
+        }
     }
 
     @Override
@@ -186,27 +188,30 @@ public class LearningService extends Service implements SensorEventListener {
                 // Stop Sensors listener
                 sensorManager.unregisterListener((SensorEventListener) mContext);
 
-                // Send close to server
-                sendClose(sendingArchive);
-
                 // Send end to UI
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_ACTIVITY_END");
                     sendTime.putExtra( "ACTIVITY_END", true);
                 sendBroadcast(sendTime);
 
-                // Stop service
-                stopSelf();
+                // Send close to server
+                sendClose(sendingArchive);
+
             }
         };
 
         // Connect to the server
         conn = new Connection(host, port, new Connection.OnMessageReceived() {
             @Override
-            //here the messageReceived method is implemented
             public void messageReceived(String message) {
 
-                Log.d(TAG, "response " + message);
+                Log.d("LearningServiceResponse", "Response: " + message);
+
+                try {
+                    readReceivedData(message);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
         });
@@ -225,39 +230,38 @@ public class LearningService extends Service implements SensorEventListener {
     }
 
     /**
+     * Receive data from Server
+     *
+     * @param dataReceived data received from the server
+     * */
+    private void readReceivedData(String dataReceived) throws JSONException {
+
+        JSONObject response = new JSONObject(dataReceived);
+
+        if (response.getString("status").equals("OK")) {
+
+            if (response.getString("type").equals("close")) {
+
+                Log.d(TAG, "All data received. Stop the service...");
+                stopSelf();
+
+            }
+
+        }
+
+    }
+
+    /**
      * Send data to Server
      *
      * @param dataToSend data to send to the server
      * */
     private void sendData(String dataToSend) {
 
-        /*Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-
-                Socket socket = null;
-                try {
-                    socket = new Socket(host, port);
-                    PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-                    printWriter.write(dataToSend);
-                    printWriter.flush();
-                    printWriter.close();
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        };
-        new Thread(runnable).start();*/
-
         //sends the message to the server
         if (conn != null) {
             conn.sendMessage(dataToSend);
         }
-
-
-
 
     }
 
@@ -277,7 +281,6 @@ public class LearningService extends Service implements SensorEventListener {
 
             jsonData = new JSONObject()
                     .put("status", "OK")
-                    .put("error", false)
                     .put("response", new JSONObject()
                             .put("archive", id)
                             .put("type", "data")

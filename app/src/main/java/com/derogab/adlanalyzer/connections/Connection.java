@@ -53,7 +53,6 @@ public class Connection {
             @Override
             public void run() {
                 if (mBufferOut != null) {
-                    Log.d(TAG, "Sending: " + message);
                     mBufferOut.println(message);
                     mBufferOut.flush();
                 }
@@ -66,7 +65,7 @@ public class Connection {
     /**
      * Close the connection and release the members
      */
-    public void stop() {
+    public void close() {
 
         mRun = false;
 
@@ -93,7 +92,7 @@ public class Connection {
             public void run() {
 
                 try {
-                    Log.d(TAG, "C: Connecting...");
+                    Log.d(TAG, "Connecting...");
 
                     // create a socket to make the connection with the server
                     Log.d(TAG, "Host: " + mServerDestination);
@@ -114,24 +113,31 @@ public class Connection {
                             mServerMessage = mBufferIn.readLine();
 
                             if (mServerMessage != null && mMessageListener != null) {
-                                //call the method messageReceived from MyActivity class
-                                mMessageListener.messageReceived(mServerMessage);
+
+                                Runnable runnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        mMessageListener.messageReceived(mServerMessage);
+
+                                    }
+                                };
+                                new Thread(runnable).start();
+
                             }
 
                         }
 
-                        Log.d(TAG, "S: Received Message: '" + mServerMessage + "'");
-
                     } catch (Exception e) {
-                        Log.e(TAG, "S: Error", e);
+                        Log.e(TAG, "Error", e);
                     } finally {
-                        //the socket must be closed. It is not possible to reconnect to this socket
+                        // the socket must be closed. It is not possible to reconnect to this socket
                         // after it is closed, which means a new socket instance has to be created.
                         mSocket.close();
                     }
 
                 } catch (Exception e) {
-                    Log.e(TAG, "C: Error", e);
+                    Log.e(TAG, "Error", e);
                 }
 
             }
