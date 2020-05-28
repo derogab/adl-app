@@ -205,7 +205,7 @@ public class LearningService extends Service implements SensorEventListener {
             @Override
             public void messageReceived(String message) {
 
-                Log.d("LearningServiceResponse", "Response: " + message);
+                //Log.d("LearningServiceResponse", "Response: " + message);
 
                 try {
                     readReceivedData(message);
@@ -242,8 +242,14 @@ public class LearningService extends Service implements SensorEventListener {
 
             if (response.getString("type").equals("close")) {
 
-                Log.d(TAG, "All data received. Stop the service...");
+                Log.d(TAG, "All data sent. Stop the service...");
                 stopSelf();
+
+            }
+
+            else if (response.getString("type").equals("ack")) {
+
+                Log.d(TAG, "Ack received.");
 
             }
 
