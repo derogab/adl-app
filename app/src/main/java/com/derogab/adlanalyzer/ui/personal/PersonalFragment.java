@@ -17,6 +17,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.derogab.adlanalyzer.R;
+import com.derogab.adlanalyzer.databinding.FragmentPersonalBinding;
 import com.derogab.adlanalyzer.models.FormElement;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -27,6 +28,8 @@ import java.util.List;
 public class PersonalFragment extends Fragment {
 
     private static final String TAG = "PersonalFragment";
+
+    private FragmentPersonalBinding binding;
 
     private PersonalViewModel personalViewModel;
     private List<FormElement> elements;
@@ -43,17 +46,15 @@ public class PersonalFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        return inflater.inflate(R.layout.fragment_personal, container, false);
+        // View Binding
+        binding = FragmentPersonalBinding.inflate(getLayoutInflater());
+        return binding.getRoot();
 
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        PersonalContainerLayout personalFormContent = view.findViewById(R.id.personalFormContent);
-        FloatingActionButton saveButton = view.findViewById(R.id.fragment_personal_save_button);
-        TextView loader = view.findViewById(R.id.loader);
 
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
 
@@ -65,20 +66,20 @@ public class PersonalFragment extends Fragment {
                 Log.d(TAG, "Elements: " + elements);
 
                 setElements(elements);
-                loader.setVisibility(View.GONE);
-                saveButton.show();
-                personalFormContent.generate(elements, sharedPreferences);
+                binding.loader.setVisibility(View.GONE);
+                binding.fragmentPersonalSaveButton.show();
+                binding.personalFormContent.generate(elements, sharedPreferences);
 
             }
 
         });
 
         // Saving button to save info
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        binding.fragmentPersonalSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-                personalFormContent.save(elements, sharedPreferences);
+                binding.personalFormContent.save(elements, sharedPreferences);
                 Snackbar.make(v, R.string.fragment_personal_saved, Snackbar.LENGTH_SHORT).show();
 
             }

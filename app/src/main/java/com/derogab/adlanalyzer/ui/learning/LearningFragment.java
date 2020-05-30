@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.derogab.adlanalyzer.databinding.FragmentLearningBinding;
 import com.derogab.adlanalyzer.services.LearningService;
 import com.derogab.adlanalyzer.utils.CountDown;
 
@@ -45,6 +46,8 @@ public class LearningFragment extends Fragment {
 
     private static final String TAG = "LearningFragment";
 
+    private FragmentLearningBinding binding;
+
     private static final String ACTIVITY_SELECTED_INDEX = "activity_selected_index";
 
     private TextToSpeech textToSpeech;
@@ -52,17 +55,10 @@ public class LearningFragment extends Fragment {
 
     private BroadcastReceiver learningServiceReceiver;
 
-    private TextView accelerometerValue, gyroscopeValue, countdownValue;
-
     private FragmentActivity mContext;
 
 
     private LearningViewModel learningViewModel;
-
-    private MaterialSpinner activitySelector, phonePositionSelector;
-    private FloatingActionButton startLearning;
-
-    private View root;
 
     private Intent learningIntent;
 
@@ -115,51 +111,34 @@ public class LearningFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        // Generate view
-        if (root == null) {
-            Log.d(TAG, "Creating View...");
-            root = inflater.inflate(R.layout.fragment_learning, container, false);
-        }
-        else {
-            Log.d(TAG, "Restoring View...");
-        }
+        // View Binding
+        binding = FragmentLearningBinding.inflate(getLayoutInflater());
+        return binding.getRoot();
 
-        // Return view
-        return root;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Layout elements
-        activitySelector = (MaterialSpinner) view.findViewById(R.id.activity_selector);
-        phonePositionSelector = (MaterialSpinner) view.findViewById(R.id.phone_position_selector);
-        startLearning = view.findViewById(R.id.fragment_learning_start_button);
-
-        // Dynamic values
-        countdownValue = view.findViewById(R.id.fragment_learning_countdown_timer);
-        accelerometerValue = view.findViewById(R.id.fragment_learning_sensors_accelerometer_value);
-        gyroscopeValue = view.findViewById(R.id.fragment_learning_sensors_gyroscope_value);
-
         // Insert phone positions
-        phonePositionSelector.setItems(PhonePosition.getAll(mContext));
+        binding.phonePositionSelector.setItems(PhonePosition.getAll(mContext));
 
         // Insert activities
         learningViewModel.getActivities().observe(getViewLifecycleOwner(), new Observer<List<Activity>>() {
             @Override
             public void onChanged(List<Activity> activities) {
 
-                activitySelector.setItems(activities);
+                binding.activitySelector.setItems(activities);
                 updateInfo();
-                if(!isLearningInProgress) startLearning.show();
+                if(!isLearningInProgress) binding.fragmentLearningStartButton.show();
 
             }
 
         });
 
         // Set listener on Spinner select change
-        activitySelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Activity>() {
+        binding.activitySelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Activity>() {
 
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, Activity item) {
 
@@ -170,13 +149,13 @@ public class LearningFragment extends Fragment {
         });
 
         // Set button start listener
-        startLearning.setOnClickListener(new View.OnClickListener() {
+        binding.fragmentLearningStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
                 alert(view, "Starting in 10 seconds");
 
-                startLearning.hide();
+                binding.fragmentLearningStartButton.hide();
                 isLearningInProgress = true;
 
                 // Get SharedPreferences file for settings preferences
@@ -209,20 +188,20 @@ public class LearningFragment extends Fragment {
     private Activity getSelectedActivity() {
 
         // Get the selected activity index
-        int index = activitySelector.getSelectedIndex();
+        int index = binding.activitySelector.getSelectedIndex();
 
         // Get the selected activity
-        return (Activity) activitySelector.getItems().get(index);
+        return (Activity) binding.activitySelector.getItems().get(index);
 
     }
 
     private PhonePosition getSelectedPosition() {
 
         // Get the selected activity index
-        int index = phonePositionSelector.getSelectedIndex();
+        int index = binding.phonePositionSelector.getSelectedIndex();
 
         // Get the selected activity
-        return (PhonePosition) phonePositionSelector.getItems().get(index);
+        return (PhonePosition) binding.phonePositionSelector.getItems().get(index);
 
     }
 
@@ -241,11 +220,11 @@ public class LearningFragment extends Fragment {
         if (as != null) {
 
             // Write time in the countdown
-            countdownValue.setText(CountDown.get(as.getTime()));
+            binding.fragmentLearningCountdownTimer.setText(CountDown.get(as.getTime()));
 
             // Write sensors status
-            accelerometerValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_ACCELEROMETER)));
-            gyroscopeValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_GYROSCOPE)));
+            binding.fragmentLearningSensorsAccelerometerValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_ACCELEROMETER)));
+            binding.fragmentLearningSensorsGyroscopeValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_GYROSCOPE)));
 
         }
 
@@ -261,7 +240,7 @@ public class LearningFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-                startLearning.hide();
+                binding.fragmentLearningStartButton.hide();
 
                 if(intent.getAction().equals("GET_ACTIVITY_COUNTDOWN")) {
 
@@ -274,8 +253,8 @@ public class LearningFragment extends Fragment {
 
                     }
 
-                    countdownValue.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
-                    countdownValue.setText(CountDown.get(activityCountdown));
+                    binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                    binding.fragmentLearningCountdownTimer.setText(CountDown.get(activityCountdown));
 
 
                 }
@@ -290,8 +269,8 @@ public class LearningFragment extends Fragment {
 
                     }
 
-                    countdownValue.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
-                    countdownValue.setText(CountDown.get(preparationCountdown));
+                    binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+                    binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
 
                 }
                 else if(intent.getAction().equals("GET_ACTIVITY_START")) {
@@ -299,18 +278,18 @@ public class LearningFragment extends Fragment {
 
                     speak("Activity started.");
 
-                    alert(root, "Activity started.");
+                    alert(getView(), "Activity started.");
                 }
                 else if(intent.getAction().equals("GET_ACTIVITY_END")) {
                     Log.d(TAG, "Activity stop");
 
                     speak("done!");
 
-                    countdownValue.setText(CountDown.get(getSelectedActivity().getTime()));
+                    binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
 
-                    alert(root, "Done.");
+                    alert(getView(), "Done.");
 
-                    startLearning.show();
+                    binding.fragmentLearningStartButton.show();
                 }
 
 

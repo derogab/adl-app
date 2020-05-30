@@ -13,13 +13,18 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import com.derogab.adlanalyzer.R;
+import com.derogab.adlanalyzer.databinding.FragmentAnalyzerBinding;
 
 public class AnalyzerFragment extends Fragment {
 
+    private FragmentAnalyzerBinding binding;
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_analyzer, container, false);
 
-        return root;
+        // View Binding
+        binding = FragmentAnalyzerBinding.inflate(getLayoutInflater());
+        return binding.getRoot();
+
     }
 }
