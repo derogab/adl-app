@@ -19,10 +19,6 @@ import com.derogab.adlanalyzer.utils.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.Socket;
-
 import androidx.annotation.Nullable;
 
 public class LearningService extends Service implements SensorEventListener {

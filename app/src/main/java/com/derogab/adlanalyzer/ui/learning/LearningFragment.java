@@ -12,7 +12,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.derogab.adlanalyzer.databinding.FragmentLearningBinding;
 import com.derogab.adlanalyzer.services.LearningService;
@@ -33,7 +32,6 @@ import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.PhonePosition;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
@@ -48,8 +46,6 @@ public class LearningFragment extends Fragment {
 
     private FragmentLearningBinding binding;
 
-    private static final String ACTIVITY_SELECTED_INDEX = "activity_selected_index";
-
     private TextToSpeech textToSpeech;
     private CountDownTimer preparationTimer, activityTimer;
 
@@ -63,7 +59,6 @@ public class LearningFragment extends Fragment {
     private Intent learningIntent;
 
 
-    private String learningArchive;
 
     private boolean isLearningInProgress = false;
 

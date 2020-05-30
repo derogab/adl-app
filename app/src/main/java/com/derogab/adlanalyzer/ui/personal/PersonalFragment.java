@@ -7,8 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +18,6 @@ import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.databinding.FragmentPersonalBinding;
 import com.derogab.adlanalyzer.models.FormElement;
 import com.derogab.adlanalyzer.utils.Constants;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.List;
@@ -92,7 +89,7 @@ public class PersonalFragment extends Fragment {
      *
      * Set the current form elements
      * */
-    public void setElements(List<FormElement> elements) {
+    private void setElements(List<FormElement> elements) {
         this.elements = elements;
     }
 }

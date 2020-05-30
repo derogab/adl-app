@@ -1,17 +1,11 @@
 package com.derogab.adlanalyzer;
 
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.derogab.adlanalyzer.models.Activity;
-import com.derogab.adlanalyzer.utils.PhonePosition;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.annotation.NonNull;
