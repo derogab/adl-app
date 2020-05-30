@@ -260,14 +260,12 @@ public class LearningService extends Service implements SensorEventListener {
     /**
      * Send data to Server
      *
-     * @param dataToSend data to send to the server
+     * @param data data to send to the server
      * */
-    private void sendData(String dataToSend) {
+    private void sendData(String data) {
 
         //sends the message to the server
-        if (conn != null) {
-            conn.sendMessage(dataToSend);
-        }
+        if (conn != null && data != null) conn.sendMessage(data);
 
     }
 
