@@ -4,10 +4,14 @@ import java.util.ArrayList;
 
 public class MyR {
 
+    public static final int NO_ID = -1;
+
     private static ArrayList<MyR> list = new ArrayList<>();
 
     private int id;
     private String name;
+
+    private MyR() {}
 
     private MyR(int id, String name) {
         this.id = id;
