@@ -1,9 +1,11 @@
 package com.derogab.adlanalyzer.ui.learning;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.repositories.ActivitiesRepository;
+import com.derogab.adlanalyzer.utils.PhonePosition;
 
 import java.util.List;
 
@@ -16,6 +18,12 @@ public class LearningViewModel extends ViewModel {
     private final static String TAG = "LearningViewModel";
 
     private MutableLiveData<List<Activity>> activities;
+    private int activitySelectedIndex = 0;
+
+    private MutableLiveData<List<PhonePosition>> phonePositions;
+    private int phonePositionSelectedIndex = 0;
+
+    private boolean learningInProgress = false;
 
     public LiveData<List<Activity>> getActivities() {
 
@@ -33,4 +41,40 @@ public class LearningViewModel extends ViewModel {
 
     }
 
+    public MutableLiveData<List<PhonePosition>> getPhonePositions(Context context) {
+
+        if (phonePositions == null) {
+
+            phonePositions = new MutableLiveData<List<PhonePosition>>();
+                phonePositions.postValue(PhonePosition.getAll(context));
+
+        }
+
+        return phonePositions;
+
+    }
+
+    public int getActivitySelectedIndex() {
+        return activitySelectedIndex;
+    }
+
+    public void setActivitySelectedIndex(int activitySelectedIndex) {
+        this.activitySelectedIndex = activitySelectedIndex;
+    }
+
+    public int getPhonePositionSelectedIndex() {
+        return phonePositionSelectedIndex;
+    }
+
+    public void setPhonePositionSelectedIndex(int phonePositionSelectedIndex) {
+        this.phonePositionSelectedIndex = phonePositionSelectedIndex;
+    }
+
+    public boolean isLearningInProgress() {
+        return learningInProgress;
+    }
+
+    public void setLearningInProgress(boolean learningInProgress) {
+        this.learningInProgress = learningInProgress;
+    }
 }

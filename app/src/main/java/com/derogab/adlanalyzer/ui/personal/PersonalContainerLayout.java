@@ -2,11 +2,14 @@ package com.derogab.adlanalyzer.ui.personal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -22,6 +25,7 @@ import com.google.android.material.textfield.TextInputLayout;
 
 import org.json.JSONArray;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,7 +70,7 @@ public class PersonalContainerLayout extends LinearLayout {
      *
      * Generate the layout contents
      * */
-    public void generate(List<FormElement> elements, SharedPreferences sharedPreferences) {
+    public void generate(List<FormElement> elements, SharedPreferences sharedPreferences, PersonalViewModel personalViewModel) {
 
         int viewId = 1;
 
@@ -107,15 +111,42 @@ public class PersonalContainerLayout extends LinearLayout {
                     // Create TextInputEditText
                     TextInputEditText input_text = new TextInputEditText(getContext());
 
+                    // Set the id
+                    setElementId(input_text, viewId++, element.getId());
+
+                    // Listener onChange
+                    input_text.addTextChangedListener(new TextWatcher() {
+                        @Override
+                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                        }
+
+                        @Override
+                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                        }
+
+                        @Override
+                        public void afterTextChanged(Editable s) {
+
+                            if (MyR.get(element.getId()) != MyR.NO_ID)
+                                personalViewModel.addFormValue(MyR.get(element.getId()), s.toString());
+
+                        }
+                    });
+
                     // Restore value
-                    if (sharedPreferences != null)
-                        input_text.setText(sharedPreferences.getString(element.getId(), ""));
+                    if (personalViewModel.getFormValue(MyR.get(element.getId())) != null)
+                        input_text.setText(personalViewModel.getFormValue(MyR.get(element.getId())));
+                    else if (sharedPreferences != null) {
+                        String storageValue = sharedPreferences.getString(element.getId(), "");
+
+                        input_text.setText(storageValue);
+                        personalViewModel.addFormValue(MyR.get(element.getId()), storageValue);
+                    }
 
                     if (element.getOption("size") != null)
                         input_text.setTextSize(Integer.parseInt(element.getOption("size")));
-
-                    // Set the id
-                    setElementId(input_text, viewId++, element.getId());
 
                     // Set label
                     if (element.getOption("label") != null)
@@ -161,8 +192,41 @@ public class PersonalContainerLayout extends LinearLayout {
                         // Create CheckBox
                         CheckBox c = new CheckBox(getContext());
 
+                        // Set checkbox attributes
+                        setElementId(c, viewId++, checkbox.getId());
+
+                        // Listener onChange
+                        c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                if (MyR.get(element.getId()) != MyR.NO_ID) {
+
+                                    if (isChecked)
+                                        personalViewModel.appendFormValue(MyR.get(element.getId()),
+                                                checkbox.getId());
+                                    else
+                                        personalViewModel.removeFormValue(MyR.get(element.getId()),
+                                                checkbox.getId());
+
+                                }
+                            }
+                        });
+
                         // Restore value
-                        if (sharedPreferences != null) {
+                        if (personalViewModel.getFormValues(MyR.get(element.getId())) != null) {
+
+                            ArrayList<String> checkboxList =
+                                    (ArrayList<String>) personalViewModel.getFormValues(MyR.get(element.getId()));
+
+                            if (checkboxList != null && checkboxList.contains(checkbox.getId())) {
+
+                                c.setChecked(true);
+
+                            }
+
+
+                        }
+                        else if (sharedPreferences != null) {
                             Set<String> checkboxSet = sharedPreferences.getStringSet(element.getId(), null);
 
                             if (checkboxSet != null && checkboxSet.contains(checkbox.getId())) {
@@ -172,9 +236,6 @@ public class PersonalContainerLayout extends LinearLayout {
                             }
 
                         }
-
-                        // Set checkbox attributes
-                        setElementId(c, viewId++, checkbox.getId());
 
                         if(checkbox.getText() != null)
                             c.setText(checkbox.getText());
@@ -221,8 +282,32 @@ public class PersonalContainerLayout extends LinearLayout {
                         // Create Radio
                         RadioButton r = new RadioButton(getContext());
 
+                        // Set radio attributes
+                        setElementId(r, viewId++, radio.getId());
+
+                        // Listener onChange
+                        r.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                            @Override
+                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                                if (MyR.get(element.getId()) != MyR.NO_ID && isChecked)
+                                    personalViewModel.addFormValue(MyR.get(element.getId()), radio.getId());
+
+                            }
+                        });
+
                         // Restore value
-                        if (sharedPreferences != null) {
+                        if (personalViewModel.getFormValue(MyR.get(element.getId())) != null){
+                            String radioJustSelectedId = personalViewModel.getFormValue(MyR.get(element.getId()));
+
+                            if (radioJustSelectedId != null && radio.getId().equals(radioJustSelectedId) ) {
+
+                                r.setChecked(true);
+
+                            }
+
+                        }
+                        else if (sharedPreferences != null) {
                             String radioSelectedId = sharedPreferences.getString(element.getId(), null);
 
                             if (radioSelectedId != null && radio.getId().equals(radioSelectedId) ) {
@@ -232,9 +317,6 @@ public class PersonalContainerLayout extends LinearLayout {
                             }
 
                         }
-
-                        // Set radio attributes
-                        setElementId(r, viewId++, radio.getId());
 
                         if(radio.getText() != null)
                             r.setText(radio.getText());
@@ -330,7 +412,6 @@ public class PersonalContainerLayout extends LinearLayout {
 
                             // Insert id if checked
                             if (MyR.get(radioInfo.getId()) == checkedRadioButton){
-                                // Italy
                                 editor.putString(element.getId(), radioInfo.getId());
                             }
 

@@ -65,7 +65,7 @@ public class PersonalFragment extends Fragment {
                 setElements(elements);
                 binding.loader.setVisibility(View.GONE);
                 binding.fragmentPersonalSaveButton.show();
-                binding.personalFormContent.generate(elements, sharedPreferences);
+                binding.personalFormContent.generate(elements, sharedPreferences, personalViewModel);
 
             }
 

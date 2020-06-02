@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,22 +44,16 @@ public class LearningFragment extends Fragment {
     private static final String TAG = "LearningFragment";
 
     private FragmentLearningBinding binding;
+    private LearningViewModel learningViewModel;
 
     private TextToSpeech textToSpeech;
-    private CountDownTimer preparationTimer, activityTimer;
 
     private BroadcastReceiver learningServiceReceiver;
 
     private FragmentActivity mContext;
 
-
-    private LearningViewModel learningViewModel;
-
     private Intent learningIntent;
 
-
-
-    private boolean isLearningInProgress = false;
 
 
 
@@ -73,7 +66,7 @@ public class LearningFragment extends Fragment {
         mContext = this.getActivity();
 
         // Set TTS object
-        textToSpeech = new TextToSpeech(getContext(), new TextToSpeech.OnInitListener() {
+        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
@@ -117,7 +110,17 @@ public class LearningFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Insert phone positions
-        binding.phonePositionSelector.setItems(PhonePosition.getAll(mContext));
+        learningViewModel.getPhonePositions(getActivity()).observe(getViewLifecycleOwner(), new Observer<List<PhonePosition>>() {
+            @Override
+            public void onChanged(List<PhonePosition> phonePositions) {
+
+                binding.phonePositionSelector.setItems(phonePositions);
+
+                if (binding.phonePositionSelector.getItems().size() > learningViewModel.getPhonePositionSelectedIndex())
+                    binding.phonePositionSelector.setSelectedIndex(learningViewModel.getPhonePositionSelectedIndex());
+
+            }
+        });
 
         // Insert activities
         learningViewModel.getActivities().observe(getViewLifecycleOwner(), new Observer<List<Activity>>() {
@@ -125,19 +128,37 @@ public class LearningFragment extends Fragment {
             public void onChanged(List<Activity> activities) {
 
                 binding.activitySelector.setItems(activities);
+
+                if (binding.activitySelector.getItems().size() > learningViewModel.getActivitySelectedIndex())
+                    binding.activitySelector.setSelectedIndex(learningViewModel.getActivitySelectedIndex());
+
                 updateInfo();
-                if(!isLearningInProgress) binding.fragmentLearningStartButton.show();
+
+                if(!learningViewModel.isLearningInProgress())
+                    binding.fragmentLearningStartButton.show();
 
             }
 
         });
 
-        // Set listener on Spinner select change
+        // Set listener on Activity Spinner select change
         binding.activitySelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<Activity>() {
 
             @Override public void onItemSelected(MaterialSpinner view, int position, long id, Activity item) {
 
+                learningViewModel.setActivitySelectedIndex(position);
                 updateInfo();
+
+            }
+
+        });
+
+        // Set listener on PhonePosition Spinner select change
+        binding.phonePositionSelector.setOnItemSelectedListener(new MaterialSpinner.OnItemSelectedListener<PhonePosition>() {
+
+            @Override public void onItemSelected(MaterialSpinner view, int position, long id, PhonePosition item) {
+
+                learningViewModel.setPhonePositionSelectedIndex(position);
 
             }
 
@@ -151,7 +172,8 @@ public class LearningFragment extends Fragment {
                 alert(view, "Starting in 10 seconds");
 
                 binding.fragmentLearningStartButton.hide();
-                isLearningInProgress = true;
+
+                learningViewModel.setLearningInProgress(true);
 
                 // Get SharedPreferences file for settings preferences
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -284,6 +306,8 @@ public class LearningFragment extends Fragment {
 
                     alert(getView(), "Done.");
 
+                    learningViewModel.setLearningInProgress(false);
+
                     binding.fragmentLearningStartButton.show();
                 }
 
@@ -298,26 +322,6 @@ public class LearningFragment extends Fragment {
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_START"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_END"));
 
-
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(TAG, "Resuming...");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d(TAG, "Pausing...");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(TAG, "Stopping...");
     }
 
     @Override
