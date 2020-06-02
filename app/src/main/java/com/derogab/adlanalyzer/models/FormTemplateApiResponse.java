@@ -2,14 +2,14 @@ package com.derogab.adlanalyzer.models;
 
 import java.util.List;
 
-public class FormElementsApiResponse {
+public class FormTemplateApiResponse {
 
     private String status;
-    private List<FormElement> elements;
+    private List<FormGroup> groups;
 
-    public FormElementsApiResponse(String status, List<FormElement> elements) {
+    public FormTemplateApiResponse(String status, List<FormGroup> groups) {
         this.status = status;
-        this.elements = elements;
+        this.groups = groups;
     }
 
     public String getStatus() {
@@ -20,20 +20,19 @@ public class FormElementsApiResponse {
         this.status = status;
     }
 
-    public List<FormElement> getElements() {
-        return elements;
+    public List<FormGroup> getGroups() {
+        return groups;
     }
 
-    public void setElements(List<FormElement> elements) {
-        this.elements = elements;
+    public void setGroups(List<FormGroup> groups) {
+        this.groups = groups;
     }
 
     @Override
     public String toString() {
         return "FormElementsApiResponse{" +
                 "status='" + status + '\'' +
-                ", elements=" + elements +
+                ", groups=" + groups +
                 '}';
     }
-
 }

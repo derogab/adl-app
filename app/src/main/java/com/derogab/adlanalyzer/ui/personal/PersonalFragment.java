@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.databinding.FragmentPersonalBinding;
 import com.derogab.adlanalyzer.models.FormElement;
+import com.derogab.adlanalyzer.models.FormGroup;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -56,16 +57,13 @@ public class PersonalFragment extends Fragment {
         SharedPreferences sharedPreferences = requireActivity().getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
 
         // Get elements for form
-        personalViewModel.getFormElements().observe(getViewLifecycleOwner(), new Observer<List<FormElement>>() {
+        personalViewModel.getFormTemplate().observe(getViewLifecycleOwner(), new Observer<List<FormGroup>>() {
             @Override
-            public void onChanged(List<FormElement> elements) {
+            public void onChanged(List<FormGroup> groups) {
 
-                Log.d(TAG, "Elements: " + elements);
-
-                setElements(elements);
                 binding.loader.setVisibility(View.GONE);
                 binding.fragmentPersonalSaveButton.show();
-                binding.personalFormContent.generate(elements, sharedPreferences, personalViewModel);
+                binding.personalFormContent.generate(groups, sharedPreferences, personalViewModel);
 
             }
 
@@ -76,7 +74,7 @@ public class PersonalFragment extends Fragment {
             @Override
             public void onClick(View v) {
 
-                binding.personalFormContent.save(elements, sharedPreferences);
+                binding.personalFormContent.save(personalViewModel.getFormTemplate().getValue(), sharedPreferences);
                 Snackbar.make(v, R.string.fragment_personal_saved, Snackbar.LENGTH_SHORT).show();
 
             }
@@ -84,12 +82,4 @@ public class PersonalFragment extends Fragment {
 
     }
 
-    /**
-     * setElements()
-     *
-     * Set the current form elements
-     * */
-    private void setElements(List<FormElement> elements) {
-        this.elements = elements;
-    }
 }

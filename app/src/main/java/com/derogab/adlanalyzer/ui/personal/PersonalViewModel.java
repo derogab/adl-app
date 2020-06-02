@@ -2,14 +2,14 @@ package com.derogab.adlanalyzer.ui.personal;
 
 import android.util.Log;
 
-import androidx.lifecycle.FlowLiveDataConversions;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.derogab.adlanalyzer.models.FormElement;
+import com.derogab.adlanalyzer.models.FormGroup;
 import com.derogab.adlanalyzer.models.FormValue;
-import com.derogab.adlanalyzer.repositories.FormElementsRepository;
+import com.derogab.adlanalyzer.repositories.FormTemplateRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +18,22 @@ public class PersonalViewModel extends ViewModel {
 
     private final static String TAG = "PersonalViewModel";
 
-    private MutableLiveData<List<FormElement>> elements;
+    private MutableLiveData<List<FormGroup>> groups;
     private ArrayList<FormValue> values;
 
-    public LiveData<List<FormElement>> getFormElements() {
+    public LiveData<List<FormGroup>> getFormTemplate() {
 
-        if (elements == null) {
-            elements = new MutableLiveData<List<FormElement>>();
+        if (groups == null) {
+            groups = new MutableLiveData<List<FormGroup>>();
 
-            Log.d(TAG, "Download elements...");
+            Log.d(TAG, "Download template...");
 
-            FormElementsRepository.getInstance().getFormElements(elements);
+            FormTemplateRepository.getInstance().getFormTemplate(groups);
 
         }
 
-        Log.d(TAG, "Get elements...");
-        return elements;
+        Log.d(TAG, "Get template...");
+        return groups;
     }
 
     public void addFormValue(int key, String value) {

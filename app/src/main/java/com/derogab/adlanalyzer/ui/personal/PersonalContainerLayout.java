@@ -2,6 +2,7 @@ package com.derogab.adlanalyzer.ui.personal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -16,10 +17,12 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.derogab.adlanalyzer.models.FormElement;
+import com.derogab.adlanalyzer.models.FormGroup;
 import com.derogab.adlanalyzer.models.FormSubElement;
 import com.derogab.adlanalyzer.utils.Constants;
 
 import com.derogab.adlanalyzer.utils.MyR;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
@@ -31,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 
 public class PersonalContainerLayout extends LinearLayout {
 
@@ -70,267 +74,298 @@ public class PersonalContainerLayout extends LinearLayout {
      *
      * Generate the layout contents
      * */
-    public void generate(List<FormElement> elements, SharedPreferences sharedPreferences, PersonalViewModel personalViewModel) {
+    public void generate(List<FormGroup> groups, SharedPreferences sharedPreferences, PersonalViewModel personalViewModel) {
 
         int viewId = 1;
 
-        for (int i = 0; i < elements.size(); i++) {
+        for (int g = 0; g < groups.size(); g++) {
 
-            FormElement element = elements.get(i);
-            View customView = null;
+            FormGroup group = groups.get(g);
+            List<FormElement> elements = group.getElements();
 
-            switch (element.getType()){
+            MaterialCardView groupCard = new MaterialCardView(getContext());
+            // Set the CardView layoutParams
+            LayoutParams layoutParams = new LayoutParams(
+                    LayoutParams.MATCH_PARENT,
+                    LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.setMargins(0,8,0,8);
+            groupCard.setLayoutParams(layoutParams);
+            // Set CardView corner radius
+            groupCard.setRadius(4);
+            // Set cardView content padding
+            groupCard.setContentPadding(8, 8, 8, 8);
 
-                case Constants.FORM_ELEMENT_TYPE_TEXT_VIEW:
+            LinearLayout groupCardLayout = new LinearLayout(getContext());
+                groupCardLayout.setOrientation(LinearLayout.VERTICAL);
+                groupCardLayout.setPadding(0,0,0,0);
+                groupCardLayout.setLayoutParams(new LayoutParams(
+                        LayoutParams.MATCH_PARENT,
+                        LayoutParams.WRAP_CONTENT
+                ));
 
-                    // Create a TextView
-                    customView = new TextView(getContext());
+            for (int i = 0; i < elements.size(); i++) {
 
-                    // Set the id
-                    customView.setId(viewId++);
+                FormElement element = elements.get(i);
+                View customView = null;
 
-                    // Set attributes
-                    if (element.getOption("text") != null)
-                        ((TextView)customView).setText(element.getOption("text"));
+                switch (element.getType()){
 
-                    if (element.getOption("size") != null)
-                        ((TextView)customView)
-                                .setTextSize(TypedValue.COMPLEX_UNIT_SP,
-                                        Integer.parseInt(element.getOption("size")));
+                    case Constants.FORM_ELEMENT_TYPE_TEXT_VIEW:
 
-                    break;
+                        // Create a TextView
+                        customView = new TextView(getContext());
 
-                case Constants.FORM_ELEMENT_TYPE_INPUT_TEXT:
+                        // Set the id
+                        customView.setId(viewId++);
 
-                    // Create a TextInputLayout
-                    customView = new TextInputLayout(getContext());
+                        // Set attributes
+                        if (element.getOption("text") != null)
+                            ((TextView)customView).setText(element.getOption("text"));
 
-                    // Set attributes
-                    ((TextInputLayout)customView).setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
+                        if (element.getOption("size") != null)
+                            ((TextView)customView)
+                                    .setTextSize(TypedValue.COMPLEX_UNIT_SP,
+                                            Integer.parseInt(element.getOption("size")));
 
-                    // Create TextInputEditText
-                    TextInputEditText input_text = new TextInputEditText(getContext());
+                        break;
 
-                    // Set the id
-                    setElementId(input_text, viewId++, element.getId());
+                    case Constants.FORM_ELEMENT_TYPE_INPUT_TEXT:
 
-                    // Listener onChange
-                    input_text.addTextChangedListener(new TextWatcher() {
-                        @Override
-                        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                        // Create a TextInputLayout
+                        customView = new TextInputLayout(getContext());
 
-                        }
+                        // Set attributes
+                        ((TextInputLayout)customView).setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
 
-                        @Override
-                        public void onTextChanged(CharSequence s, int start, int before, int count) {
+                        // Create TextInputEditText
+                        TextInputEditText input_text = new TextInputEditText(getContext());
 
-                        }
-
-                        @Override
-                        public void afterTextChanged(Editable s) {
-
-                            if (MyR.get(element.getId()) != MyR.NO_ID)
-                                personalViewModel.addFormValue(MyR.get(element.getId()), s.toString());
-
-                        }
-                    });
-
-                    // Restore value
-                    if (personalViewModel.getFormValue(MyR.get(element.getId())) != null)
-                        input_text.setText(personalViewModel.getFormValue(MyR.get(element.getId())));
-                    else if (sharedPreferences != null) {
-                        String storageValue = sharedPreferences.getString(element.getId(), "");
-
-                        input_text.setText(storageValue);
-                        personalViewModel.addFormValue(MyR.get(element.getId()), storageValue);
-                    }
-
-                    if (element.getOption("size") != null)
-                        input_text.setTextSize(Integer.parseInt(element.getOption("size")));
-
-                    // Set label
-                    if (element.getOption("label") != null)
-                        input_text.setHint(element.getOption("label"));
-
-                    // Add TextInputEditText in TextInputLayout
-                    ((TextInputLayout)customView).addView(input_text);
-
-                    break;
-
-                case Constants.FORM_ELEMENT_TYPE_CHECK_GROUP:
-
-                    // Get checkboxes
-                    List<FormSubElement> checkboxes = element.getContents();
-
-                    // Create a container
-                    customView = new LinearLayout(getContext());
-
-                    // Set the id
-                    setElementId(customView, viewId++, element.getId());
-
-                    // Change orientation if necessary
-                    if (checkboxes.size() > 2)
-                        ((LinearLayout)customView).setOrientation(LinearLayout.VERTICAL);
-
-                    // Add label
-                    if (element.getOption("label") != null) {
-
-                        TextView label = new TextView(getContext());
-
-                        label.setText(element.getOption("label"));
-
-                        ((LinearLayout)customView).addView(label);
-
-                    }
-
-                    // Create checkboxes
-                    for(int j = 0 ; j < checkboxes.size() ; j++){
-
-                        // Get checkbox info
-                        FormSubElement checkbox = checkboxes.get(j);
-
-                        // Create CheckBox
-                        CheckBox c = new CheckBox(getContext());
-
-                        // Set checkbox attributes
-                        setElementId(c, viewId++, checkbox.getId());
+                        // Set the id
+                        setElementId(input_text, viewId++, element.getId());
 
                         // Listener onChange
-                        c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        input_text.addTextChangedListener(new TextWatcher() {
                             @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                                if (MyR.get(element.getId()) != MyR.NO_ID) {
+                            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-                                    if (isChecked)
-                                        personalViewModel.appendFormValue(MyR.get(element.getId()),
-                                                checkbox.getId());
-                                    else
-                                        personalViewModel.removeFormValue(MyR.get(element.getId()),
-                                                checkbox.getId());
+                            }
+
+                            @Override
+                            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                            }
+
+                            @Override
+                            public void afterTextChanged(Editable s) {
+
+                                if (MyR.get(element.getId()) != MyR.NO_ID)
+                                    personalViewModel.addFormValue(MyR.get(element.getId()), s.toString());
+
+                            }
+                        });
+
+                        // Restore value
+                        if (personalViewModel.getFormValue(MyR.get(element.getId())) != null)
+                            input_text.setText(personalViewModel.getFormValue(MyR.get(element.getId())));
+                        else if (sharedPreferences != null) {
+                            String storageValue = sharedPreferences.getString(element.getId(), "");
+
+                            input_text.setText(storageValue);
+                            personalViewModel.addFormValue(MyR.get(element.getId()), storageValue);
+                        }
+
+                        if (element.getOption("size") != null)
+                            input_text.setTextSize(Integer.parseInt(element.getOption("size")));
+
+                        // Set label
+                        if (element.getOption("label") != null)
+                            input_text.setHint(element.getOption("label"));
+
+                        // Add TextInputEditText in TextInputLayout
+                        ((TextInputLayout)customView).addView(input_text);
+
+                        break;
+
+                    case Constants.FORM_ELEMENT_TYPE_CHECK_GROUP:
+
+                        // Get checkboxes
+                        List<FormSubElement> checkboxes = element.getContents();
+
+                        // Create a container
+                        customView = new LinearLayout(getContext());
+
+                        // Set the id
+                        setElementId(customView, viewId++, element.getId());
+
+                        // Change orientation if necessary
+                        if (checkboxes.size() > 2)
+                            ((LinearLayout)customView).setOrientation(LinearLayout.VERTICAL);
+
+                        // Add label
+                        if (element.getOption("label") != null) {
+
+                            TextView label = new TextView(getContext());
+
+                            label.setText(element.getOption("label"));
+
+                            ((LinearLayout)customView).addView(label);
+
+                        }
+
+                        // Create checkboxes
+                        for(int j = 0 ; j < checkboxes.size() ; j++){
+
+                            // Get checkbox info
+                            FormSubElement checkbox = checkboxes.get(j);
+
+                            // Create CheckBox
+                            CheckBox c = new CheckBox(getContext());
+
+                            // Set checkbox attributes
+                            setElementId(c, viewId++, checkbox.getId());
+
+                            // Listener onChange
+                            c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                                    if (MyR.get(element.getId()) != MyR.NO_ID) {
+
+                                        if (isChecked)
+                                            personalViewModel.appendFormValue(MyR.get(element.getId()),
+                                                    checkbox.getId());
+                                        else
+                                            personalViewModel.removeFormValue(MyR.get(element.getId()),
+                                                    checkbox.getId());
+
+                                    }
+                                }
+                            });
+
+                            // Restore value
+                            if (personalViewModel.getFormValues(MyR.get(element.getId())) != null) {
+
+                                ArrayList<String> checkboxList =
+                                        (ArrayList<String>) personalViewModel.getFormValues(MyR.get(element.getId()));
+
+                                if (checkboxList != null && checkboxList.contains(checkbox.getId())) {
+
+                                    c.setChecked(true);
 
                                 }
-                            }
-                        });
 
-                        // Restore value
-                        if (personalViewModel.getFormValues(MyR.get(element.getId())) != null) {
-
-                            ArrayList<String> checkboxList =
-                                    (ArrayList<String>) personalViewModel.getFormValues(MyR.get(element.getId()));
-
-                            if (checkboxList != null && checkboxList.contains(checkbox.getId())) {
-
-                                c.setChecked(true);
 
                             }
+                            else if (sharedPreferences != null) {
+                                Set<String> checkboxSet = sharedPreferences.getStringSet(element.getId(), null);
 
+                                if (checkboxSet != null && checkboxSet.contains(checkbox.getId())) {
+
+                                    c.setChecked(true);
+
+                                }
+
+                            }
+
+                            if(checkbox.getText() != null)
+                                c.setText(checkbox.getText());
+
+                            // Add checkbox to the container
+                            ((LinearLayout)customView).addView(c);
 
                         }
-                        else if (sharedPreferences != null) {
-                            Set<String> checkboxSet = sharedPreferences.getStringSet(element.getId(), null);
-
-                            if (checkboxSet != null && checkboxSet.contains(checkbox.getId())) {
-
-                                c.setChecked(true);
-
-                            }
-
-                        }
-
-                        if(checkbox.getText() != null)
-                            c.setText(checkbox.getText());
-
-                        // Add checkbox to the container
-                        ((LinearLayout)customView).addView(c);
-
-                    }
-                    break;
+                        break;
 
 
-                case Constants.FORM_ELEMENT_TYPE_RADIO_GROUP:
+                    case Constants.FORM_ELEMENT_TYPE_RADIO_GROUP:
 
-                    // Get radios
-                    List<FormSubElement> radios = element.getContents();
+                        // Get radios
+                        List<FormSubElement> radios = element.getContents();
 
-                    // Create a container
-                    customView = new RadioGroup(getContext());
+                        // Create a container
+                        customView = new RadioGroup(getContext());
 
-                    // Set the id
-                    setElementId(customView, viewId++, element.getId());
+                        // Set the id
+                        setElementId(customView, viewId++, element.getId());
 
-                    // Change orientation if necessary
-                    if (radios.size() < 3)
-                        ((RadioGroup)customView).setOrientation(RadioGroup.HORIZONTAL);
+                        // Change orientation if necessary
+                        if (radios.size() < 3)
+                            ((RadioGroup)customView).setOrientation(RadioGroup.HORIZONTAL);
 
-                    // Add label
-                    if (element.getOption("label") != null) {
+                        // Add label
+                        if (element.getOption("label") != null) {
 
-                        TextView label = new TextView(getContext());
+                            TextView label = new TextView(getContext());
 
-                        label.setText(element.getOption("label"));
+                            label.setText(element.getOption("label"));
 
-                        ((RadioGroup)customView).addView(label);
-
-                    }
-
-                    // Create radios
-                    for(int j = 0 ; j < radios.size() ; j++){
-
-                        // Get radio info
-                        FormSubElement radio = radios.get(j);
-
-                        // Create Radio
-                        RadioButton r = new RadioButton(getContext());
-
-                        // Set radio attributes
-                        setElementId(r, viewId++, radio.getId());
-
-                        // Listener onChange
-                        r.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                            @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-                                if (MyR.get(element.getId()) != MyR.NO_ID && isChecked)
-                                    personalViewModel.addFormValue(MyR.get(element.getId()), radio.getId());
-
-                            }
-                        });
-
-                        // Restore value
-                        if (personalViewModel.getFormValue(MyR.get(element.getId())) != null){
-                            String radioJustSelectedId = personalViewModel.getFormValue(MyR.get(element.getId()));
-
-                            if (radioJustSelectedId != null && radio.getId().equals(radioJustSelectedId) ) {
-
-                                r.setChecked(true);
-
-                            }
-
-                        }
-                        else if (sharedPreferences != null) {
-                            String radioSelectedId = sharedPreferences.getString(element.getId(), null);
-
-                            if (radioSelectedId != null && radio.getId().equals(radioSelectedId) ) {
-
-                                r.setChecked(true);
-
-                            }
+                            ((RadioGroup)customView).addView(label);
 
                         }
 
-                        if(radio.getText() != null)
-                            r.setText(radio.getText());
+                        // Create radios
+                        for(int j = 0 ; j < radios.size() ; j++){
 
-                        // Add radio to the container
-                        ((RadioGroup)customView).addView(r);
+                            // Get radio info
+                            FormSubElement radio = radios.get(j);
 
-                    }
-                    break;
+                            // Create Radio
+                            RadioButton r = new RadioButton(getContext());
 
+                            // Set radio attributes
+                            setElementId(r, viewId++, radio.getId());
+
+                            // Listener onChange
+                            r.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                                @Override
+                                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+
+                                    if (MyR.get(element.getId()) != MyR.NO_ID && isChecked)
+                                        personalViewModel.addFormValue(MyR.get(element.getId()), radio.getId());
+
+                                }
+                            });
+
+                            // Restore value
+                            if (personalViewModel.getFormValue(MyR.get(element.getId())) != null){
+                                String radioJustSelectedId = personalViewModel.getFormValue(MyR.get(element.getId()));
+
+                                if (radioJustSelectedId != null && radio.getId().equals(radioJustSelectedId) ) {
+
+                                    r.setChecked(true);
+
+                                }
+
+                            }
+                            else if (sharedPreferences != null) {
+                                String radioSelectedId = sharedPreferences.getString(element.getId(), null);
+
+                                if (radioSelectedId != null && radio.getId().equals(radioSelectedId) ) {
+
+                                    r.setChecked(true);
+
+                                }
+
+                            }
+
+                            if(radio.getText() != null)
+                                r.setText(radio.getText());
+
+                            // Add radio to the container
+                            ((RadioGroup)customView).addView(r);
+
+                        }
+                        break;
+
+
+                }
+
+                if (customView != null) groupCardLayout.addView(customView);
 
             }
 
-            if (customView != null) this.addView(customView);
+            groupCard.addView(groupCardLayout);
+            this.addView(groupCard);
 
         }
 
@@ -341,83 +376,90 @@ public class PersonalContainerLayout extends LinearLayout {
      *
      * Save the data
      * */
-    public void save(List<FormElement> elements, SharedPreferences sharedPreferences) {
+    public void save(List<FormGroup> groups, SharedPreferences sharedPreferences) {
 
         Log.d(TAG, "Saving Personal information...");
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        for (int i = 0; i < elements.size(); i++) {
+        for (int g = 0; g < groups.size(); g++) {
 
-            // Get params
-            FormElement element = elements.get(i);
+            FormGroup group = groups.get(g);
+            List<FormElement> elements = group.getElements();
 
-            // Save only data with an ID
-            if (element.getId() != null) {
+            for (int i = 0; i < elements.size(); i++) {
 
-                switch (element.getType()){
+                // Get params
+                FormElement element = elements.get(i);
 
-                    case Constants.FORM_ELEMENT_TYPE_INPUT_TEXT:
+                // Save only data with an ID
+                if (element.getId() != null) {
 
-                        editor.putString(element.getId(),
-                                ((TextView)findViewById(MyR.get(element.getId()))).getText().toString() );
+                    switch (element.getType()){
 
-                        break;
+                        case Constants.FORM_ELEMENT_TYPE_INPUT_TEXT:
 
-                    case Constants.FORM_ELEMENT_TYPE_CHECK_GROUP:
+                            editor.putString(element.getId(),
+                                    ((TextView)findViewById(MyR.get(element.getId()))).getText().toString() );
 
-                        // Get checkboxes
-                        List<FormSubElement> checkboxes = element.getContents();
+                            break;
 
-                        // Create Set
-                        Set<String> checkGroup = new HashSet<>();
+                        case Constants.FORM_ELEMENT_TYPE_CHECK_GROUP:
 
-                        // Save every checkboxes
-                        for(int j = 0 ; j < checkboxes.size() ; j++) {
+                            // Get checkboxes
+                            List<FormSubElement> checkboxes = element.getContents();
 
-                            // Get checkbox info
-                            FormSubElement checkboxObject = checkboxes.get(j);
+                            // Create Set
+                            Set<String> checkGroup = new HashSet<>();
 
-                            // Get CheckBox by id
-                            CheckBox checkBox = ((CheckBox) findViewById(MyR.get(checkboxObject.getId())));
+                            // Save every checkboxes
+                            for(int j = 0 ; j < checkboxes.size() ; j++) {
 
-                            // Save checked
-                            if(checkBox.isChecked()) {
-                                checkGroup.add(checkboxObject.getId());
+                                // Get checkbox info
+                                FormSubElement checkboxObject = checkboxes.get(j);
+
+                                // Get CheckBox by id
+                                CheckBox checkBox = ((CheckBox) findViewById(MyR.get(checkboxObject.getId())));
+
+                                // Save checked
+                                if(checkBox.isChecked()) {
+                                    checkGroup.add(checkboxObject.getId());
+                                }
+
                             }
 
-                        }
+                            // Save all checked checkbox
+                            editor.putStringSet(element.getId(), checkGroup);
 
-                        // Save all checked checkbox
-                        editor.putStringSet(element.getId(), checkGroup);
-
-                        break;
+                            break;
 
 
-                    case Constants.FORM_ELEMENT_TYPE_RADIO_GROUP:
+                        case Constants.FORM_ELEMENT_TYPE_RADIO_GROUP:
 
-                        // Get radios
-                        List<FormSubElement> radios = element.getContents();
+                            // Get radios
+                            List<FormSubElement> radios = element.getContents();
 
-                        // Get radiogroup by id
-                        RadioGroup radioGroupView = ((RadioGroup) findViewById(MyR.get(element.getId())));
+                            // Get radiogroup by id
+                            RadioGroup radioGroupView = ((RadioGroup) findViewById(MyR.get(element.getId())));
 
-                        // Get checked radio button id
-                        int checkedRadioButton = radioGroupView.getCheckedRadioButtonId();
+                            // Get checked radio button id
+                            int checkedRadioButton = radioGroupView.getCheckedRadioButtonId();
 
-                        // Create radios
-                        for(int j = 0 ; j < radios.size() ; j++){
+                            // Create radios
+                            for(int j = 0 ; j < radios.size() ; j++){
 
-                            // Get radio info
-                            FormSubElement radioInfo = radios.get(j);
+                                // Get radio info
+                                FormSubElement radioInfo = radios.get(j);
 
-                            // Insert id if checked
-                            if (MyR.get(radioInfo.getId()) == checkedRadioButton){
-                                editor.putString(element.getId(), radioInfo.getId());
+                                // Insert id if checked
+                                if (MyR.get(radioInfo.getId()) == checkedRadioButton){
+                                    editor.putString(element.getId(), radioInfo.getId());
+                                }
+
                             }
 
-                        }
+                            break;
+                    }
 
-                        break;
                 }
 
             }
