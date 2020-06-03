@@ -1,5 +1,9 @@
 package com.derogab.adlanalyzer.services;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 
 import android.content.Context;
@@ -9,21 +13,28 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.connections.Connection;
+import com.derogab.adlanalyzer.ui.learning.LearningFragment;
 import com.derogab.adlanalyzer.utils.Constants;
+import com.derogab.adlanalyzer.utils.CountDown;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
 
 public class LearningService extends Service implements SensorEventListener {
 
     private static final String TAG = "LearningService";
+
+    private static final String NOTIFICATION_CHANNEL_ID = "learning_notification_channel_id";
 
     private int index;
 
@@ -95,11 +106,29 @@ public class LearningService extends Service implements SensorEventListener {
             conn.close();
             Log.d(TAG, "Connection closed.");
         }
+
+        stopForeground(true);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "onStartCommand(): start sensors...");
+
+        // Foreground notification
+        Intent notificationIntent = new Intent(getApplicationContext(), LearningFragment.class);
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
+
+        createNotificationChannel();
+
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID)
+            .setContentTitle("Learning Service")
+            .setContentText("Learning in progress...")
+            .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
+            .setContentIntent(pendingIntent)
+            .build();
+
+        startForeground(1, notification);
 
         mContext = this;
 
@@ -174,6 +203,23 @@ public class LearningService extends Service implements SensorEventListener {
                     sendTime.setAction("GET_ACTIVITY_COUNTDOWN");
                     sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
+
+                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID)
+                        .setContentTitle("Learning Service")
+                        .setContentText("Learning in progress... " + CountDown.get(secondsUntilFinished))
+                        .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
+                        .setContentIntent(pendingIntent)
+                        .build();
+
+                NotificationManager notificationManager = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+                    notificationManager = mContext.getSystemService(NotificationManager.class);
+                else
+                    notificationManager =
+                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if (notificationManager != null)
+                    notificationManager.notify(1, notification);
 
             }
 
@@ -326,5 +372,21 @@ public class LearningService extends Service implements SensorEventListener {
 
     }
 
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.service_learning_channel_name);
+            String description = getString(R.string.service_learning_channel_description);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+    }
 
 }
