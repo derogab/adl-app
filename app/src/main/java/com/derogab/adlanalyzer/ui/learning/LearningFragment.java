@@ -169,7 +169,6 @@ public class LearningFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Log.d(TAG, "fab clicked. ");
-                alert(view, "Starting in 10 seconds");
 
                 binding.fragmentLearningStartButton.hide();
 
@@ -259,56 +258,69 @@ public class LearningFragment extends Fragment {
 
                 binding.fragmentLearningStartButton.hide();
 
-                if(intent.getAction().equals("GET_ACTIVITY_COUNTDOWN")) {
+                if (intent.getAction() != null) switch (intent.getAction()) {
 
-                    long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN",0);
-                    Log.d(TAG, "Activity countdown received: " + activityCountdown);
+                    case "GET_SERVICE_START":
 
-                    if (activityCountdown % 5 == 0) {
+                        alert(getView(), "Starting in 10 seconds");
 
-                        speak(""+activityCountdown);
+                        break;
 
-                    }
+                    case "GET_ACTIVITY_START":
 
-                    binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
-                    binding.fragmentLearningCountdownTimer.setText(CountDown.get(activityCountdown));
+                        speak("Activity started.");
+                        alert(getView(), "Activity started.");
+                        break;
 
+                    case "GET_ACTIVITY_COUNTDOWN":
 
-                }
-                else if(intent.getAction().equals("GET_PREPARATION_COUNTDOWN")) {
+                        long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN", 0);
 
-                    long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN",0);
-                    Log.d(TAG, "Preparation countdown received: " + preparationCountdown);
+                        if (activityCountdown % 5 == 0)
+                            speak("" + activityCountdown);
 
-                    if (preparationCountdown == 3) {
+                        binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                        binding.fragmentLearningCountdownTimer.setText(CountDown.get(activityCountdown));
 
-                        speak("The activity is about to begin");
+                        break;
 
-                    }
+                    case "GET_PREPARATION_COUNTDOWN":
 
-                    binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
-                    binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
+                        long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN", 0);
 
-                }
-                else if(intent.getAction().equals("GET_ACTIVITY_START")) {
-                    Log.d(TAG, "Activity started");
+                        if (preparationCountdown == 3)
+                            speak("The activity is about to begin");
 
-                    speak("Activity started.");
+                        binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+                        binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
 
-                    alert(getView(), "Activity started.");
-                }
-                else if(intent.getAction().equals("GET_ACTIVITY_END")) {
-                    Log.d(TAG, "Activity stop");
+                        break;
 
-                    speak("done!");
+                    case "GET_ACTIVITY_END":
 
-                    binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
+                        speak("done!");
+                        alert(getView(), "Done.");
 
-                    alert(getView(), "Done.");
+                        binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
+                        binding.fragmentLearningStartButton.show();
 
-                    learningViewModel.setLearningInProgress(false);
+                        learningViewModel.setLearningInProgress(false);
 
-                    binding.fragmentLearningStartButton.show();
+                        break;
+
+                    case "GET_CONNECTION_ERROR":
+
+                        String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
+
+                        if (errorMessage != null)
+                            alert(getView(), errorMessage);
+
+                        binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
+                        binding.fragmentLearningStartButton.show();
+
+                        learningViewModel.setLearningInProgress(false);
+
+                        break;
                 }
 
 
@@ -317,10 +329,12 @@ public class LearningFragment extends Fragment {
 
 
         // Init receiver
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_SERVICE_START"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_COUNTDOWN"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_PREPARATION_COUNTDOWN"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_START"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_END"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_CONNECTION_ERROR"));
 
     }
 

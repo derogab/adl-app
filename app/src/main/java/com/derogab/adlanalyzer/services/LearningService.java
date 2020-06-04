@@ -92,27 +92,16 @@ public class LearningService extends Service implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "Creating...");
-
-    }
-
-    @Override
     public void onDestroy() {
         super.onDestroy();
 
-        if (conn != null) {
-            conn.close();
-            Log.d(TAG, "Connection closed.");
-        }
+        if (conn != null) conn.close();
 
         stopForeground(true);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand(): start sensors...");
 
         // Foreground notification
         Intent notificationIntent = new Intent(getApplicationContext(), LearningFragment.class);
@@ -145,9 +134,6 @@ public class LearningService extends Service implements SensorEventListener {
 
         host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
         port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
-
-
-        Log.d(TAG, "activityTime: " + activityTime);
 
         // Init sensor manager
         sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
@@ -243,11 +229,9 @@ public class LearningService extends Service implements SensorEventListener {
         };
 
         // Connect to the server
-        conn = new Connection(host, port, new Connection.OnMessageReceived() {
+        conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
             @Override
             public void messageReceived(String message) {
-
-                //Log.d("LearningServiceResponse", "Response: " + message);
 
                 try {
                     readReceivedData(message);
@@ -256,11 +240,35 @@ public class LearningService extends Service implements SensorEventListener {
                 }
 
             }
+        }, new Connection.OnConnectionErrorListener() {
+            @Override
+            public void onConnectionError() {
+
+                // Send connection error to UI
+                Intent sendTime = new Intent();
+                    sendTime.setAction("GET_CONNECTION_ERROR");
+                    sendTime.putExtra( "CONNECTION_ERROR", "Error to connect to database.");
+                sendBroadcast(sendTime);
+
+                // Just close the service
+                stopSelf();
+
+            }
+        }, new Connection.OnConnectionSuccessListener() {
+            @Override
+            public void onConnectionSuccess() {
+
+                // Start service task
+                preparationTimer.start();
+                // and communicate that it is started
+                Intent sendTime = new Intent();
+                    sendTime.setAction("GET_SERVICE_START");
+                    sendTime.putExtra( "SERVICE_START", true);
+                sendBroadcast(sendTime);
+
+            }
         });
         conn.run();
-
-        // Start service task
-        preparationTimer.start();
 
         return super.onStartCommand(intent, flags, startId);
     }

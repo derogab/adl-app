@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -21,7 +22,7 @@ public class Connection {
     // message to send to the server
     private String mServerMessage;
     // sends message received notifications
-    private OnMessageReceived mMessageListener = null;
+    private OnMessageReceivedListener mMessageListener = null;
     // while this is true, the server will continue running
     private boolean mRun = false;
     // used to send messages
@@ -29,18 +30,31 @@ public class Connection {
     // used to read messages from the server
     private BufferedReader mBufferIn;
 
+    // callbacks
+    private OnConnectionErrorListener onConnectionErrorListener;
+    private OnConnectionSuccessListener onConnectionSuccessListener;
+
     /**
      * Constructor of the class.
      * OnMessagedReceived listens for the messages received from server
      *
      * @param dest the destination (ip/url) of the server
      * @param port the destination port of the server
-     * @param listener the OnMessageReceived listener / callback method
+     * @param onMessageReceivedListener the OnMessageReceived listener / callback method
+     * @param onConnectionErrorListener the OnConnectionErrorListener listener / callback method
+     * @param onConnectionSuccessListener the OnConnectionSuccessListener listener / callback method
      */
-    public Connection(String dest, int port, OnMessageReceived listener) {
-        mServerDestination = dest;
-        mServerPort = port;
-        mMessageListener = listener;
+    public Connection(String dest, int port,
+                      OnMessageReceivedListener onMessageReceivedListener,
+                      OnConnectionErrorListener onConnectionErrorListener,
+                      OnConnectionSuccessListener onConnectionSuccessListener) {
+
+        this.mServerDestination = dest;
+        this.mServerPort = port;
+        this.mMessageListener = onMessageReceivedListener;
+        this.onConnectionErrorListener = onConnectionErrorListener;
+        this.onConnectionSuccessListener = onConnectionSuccessListener;
+
     }
 
     /**
@@ -92,12 +106,20 @@ public class Connection {
             public void run() {
 
                 try {
-                    Log.d(TAG, "Connecting...");
-
+                    Log.d(TAG, "Connecting to server...");
                     // create a socket to make the connection with the server
                     Log.d(TAG, "Host: " + mServerDestination);
                     Log.d(TAG, "Port: " + mServerPort);
                     mSocket = new Socket(mServerDestination, mServerPort);
+                    // exec callback after connection
+                    onConnectionSuccessListener.onConnectionSuccess();
+
+                } catch (Exception e) {
+                    // Exec callback
+                    onConnectionErrorListener.onConnectionError();
+                }
+
+                if (mSocket != null) {
 
                     try {
 
@@ -129,15 +151,19 @@ public class Connection {
                         }
 
                     } catch (Exception e) {
+
                         Log.e(TAG, "Error", e);
+
                     } finally {
                         // the socket must be closed. It is not possible to reconnect to this socket
                         // after it is closed, which means a new socket instance has to be created.
-                        mSocket.close();
+                        try {
+                            mSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
 
-                } catch (Exception e) {
-                    Log.e(TAG, "Error", e);
                 }
 
             }
@@ -147,8 +173,31 @@ public class Connection {
 
     }
 
-    public interface OnMessageReceived {
+    /**
+     * Interface for connection success
+     * OnMessageReceivedListener listens for message received
+     *
+     */
+    public interface OnMessageReceivedListener {
         public void messageReceived(String message);
+    }
+
+    /**
+     * Interface for connection errors
+     * OnConnectionErrorListener listens for the connection error
+     *
+     */
+    public interface OnConnectionErrorListener {
+        void onConnectionError();
+    }
+
+    /**
+     * Interface for connection success
+     * OnConnectionSuccessListener listens for the connection success
+     *
+     */
+    public interface OnConnectionSuccessListener {
+        void onConnectionSuccess();
     }
 
 }
