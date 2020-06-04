@@ -14,28 +14,29 @@ public class Connection {
 
     private static final String TAG = "Connection";
 
-    // server information
-    private String mServerDestination;
-    private int mServerPort;
-    // connection socket
-    private Socket mSocket;
-    // message to send to the server
-    private String mServerMessage;
-    // sends message received notifications
-    private OnMessageReceivedListener mMessageListener = null;
-    // while this is true, the server will continue running
-    private boolean mRun = false;
-    // used to send messages
-    private PrintWriter mBufferOut;
-    // used to read messages from the server
-    private BufferedReader mBufferIn;
+    // Server information
+    private String destination;
+    private int port;
+    // Connection socket
+    private Socket socket;
+    // Server message
+    private String serverMessage;
+    // Check variable
+    private boolean mRun = false; // while this is true, the server will continue running
+    // Buffer used to send messages
+    private PrintWriter bufferOut;
+    // Buffer used to read messages from the server
+    private BufferedReader bufferIn;
 
-    // callbacks
-    private OnConnectionErrorListener onConnectionErrorListener;
+    // Callbacks
+    private OnMessageReceivedListener onMessageReceivedListener;
     private OnConnectionSuccessListener onConnectionSuccessListener;
+    private OnConnectionErrorListener onConnectionErrorListener;
 
     /**
      * Constructor of the class.
+     * OnMessagedReceived listens for the messages received from server
+     * OnMessagedReceived listens for the messages received from server
      * OnMessagedReceived listens for the messages received from server
      *
      * @param dest the destination (ip/url) of the server
@@ -49,9 +50,9 @@ public class Connection {
                       OnConnectionErrorListener onConnectionErrorListener,
                       OnConnectionSuccessListener onConnectionSuccessListener) {
 
-        this.mServerDestination = dest;
-        this.mServerPort = port;
-        this.mMessageListener = onMessageReceivedListener;
+        this.destination = dest;
+        this.port = port;
+        this.onMessageReceivedListener = onMessageReceivedListener;
         this.onConnectionErrorListener = onConnectionErrorListener;
         this.onConnectionSuccessListener = onConnectionSuccessListener;
 
@@ -62,13 +63,13 @@ public class Connection {
      *
      * @param message text entered by client
      */
-    public void sendMessage(final String message) {
+    public void sendMessage(String message) {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (mBufferOut != null) {
-                    mBufferOut.println(message);
-                    mBufferOut.flush();
+                if (bufferOut != null) {
+                    bufferOut.println(message);
+                    bufferOut.flush();
                 }
             }
         };
@@ -83,20 +84,23 @@ public class Connection {
 
         mRun = false;
 
-        if (mBufferOut != null) {
-            mBufferOut.flush();
-            mBufferOut.close();
+        if (bufferOut != null) {
+            bufferOut.flush();
+            bufferOut.close();
         }
 
-        mMessageListener = null;
-        mBufferIn = null;
-        mBufferOut = null;
-        mServerMessage = null;
-        mServerDestination = null;
-        mServerPort = 0;
-        mSocket = null;
+        onMessageReceivedListener = null;
+        bufferIn = null;
+        bufferOut = null;
+        serverMessage = null;
+        destination = null;
+        port = 0;
+        socket = null;
     }
 
+    /**
+     * Tasks when the connection is established
+     */
     public void run() {
 
         mRun = true;
@@ -107,11 +111,11 @@ public class Connection {
 
                 try {
                     Log.d(TAG, "Connecting to server...");
-                    // create a socket to make the connection with the server
-                    Log.d(TAG, "Host: " + mServerDestination);
-                    Log.d(TAG, "Port: " + mServerPort);
-                    mSocket = new Socket(mServerDestination, mServerPort);
-                    // exec callback after connection
+                    // Create a socket to make the connection with the server
+                    Log.d(TAG, "Host: " + destination);
+                    Log.d(TAG, "Port: " + port);
+                    socket = new Socket(destination, port);
+                    // Exec callback after connection
                     onConnectionSuccessListener.onConnectionSuccess();
 
                 } catch (Exception e) {
@@ -119,28 +123,28 @@ public class Connection {
                     onConnectionErrorListener.onConnectionError();
                 }
 
-                if (mSocket != null) {
+                if (socket != null) {
 
                     try {
 
-                        //sends the message to the server
-                        mBufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(mSocket.getOutputStream())), true);
+                        // Sends the message to the server
+                        bufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 
-                        //receives the message which the server sends back
-                        mBufferIn = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                        // Receives the message which the server sends back
+                        bufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                        //in this while the client listens for the messages sent by the server
+                        // In this while the client listens for the messages sent by the server
                         while (mRun) {
 
-                            mServerMessage = mBufferIn.readLine();
+                            serverMessage = bufferIn.readLine();
 
-                            if (mServerMessage != null && mMessageListener != null) {
+                            if (serverMessage != null && onMessageReceivedListener != null) {
 
                                 Runnable runnable = new Runnable() {
                                     @Override
                                     public void run() {
 
-                                        mMessageListener.messageReceived(mServerMessage);
+                                        onMessageReceivedListener.messageReceived(serverMessage);
 
                                     }
                                 };
@@ -152,16 +156,20 @@ public class Connection {
 
                     } catch (Exception e) {
 
+                        // Error communicating with the server
                         Log.e(TAG, "Error", e);
 
                     } finally {
-                        // the socket must be closed. It is not possible to reconnect to this socket
-                        // after it is closed, which means a new socket instance has to be created.
+
                         try {
-                            mSocket.close();
+                            // The socket must be closed.
+                            // It is not possible to reconnect to this socket
+                            // after it is closed, which means a new socket instance has to be created.
+                            socket.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
+
                     }
 
                 }
@@ -174,7 +182,7 @@ public class Connection {
     }
 
     /**
-     * Interface for connection success
+     * Interface to receive messages
      * OnMessageReceivedListener listens for message received
      *
      */
@@ -183,7 +191,7 @@ public class Connection {
     }
 
     /**
-     * Interface for connection errors
+     * Interface to receive connection errors
      * OnConnectionErrorListener listens for the connection error
      *
      */
@@ -192,7 +200,7 @@ public class Connection {
     }
 
     /**
-     * Interface for connection success
+     * Interface to receive connection success
      * OnConnectionSuccessListener listens for the connection success
      *
      */

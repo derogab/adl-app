@@ -34,19 +34,15 @@ public class LearningService extends Service implements SensorEventListener {
 
     private static final String TAG = "LearningService";
 
-    private static final String NOTIFICATION_CHANNEL_ID = "learning_notification_channel_id";
-
-    private int index;
-
+    // Countdown timers
     private CountDownTimer preparationTimer;
     private CountDownTimer activityTimer;
-
+    // Sensor utility
     private SensorManager sensorManager;
-    private Context mContext;
-
+    private SensorEventListener sensorEventListener;
+    // Connection to a socket
     private Connection conn;
-
-    // Activity info
+    // Current activity information
     private String sendingArchive;
     private String activityToAnalyze;
     private String phonePosition;
@@ -54,10 +50,154 @@ public class LearningService extends Service implements SensorEventListener {
     // Sensors status
     private boolean isSensorAccelerometerActive;
     private boolean isSensorGyroscopeActive;
-    // Destination server
-    private String host;
-    private int port;
+    // Data counter
+    private int index;
 
+    /**
+     * Notification channel creation
+     * */
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.service_learning_channel_name);
+            String description = getString(R.string.service_learning_channel_description);
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel channel = new NotificationChannel(Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+    }
+
+    /**
+     * Receive data from Server
+     *
+     * @param dataReceived data received from the server
+     * */
+    private void readReceivedData(String dataReceived) throws JSONException {
+
+        JSONObject response = new JSONObject(dataReceived);
+
+        if (response.getString("status").equals("OK")) {
+
+            if (response.getString("type").equals("close")) {
+
+                stopSelf();
+
+            }
+
+            else if (response.getString("type").equals("ack")) {
+
+                Log.d(TAG, "Ack received.");
+
+            }
+
+        }
+
+    }
+
+    /**
+     * Send data to Server
+     *
+     * @param data data to send to the server
+     * */
+    private void sendData(String data) {
+
+        // if connected
+        if (conn != null && data != null)
+            // send the data to the server
+            conn.sendMessage(data);
+
+    }
+
+    /**
+     * Create the closing message json
+     *
+     * @param archive archive to close
+     *
+     * @return the closing message json
+     * */
+    private String getClosingMessage(String archive) {
+
+        String jsonData = null;
+        try {
+
+            jsonData = new JSONObject()
+                    .put("status", "OK")
+                    .put("error", false)
+                    .put("response", new JSONObject()
+                            .put("archive", archive)
+                            .put("type", "close")).toString();
+
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonData;
+
+    }
+
+    /**
+     * Create the data message json
+     *
+     * @param archive archive to close
+     * @param activity the activity to learn
+     * @param sensor the sensor data
+     * @param phonePosition the phone position
+     * @param x the x axis value
+     * @param y the y axis value
+     * @param z the z axis value
+     *
+     * @return the data message json
+     * */
+    private String getCollectionDataMessage(String archive,
+                                   String activity,
+                                   String sensor,
+                                   String phonePosition,
+                                   float x,
+                                   float y,
+                                   float z){
+
+        index++;
+
+        // Create data
+        String jsonData = null;
+        try {
+
+            jsonData = new JSONObject()
+                    .put("status", "OK")
+                    .put("response", new JSONObject()
+                            .put("archive", archive)
+                            .put("type", "data")
+                            .put("info", new JSONObject()
+                                    .put("index", index)
+                                    .put("activity", activity)
+                                    .put("sensor", sensor)
+                                    .put("position", phonePosition))
+                            .put("data", new JSONObject()
+                                    .put("x", x)
+                                    .put("y", y)
+                                    .put("z", z))).toString();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonData;
+
+    }
+
+    /**
+     * Sensor callback
+     * Triggered on sensor change
+     *
+     * @param event the sensor data
+     * */
     @Override
     public void onSensorChanged(SensorEvent event) {
 
@@ -69,8 +209,7 @@ public class LearningService extends Service implements SensorEventListener {
 
             Log.d(TAG, "[GYROSCOPE] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            // @TODO: send gyroscope data to server
-            sendCollectedData(sendingArchive, activityToAnalyze, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z);
+            sendData(getCollectionDataMessage(sendingArchive, activityToAnalyze, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z));
 
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -81,16 +220,26 @@ public class LearningService extends Service implements SensorEventListener {
 
             Log.d(TAG, "[ACCELEROMETER] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            // @TODO: send accelerometer data to server
-            sendCollectedData(sendingArchive, activityToAnalyze, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z);
+            sendData(getCollectionDataMessage(sendingArchive, activityToAnalyze, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z));
 
         }
 
     }
 
+    /**
+     * Accuracy callback
+     * Triggered on accuracy change
+     *
+     * @param sensor sensor data
+     * @param accuracy accuracy value
+     * */
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
+    /**
+     * Destroy callback
+     * Triggered on service destroy
+     * */
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -100,46 +249,58 @@ public class LearningService extends Service implements SensorEventListener {
         stopForeground(true);
     }
 
+    /**
+     * Sensor callback
+     * Triggered on accuracy change
+     *
+     * @param intent the intent
+     * @param flags additional data about this start request
+     * @param startId a unique integer representing this specific request to start
+     * */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        // Foreground notification
+        // Init
+        sensorEventListener = this;
+
+        // Create notification intent
         Intent notificationIntent = new Intent(getApplicationContext(), LearningFragment.class);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
 
         createNotificationChannel();
 
-        Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID)
+        // Create notification
+        Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setContentTitle("Learning Service")
             .setContentText("Learning in progress...")
             .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
             .setContentIntent(pendingIntent)
             .build();
 
+        // Start foreground notification
         startForeground(1, notification);
 
-        mContext = this;
-
-        index = 0; // init counter
-
-        // Get input data from fragment
+        // Get input data from fragment: task data
         sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
         activityToAnalyze = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
         phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
         activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
-
+        // Get input data from fragment: sensor activation status
         isSensorAccelerometerActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER, true);
         isSensorGyroscopeActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE, true);
-
-        host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
-        port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
+        // Get input data from fragment: server information
+        String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
+        int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
 
         // Init sensor manager
-        sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
         // Init PackageManager
         PackageManager packageManager = getPackageManager();
+
+        // Init counter value
+        index = 0;
 
         // Set preparation timer
         preparationTimer = new CountDownTimer(10000, 1000) {
@@ -162,9 +323,9 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Start sensors
                 if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && isSensorAccelerometerActive)
-                    sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+                    sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
                 if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
-                    sensorManager.registerListener((SensorEventListener) mContext, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+                    sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
                 // Send data
                 Intent sendTime = new Intent();
@@ -185,25 +346,27 @@ public class LearningService extends Service implements SensorEventListener {
 
                 Log.d(TAG, "seconds remaining: " + secondsUntilFinished);
 
+                // Send countdown data to UI
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_ACTIVITY_COUNTDOWN");
                     sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
-                Notification notification = new NotificationCompat.Builder(getApplicationContext(), NOTIFICATION_CHANNEL_ID)
+                // Update notification countdown
+                Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
                         .setContentTitle("Learning Service")
                         .setContentText("Learning in progress... " + CountDown.get(secondsUntilFinished))
                         .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
                         .setContentIntent(pendingIntent)
                         .build();
-
+                // Get notification manager
                 NotificationManager notificationManager = null;
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
-                    notificationManager = mContext.getSystemService(NotificationManager.class);
+                    notificationManager = getSystemService(NotificationManager.class);
                 else
                     notificationManager =
                             (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
+                // Push notification updated
                 if (notificationManager != null)
                     notificationManager.notify(1, notification);
 
@@ -211,10 +374,9 @@ public class LearningService extends Service implements SensorEventListener {
 
             @Override
             public void onFinish() {
-                Log.d(TAG, "activity timer done!");
 
                 // Stop Sensors listener
-                sensorManager.unregisterListener((SensorEventListener) mContext);
+                sensorManager.unregisterListener(sensorEventListener);
 
                 // Send end to UI
                 Intent sendTime = new Intent();
@@ -223,12 +385,12 @@ public class LearningService extends Service implements SensorEventListener {
                 sendBroadcast(sendTime);
 
                 // Send close to server
-                sendClose(sendingArchive);
+                sendData(getClosingMessage(sendingArchive));
 
             }
         };
 
-        // Connect to the server
+        // Connect to the server & set callbacks
         conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
             @Override
             public void messageReceived(String message) {
@@ -260,7 +422,7 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Start service task
                 preparationTimer.start();
-                // and communicate that it is started
+                // and communicate to UI that it is started
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_SERVICE_START");
                     sendTime.putExtra( "SERVICE_START", true);
@@ -277,124 +439,6 @@ public class LearningService extends Service implements SensorEventListener {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    /**
-     * Receive data from Server
-     *
-     * @param dataReceived data received from the server
-     * */
-    private void readReceivedData(String dataReceived) throws JSONException {
-
-        JSONObject response = new JSONObject(dataReceived);
-
-        if (response.getString("status").equals("OK")) {
-
-            if (response.getString("type").equals("close")) {
-
-                Log.d(TAG, "All data sent. Stop the service...");
-                stopSelf();
-
-            }
-
-            else if (response.getString("type").equals("ack")) {
-
-                Log.d(TAG, "Ack received.");
-
-            }
-
-        }
-
-    }
-
-    /**
-     * Send data to Server
-     *
-     * @param data data to send to the server
-     * */
-    private void sendData(String data) {
-
-        //sends the message to the server
-        if (conn != null && data != null) conn.sendMessage(data);
-
-    }
-
-    private void sendCollectedData(String id,
-                          String activity,
-                          String sensor,
-                          String phonePosition,
-                          float x,
-                          float y,
-                          float z){
-
-        index++;
-
-        // Create data
-        String jsonData = null;
-        try {
-
-            jsonData = new JSONObject()
-                    .put("status", "OK")
-                    .put("response", new JSONObject()
-                            .put("archive", id)
-                            .put("type", "data")
-                            .put("info", new JSONObject()
-                                .put("index", index)
-                                .put("activity", activity)
-                                .put("sensor", sensor)
-                                .put("position", phonePosition))
-                            .put("data", new JSONObject()
-                                .put("x", x)
-                                .put("y", y)
-                                .put("z", z))).toString();
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // Send data
-        sendData(jsonData);
-
-    }
-
-
-
-    private void sendClose(String id) {
-
-        String jsonData = null;
-        try {
-
-            jsonData = new JSONObject()
-                    .put("status", "OK")
-                    .put("error", false)
-                    .put("response", new JSONObject()
-                            .put("archive", id)
-                            .put("type", "close")).toString();
-
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        sendData(jsonData);
-
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.service_learning_channel_name);
-            String description = getString(R.string.service_learning_channel_description);
-            int importance = NotificationManager.IMPORTANCE_LOW;
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-
     }
 
 }
