@@ -2,7 +2,9 @@ package com.derogab.adlanalyzer.ui.personal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -16,6 +18,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.models.FormElement;
 import com.derogab.adlanalyzer.models.FormGroup;
 import com.derogab.adlanalyzer.models.FormSubElement;
@@ -34,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
 
 public class PersonalContainerLayout extends LinearLayout {
 
