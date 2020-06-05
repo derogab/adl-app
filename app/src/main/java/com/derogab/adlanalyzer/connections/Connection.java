@@ -90,6 +90,8 @@ public class Connection {
         }
 
         onMessageReceivedListener = null;
+        onConnectionSuccessListener = null;
+        onConnectionErrorListener = null;
         bufferIn = null;
         bufferOut = null;
         serverMessage = null;
@@ -161,13 +163,17 @@ public class Connection {
 
                     } finally {
 
-                        try {
-                            // The socket must be closed.
-                            // It is not possible to reconnect to this socket
-                            // after it is closed, which means a new socket instance has to be created.
-                            socket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
+                        if (socket != null) {
+
+                            try {
+                                // The socket must be closed.
+                                // It is not possible to reconnect to this socket
+                                // after it is closed, which means a new socket instance has to be created.
+                                socket.close();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
                         }
 
                     }

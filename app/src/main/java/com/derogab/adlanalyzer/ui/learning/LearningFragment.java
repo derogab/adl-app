@@ -136,6 +136,8 @@ public class LearningFragment extends Fragment {
 
                 if(!learningViewModel.isLearningInProgress())
                     binding.fragmentLearningStartButton.show();
+                else
+                    binding.fragmentLearningCancelButton.show();
 
             }
 
@@ -199,6 +201,18 @@ public class LearningFragment extends Fragment {
             }
         });
 
+        binding.fragmentLearningCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                binding.fragmentLearningCancelButton.hide();
+
+                mContext.stopService(learningIntent);
+                alert(v, "Activity stopped.");
+
+                binding.fragmentLearningStartButton.show();
+            }
+        });
+
     }
 
     private Activity getSelectedActivity() {
@@ -249,7 +263,6 @@ public class LearningFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "Starting...");
 
         // Set information receiver from service
         learningServiceReceiver = new BroadcastReceiver() {
@@ -263,6 +276,8 @@ public class LearningFragment extends Fragment {
                     case "GET_SERVICE_START":
 
                         alert(getView(), "Starting in 10 seconds");
+
+                        binding.fragmentLearningCancelButton.show();
 
                         break;
 
@@ -302,6 +317,7 @@ public class LearningFragment extends Fragment {
                         alert(getView(), "Done.");
 
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
+                        binding.fragmentLearningCancelButton.hide();
                         binding.fragmentLearningStartButton.show();
 
                         learningViewModel.setLearningInProgress(false);
@@ -316,6 +332,7 @@ public class LearningFragment extends Fragment {
                             alert(getView(), errorMessage);
 
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
+                        binding.fragmentLearningCancelButton.hide();
                         binding.fragmentLearningStartButton.show();
 
                         learningViewModel.setLearningInProgress(false);

@@ -33,4 +33,5 @@
     <string name="fragment_personal_loader">Loading...</string>
     <string name="service_learning_channel_description">Learning in progress...</string>
     <string name="service_learning_channel_name">Learning Service</string>
+    <string name="fragment_learning_cancel_button">Cancel</string>
 </resources>
