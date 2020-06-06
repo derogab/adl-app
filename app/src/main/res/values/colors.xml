@@ -1,7 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Light -->
     <color name="colorPrimary">#1976d2</color>
-    <color name="colorPrimaryDark">#004ba0</color>
-    <color name="colorAccent">#00e5ff</color>
-    <color name="colorAccentDark">#6effff</color>
+    <color name="colorPrimaryVariant">#004ba0</color>
+    <color name="colorOnPrimary">#FAFAFA</color>
+    <color name="colorAccent">#ffab00</color>
+    <color name="colorAccentVariant">#c67c00</color>
+    <color name="colorOnAccent">#000000</color>
+    <color name="colorBackground">#FAFAFA</color>
+    <color name="colorOnBackground">#000000</color>
+    <color name="colorSurface">#FAFAFA</color>
+    <color name="colorOnSurface">#000000</color>
+    <color name="colorText">#000000</color>
+    <color name="colorError">#F44336</color>
+    <color name="colorOnError">#FAFAFA</color>
+
+    <!-- Dark -->
+    <color name="colorPrimaryDark">#d84315</color>
+    <color name="colorPrimaryVariantDark">#9f0000</color>
+    <color name="colorOnPrimaryDark">#FFFFFF</color>
+    <color name="colorAccentDark">#ffab00</color>
+    <color name="colorAccentVariantDark">#c67c00</color>
+    <color name="colorOnAccentDark">#FFFFFF</color>
+    <color name="colorBackgroundDark">#212121</color>
+    <color name="colorOnBackgroundDark">#FFFFFF</color>
+    <color name="colorSurfaceDark">#212121</color>
+    <color name="colorOnSurfaceDark">#FFFFFF</color>
+    <color name="colorTextDark">#FFFFFF</color>
+    <color name="colorErrorDark">#F44336</color>
+    <color name="colorOnErrorDark">#FFFFFF</color>
+
 </resources>

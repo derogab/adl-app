@@ -92,16 +92,16 @@ public class PersonalContainerLayout extends LinearLayout {
                     LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT
             );
-            layoutParams.setMargins(0,8,0,8);
+            layoutParams.setMargins(0,0,0,16);
             groupCard.setLayoutParams(layoutParams);
             // Set CardView corner radius
             groupCard.setRadius(4);
             // Set cardView content padding
-            groupCard.setContentPadding(8, 8, 8, 8);
+            groupCard.setContentPadding(0, 0, 0, 0);
 
             LinearLayout groupCardLayout = new LinearLayout(getContext());
                 groupCardLayout.setOrientation(LinearLayout.VERTICAL);
-                groupCardLayout.setPadding(0,0,0,0);
+                groupCardLayout.setPadding(8,8,8,8);
                 groupCardLayout.setLayoutParams(new LayoutParams(
                         LayoutParams.MATCH_PARENT,
                         LayoutParams.WRAP_CONTENT
