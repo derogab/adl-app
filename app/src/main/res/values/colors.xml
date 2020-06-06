@@ -9,7 +9,7 @@
     <color name="colorOnAccent">#000000</color>
     <color name="colorBackground">#FAFAFA</color>
     <color name="colorOnBackground">#000000</color>
-    <color name="colorSurface">#FAFAFA</color>
+    <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnSurface">#000000</color>
     <color name="colorText">#000000</color>
     <color name="colorError">#F44336</color>

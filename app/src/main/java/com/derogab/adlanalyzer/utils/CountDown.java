@@ -1,5 +1,7 @@
 package com.derogab.adlanalyzer.utils;
 
+import java.util.Locale;
+
 public class CountDown {
 
     private static final int seconds_in_a_minute = 60;
@@ -26,19 +28,19 @@ public class CountDown {
         String output;
 
         if (days > 0) {
-            output = String.format(two_digit_format, days) + ":"
-                    + String.format(two_digit_format, hours) + ":"
-                    + String.format(two_digit_format, minutes) + ":"
-                    + String.format(two_digit_format, seconds);
+            output = String.format(Locale.getDefault(), two_digit_format, days) + ":"
+                    + String.format(Locale.getDefault(), two_digit_format, hours) + ":"
+                    + String.format(Locale.getDefault(), two_digit_format, minutes) + ":"
+                    + String.format(Locale.getDefault(), two_digit_format, seconds);
         }
         else if (hours > 0) {
-            output = String.format(two_digit_format, hours) + ":"
-                    + String.format(two_digit_format, minutes) + ":"
-                    + String.format(two_digit_format, seconds);
+            output = String.format(Locale.getDefault(), two_digit_format, hours) + ":"
+                    + String.format(Locale.getDefault(), two_digit_format, minutes) + ":"
+                    + String.format(Locale.getDefault(), two_digit_format, seconds);
         }
         else {
-            output = String.format(two_digit_format, minutes) + ":"
-                    + String.format(two_digit_format, seconds);
+            output = String.format(Locale.getDefault(), two_digit_format, minutes) + ":"
+                    + String.format(Locale.getDefault(), two_digit_format, seconds);
         }
 
         return output;
