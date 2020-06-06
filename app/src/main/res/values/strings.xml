@@ -33,6 +33,8 @@
     <string name="fragment_personal_loader">Loading...</string>
     <string name="service_learning_channel_description">Learning in progress...</string>
     <string name="service_learning_channel_name">Learning Service</string>
+    <string name="service_analyzer_channel_description">Analyzing in progress...</string>
+    <string name="service_analyzer_channel_name">Analyzer Service</string>
     <string name="fragment_learning_cancel_button">Cancel</string>
     <string name="fragment_analyzer_phone_position_selector_textview">Select phone position</string>
     <string name="fragment_analyzer_cancel_button">Cancel</string>

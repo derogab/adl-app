@@ -25,6 +25,9 @@
         <service
             android:name=".services.LearningService"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".services.AnalyzerService"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 

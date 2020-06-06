@@ -22,6 +22,8 @@ public class Constants {
     public static final String LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE = "learning_service_sensor_status_gyroscope";
     public static final String LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID = "learning_notification_channel_id";
 
+    public static final String ANALYZER_SERVICE_NOTIFICATION_CHANNEL_ID = "analyzer_notification_channel_id";
+
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";
 

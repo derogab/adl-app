@@ -200,7 +200,7 @@
         android:layout_margin="16dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_directions_run_black_24dp"
+        android:src="@drawable/ic_search_black_24dp"
         android:contentDescription="@string/fragment_analyzer_start_button"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"

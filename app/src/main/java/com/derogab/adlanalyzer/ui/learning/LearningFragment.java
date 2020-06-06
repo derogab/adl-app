@@ -60,7 +60,6 @@ public class LearningFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "Creating...");
 
         // Get main context
         mContext = this.getActivity();
