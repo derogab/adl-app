@@ -51,12 +51,6 @@ public class Activity {
     @Override
     public String toString() {
         return getActivity();
-
-        /*return "Activity{" +
-                "activity='" + activity + '\'' +
-                ", time=" + time +
-                ", sensors=" + sensors +
-                '}';*/
     }
 
 }

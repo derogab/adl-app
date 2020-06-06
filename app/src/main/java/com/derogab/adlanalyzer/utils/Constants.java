@@ -2,9 +2,6 @@ package com.derogab.adlanalyzer.utils;
 
 public class Constants {
 
-    public static final String SENDING_MODE_ANALYZE = "analyze";
-    public static final String SENDING_MODE_LEARN = "learn";
-
     public static final String FORM_ELEMENT_TYPE_TEXT_VIEW = "text";
     public static final String FORM_ELEMENT_TYPE_INPUT_TEXT = "input-text";
     public static final String FORM_ELEMENT_TYPE_CHECK_GROUP = "check-group";

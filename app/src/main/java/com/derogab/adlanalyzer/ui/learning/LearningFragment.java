@@ -30,7 +30,7 @@ import com.derogab.adlanalyzer.R;
 
 import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.utils.Constants;
-import com.derogab.adlanalyzer.utils.PhonePosition;
+import com.derogab.adlanalyzer.models.PhonePosition;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 

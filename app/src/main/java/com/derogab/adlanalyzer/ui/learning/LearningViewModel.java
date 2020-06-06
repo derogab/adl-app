@@ -5,7 +5,8 @@ import android.util.Log;
 
 import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.repositories.ActivitiesRepository;
-import com.derogab.adlanalyzer.utils.PhonePosition;
+import com.derogab.adlanalyzer.models.PhonePosition;
+import com.derogab.adlanalyzer.repositories.PhonePositionsRepository;
 
 import java.util.List;
 
@@ -44,9 +45,9 @@ public class LearningViewModel extends ViewModel {
     public MutableLiveData<List<PhonePosition>> getPhonePositions(Context context) {
 
         if (phonePositions == null) {
-
             phonePositions = new MutableLiveData<List<PhonePosition>>();
-                phonePositions.postValue(PhonePosition.getAll(context));
+
+            PhonePositionsRepository.getInstance(context).getPhonePositions(phonePositions);
 
         }
 
