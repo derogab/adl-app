@@ -1,5 +1,6 @@
 package com.derogab.adlanalyzer.ui.analyzer;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -52,10 +53,14 @@ public class AnalyzerFragment extends Fragment {
     private void checkSensor(TextView v, String featureSensor) {
         if (mContext != null){
 
-            if (mContext.getPackageManager().hasSystemFeature(featureSensor))
+            if (mContext.getPackageManager().hasSystemFeature(featureSensor)) {
                 v.setText(R.string.sensor_status_enabled);
-            else
-                v.setText(R.string.sensor_status_disabled);
+                v.setTextColor(getResources().getColor(R.color.colorEnabled));
+            }
+            else {
+                v.setText(R.string.sensor_status_not_present);
+                v.setTextColor(getResources().getColor(R.color.colorDisabled));
+            }
 
         }
     }
@@ -257,10 +262,8 @@ public class AnalyzerFragment extends Fragment {
         mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("GET_SERVICE_START"));
 
         // Set sensors status on UI
-        checkSensor(binding.fragmentAnalyzerSensorsGyroscopeValue, PackageManager.FEATURE_SENSOR_GYROSCOPE);
         checkSensor(binding.fragmentAnalyzerSensorsAccelerometerValue, PackageManager.FEATURE_SENSOR_ACCELEROMETER);
-
-
+        checkSensor(binding.fragmentAnalyzerSensorsGyroscopeValue, PackageManager.FEATURE_SENSOR_GYROSCOPE);
 
 
     }

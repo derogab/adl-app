@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
@@ -25,6 +26,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.preference.PreferenceManager;
+import android.widget.TextView;
 
 import com.derogab.adlanalyzer.R;
 
@@ -234,11 +236,23 @@ public class LearningFragment extends Fragment {
 
     }
 
-    private int getSensorStatusText(boolean isActive) {
+    private void checkSensor(TextView v, String featureSensor, boolean isEnabled) {
+        if (mContext != null){
 
-        if (isActive) return R.string.sensor_status_enabled;
-        else return R.string.sensor_status_disabled;
+            if (!mContext.getPackageManager().hasSystemFeature(featureSensor)) {
+                v.setText(R.string.sensor_status_not_present);
+                v.setTextColor(getResources().getColor(R.color.colorDisabled));
+            }
+            else if (!isEnabled) {
+                v.setText(R.string.sensor_status_disabled);
+                v.setTextColor(getResources().getColor(R.color.colorDisabled));
+            }
+            else {
+                v.setText(R.string.sensor_status_enabled);
+                v.setTextColor(getResources().getColor(R.color.colorEnabled));
+            }
 
+        }
     }
 
     private void updateInfo() {
@@ -252,8 +266,12 @@ public class LearningFragment extends Fragment {
             binding.fragmentLearningCountdownTimer.setText(CountDown.get(as.getTime()));
 
             // Write sensors status
-            binding.fragmentLearningSensorsAccelerometerValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_ACCELEROMETER)));
-            binding.fragmentLearningSensorsGyroscopeValue.setText(getSensorStatusText(as.isSensorActive(Constants.SENSOR_GYROSCOPE)));
+            checkSensor(binding.fragmentLearningSensorsAccelerometerValue,
+                    PackageManager.FEATURE_SENSOR_ACCELEROMETER,
+                    as.isSensorActive(Constants.SENSOR_ACCELEROMETER));
+            checkSensor(binding.fragmentLearningSensorsGyroscopeValue,
+                    PackageManager.FEATURE_SENSOR_GYROSCOPE,
+                    as.isSensorActive(Constants.SENSOR_GYROSCOPE));
 
         }
 

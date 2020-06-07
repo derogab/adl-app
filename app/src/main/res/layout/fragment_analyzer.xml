@@ -125,65 +125,63 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_analyzer_sensors_textview">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+                <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/fragment_analyzer_sensors_accelerometer"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/sensor_accelerometer"
-                        android:textSize="18sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                    <TableRow>
 
-                    <TextView
-                        android:id="@+id/fragment_analyzer_sensors_accelerometer_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:text="-"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toEndOf="@+id/fragment_analyzer_sensors_accelerometer"
-                        app:layout_constraintTop_toTopOf="parent" />
+                        <TextView
+                            android:id="@+id/fragment_analyzer_sensors_accelerometer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/sensor_accelerometer"
+                            android:textSize="18sp" />
 
-                    <TextView
-                        android:id="@+id/fragment_analyzer_sensors_gyroscope"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/sensor_gyroscope"
-                        android:textSize="18sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/fragment_analyzer_sensors_accelerometer" />
+                        <TextView
+                            android:id="@+id/fragment_analyzer_sensors_accelerometer_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/sensor_status_unset"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/fragment_analyzer_sensors_gyroscope_value"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginTop="8dp"
-                        android:text="-"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toEndOf="@+id/fragment_analyzer_sensors_gyroscope"
-                        app:layout_constraintTop_toBottomOf="@id/fragment_analyzer_sensors_accelerometer_value" />
+                    </TableRow>
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/fragment_analyzer_sensors_gyroscope"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/sensor_gyroscope"
+                            android:textSize="18sp" />
+
+                        <TextView
+                            android:id="@+id/fragment_analyzer_sensors_gyroscope_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/sensor_status_unset"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                    </TableRow>
+
+                </TableLayout>
 
             </com.google.android.material.card.MaterialCardView>
 

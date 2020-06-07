@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <!-- Light -->
     <color name="colorPrimary">#1976d2</color>
     <color name="colorPrimaryVariant">#004ba0</color>
@@ -15,6 +16,9 @@
     <color name="colorError">#F44336</color>
     <color name="colorOnError">#FAFAFA</color>
 
+    <color name="colorEnabled">#27ae60</color>
+    <color name="colorDisabled">#c0392b</color>
+
     <!-- Dark -->
     <color name="colorPrimaryDark">#d84315</color>
     <color name="colorPrimaryVariantDark">#9f0000</color>
@@ -29,5 +33,8 @@
     <color name="colorTextDark">#FFFFFF</color>
     <color name="colorErrorDark">#F44336</color>
     <color name="colorOnErrorDark">#FFFFFF</color>
+
+    <color name="colorEnabledDark">#2ecc71</color>
+    <color name="colorDisabledDark">#e74c3c</color>
 
 </resources>

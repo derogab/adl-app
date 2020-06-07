@@ -2,7 +2,7 @@
     <!-- LANG -->
     <string name="current_lang">en</string>
     <!-- APP NAME -->
-    <string name="app_name">ADL Analyzer</string>
+    <string name="app_name">ADL App</string>
     <!-- TITLES -->
     <string name="title_analyzer">Analyzer</string>
     <string name="title_learning">Learning</string>
@@ -44,8 +44,9 @@
     <string name="sensor_label">Sensors</string>
     <string name="sensor_accelerometer">Accelerometer</string>
     <string name="sensor_gyroscope">Gyroscope</string>
+    <string name="sensor_status_unset">-</string>
     <string name="sensor_status_enabled">enabled</string>
     <string name="sensor_status_disabled">disabled</string>
-    <string name="sensor_status_not_present">there isn\'t</string>
+    <string name="sensor_status_not_present">not present</string>
 
 </resources>
