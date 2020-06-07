@@ -168,7 +168,7 @@ public class AnalyzerFragment extends Fragment {
                 if(!analyzerViewModel.isAnalyzingInProgress())
                     binding.fragmentAnalyzerStartButton.show();
                 else
-                    binding.fragmentAnalyzerStartButton.show();
+                    binding.fragmentAnalyzerCancelButton.show();
 
             }
         });
