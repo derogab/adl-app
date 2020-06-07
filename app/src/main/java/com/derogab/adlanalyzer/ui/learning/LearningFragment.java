@@ -236,8 +236,8 @@ public class LearningFragment extends Fragment {
 
     private int getSensorStatusText(boolean isActive) {
 
-        if (isActive) return R.string.fragment_learning_sensor_status_active;
-        else return R.string.fragment_learning_sensor_status_not_active;
+        if (isActive) return R.string.sensor_status_enabled;
+        else return R.string.sensor_status_disabled;
 
     }
 

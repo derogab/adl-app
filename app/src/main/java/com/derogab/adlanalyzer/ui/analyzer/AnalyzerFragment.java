@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.databinding.FragmentAnalyzerBinding;
+import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.models.PhonePosition;
 import com.derogab.adlanalyzer.services.AnalyzerService;
 import com.derogab.adlanalyzer.utils.Constants;
@@ -52,9 +53,9 @@ public class AnalyzerFragment extends Fragment {
         if (mContext != null){
 
             if (mContext.getPackageManager().hasSystemFeature(featureSensor))
-                v.setText("attivo");
+                v.setText(R.string.sensor_status_enabled);
             else
-                v.setText("non attivo");
+                v.setText(R.string.sensor_status_disabled);
 
         }
     }

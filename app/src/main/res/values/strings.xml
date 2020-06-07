@@ -1,42 +1,51 @@
 <resources>
+    <!-- LANG -->
     <string name="current_lang">en</string>
+    <!-- APP NAME -->
     <string name="app_name">ADL Analyzer</string>
+    <!-- TITLES -->
     <string name="title_analyzer">Analyzer</string>
     <string name="title_learning">Learning</string>
     <string name="title_personal">Personal</string>
-    <string name="fragment_learning_activity_selector_textview">Select an activity…</string>
-    <string name="fragment_learning_selected_configuration_textview">Selected configuration</string>
-    <string name="fragment_learning_config_seconds">Time: </string>
-    <string name="fragment_learning_config_frequency">Frequency: </string>
-    <string name="fragment_learning_start_button">Start learning</string>
-    <string name="fragment_learning_config_sensors">"Sensors: "</string>
-    <string name="fragment_learning_tts_activity_started">Activity just started</string>
-    <string name="fragment_learning_phone_position_selector_textview">Where is the phone?</string>
+    <string name="title_settings">Settings</string>
+    <!-- SETTINGS -->
+    <string name="settings_server_destination_title">Destination</string>
+    <string name="settings_server_port_title">Port</string>
+    <string name="settings_server_category_title">Server</string>
+    <!-- ANALYZER -->
+    <string name="analyzer_service_channel_description">Analyzing in progress…</string>
+    <string name="analyzer_service_channel_name">Analyzer Service</string>
+    <string name="analyzer_fragment_activity_label">Analyzed activity…</string>
+    <!-- LEARNING -->
+    <string name="learning_fragment_activity_selector_textview">Select an activity…</string>
+    <string name="learning_fragment_selected_configuration_textview">Selected configuration</string>
+    <string name="learning_fragment_tts_activity_started">Activity just started</string>
+    <string name="learning_service_channel_description">Learning in progress…</string>
+    <string name="learning_service_channel_name">Learning Service</string>
+    <!-- PERSONAL -->
+    <string name="personal_fragment_saved">Data saved successfully.</string>
+    <string name="personal_fragment_not_saved">Error: data not saved.</string>
+    <string name="personal_fragment_loader">Loading…</string>
+    <!-- OTHERS / ALL -->
+    <string name="start_button">Start</string>
+    <string name="cancel_button">Cancel</string>
+    <string name="save_button">Save</string>
+
+    <string name="phone_position_selector_label">Where is the phone?</string>
     <string name="phone_position_in_hand">In hand</string>
     <string name="phone_position_in_the_pocket">In the pocket</string>
-    <string name="fragment_personal_save_button">Save</string>
-    <string name="fragment_personal_saved">Data saved successfully.</string>
-    <string name="fragment_personal_not_saved">Error: data not saved.</string>
     <string name="phone_position_in_the_front_left_pocket">In the front left pocket</string>
     <string name="phone_position_in_the_front_right_pocket">In the front right pocket</string>
     <string name="phone_position_in_the_back_left_pocket">In the back left pocket</string>
     <string name="phone_position_in_the_back_right_pocket">In the back right pocket</string>
     <string name="phone_position_in_left_hand">In left hand</string>
     <string name="phone_position_in_right_hand">In right hand</string>
-    <string name="title_activity_settings">Settings</string>
-    <string name="settings_title">Settings</string>
-    <string name="settings_server_destination_title">Destination</string>
-    <string name="settings_server_port_title">Port</string>
-    <string name="settings_server_category_title">Server</string>
-    <string name="fragment_learning_sensor_status_active">ON</string>
-    <string name="fragment_learning_sensor_status_not_active">OFF</string>
-    <string name="fragment_personal_loader">Loading...</string>
-    <string name="service_learning_channel_description">Learning in progress...</string>
-    <string name="service_learning_channel_name">Learning Service</string>
-    <string name="service_analyzer_channel_description">Analyzing in progress...</string>
-    <string name="service_analyzer_channel_name">Analyzer Service</string>
-    <string name="fragment_learning_cancel_button">Cancel</string>
-    <string name="fragment_analyzer_phone_position_selector_textview">Select phone position</string>
-    <string name="fragment_analyzer_cancel_button">Cancel</string>
-    <string name="fragment_analyzer_start_button">Start</string>
+
+    <string name="sensor_label">Sensors</string>
+    <string name="sensor_accelerometer">Accelerometer</string>
+    <string name="sensor_gyroscope">Gyroscope</string>
+    <string name="sensor_status_enabled">enabled</string>
+    <string name="sensor_status_disabled">disabled</string>
+    <string name="sensor_status_not_present">there isn\'t</string>
+
 </resources>

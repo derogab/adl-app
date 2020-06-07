@@ -13,7 +13,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -47,8 +46,8 @@ public class AnalyzerService extends Service implements SensorEventListener {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = getString(R.string.service_analyzer_channel_name);
-            String description = getString(R.string.service_analyzer_channel_description);
+            CharSequence name = getString(R.string.analyzer_service_channel_name);
+            String description = getString(R.string.analyzer_service_channel_description);
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel channel = new NotificationChannel(Constants.ANALYZER_SERVICE_NOTIFICATION_CHANNEL_ID, name, importance);
             channel.setDescription(description);

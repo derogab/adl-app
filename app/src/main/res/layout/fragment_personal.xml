@@ -57,7 +57,7 @@
         android:clickable="true"
         android:focusable="true"
         android:src="@drawable/ic_save_black_24dp"
-        android:contentDescription="@string/fragment_personal_save_button"
+        android:contentDescription="@string/save_button"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"

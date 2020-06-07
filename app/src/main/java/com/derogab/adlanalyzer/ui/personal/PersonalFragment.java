@@ -3,7 +3,6 @@ package com.derogab.adlanalyzer.ui.personal;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,7 +74,7 @@ public class PersonalFragment extends Fragment {
             public void onClick(View v) {
 
                 binding.personalFormContent.save(personalViewModel.getFormTemplate().getValue(), sharedPreferences);
-                Snackbar.make(v, R.string.fragment_personal_saved, Snackbar.LENGTH_SHORT).show();
+                Snackbar.make(v, R.string.personal_fragment_saved, Snackbar.LENGTH_SHORT).show();
 
             }
         });
