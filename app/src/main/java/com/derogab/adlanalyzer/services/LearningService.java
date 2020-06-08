@@ -22,6 +22,7 @@ import com.derogab.adlanalyzer.connections.Connection;
 import com.derogab.adlanalyzer.ui.learning.LearningFragment;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.CountDown;
+import com.takisoft.preferencex.EditTextPreference;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +47,7 @@ public class LearningService extends Service implements SensorEventListener {
     private String activityToAnalyze;
     private String phonePosition;
     private long activityTime;
+    private long preparationTime;
     // Sensors status
     private boolean isSensorAccelerometerActive;
     private boolean isSensorGyroscopeActive;
@@ -286,7 +288,10 @@ public class LearningService extends Service implements SensorEventListener {
         sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
         activityToAnalyze = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
         phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
-        activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, -1);
+        preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
+                Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+        activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER,
+                Constants.LEARNING_COUNTDOWN_ACTIVITY_SECONDS_DEFAULT);
         // Get input data from fragment: sensor activation status
         isSensorAccelerometerActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER, true);
         isSensorGyroscopeActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE, true);
@@ -304,7 +309,7 @@ public class LearningService extends Service implements SensorEventListener {
         index = 0;
 
         // Set preparation timer
-        preparationTimer = new CountDownTimer(10000, 1000) {
+        preparationTimer = new CountDownTimer(preparationTime * 1000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long secondsUntilFinished = millisUntilFinished / 1000;
@@ -427,6 +432,7 @@ public class LearningService extends Service implements SensorEventListener {
                 Intent sendTime = new Intent();
                     sendTime.setAction("GET_SERVICE_START");
                     sendTime.putExtra( "SERVICE_START", true);
+                    sendTime.putExtra( "PREPARATION_TIME", preparationTime);
                 sendBroadcast(sendTime);
 
             }

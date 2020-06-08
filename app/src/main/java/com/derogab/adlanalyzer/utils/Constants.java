@@ -17,7 +17,12 @@ public class Constants {
     public static final String LEARNING_SERVICE_ARCHIVE = "learning_service_archive";
     public static final String LEARNING_SERVICE_ACTIVITY = "learning_service_activity";
     public static final String LEARNING_SERVICE_PHONE_POSITION = "learning_service_phone_position";
+    public static final String LEARNING_SERVICE_PREPARATION_TIMER = "learning_service_preparation_timer";
     public static final String LEARNING_SERVICE_ACTIVITY_TIMER = "learning_service_activity_timer";
+    public static final int LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT = 10;
+    public static final int LEARNING_COUNTDOWN_ACTIVITY_SECONDS_DEFAULT = 30;
+    public static final String SERVER_HOST_DEFAULT = "localhost";
+    public static final int SERVER_HOST_PORT = 8080;
     public static final String LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER = "learning_service_sensor_status_accelerometer";
     public static final String LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE = "learning_service_sensor_status_gyroscope";
     public static final String LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID = "learning_notification_channel_id";
@@ -26,5 +31,6 @@ public class Constants {
 
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";
+    public static final String PREFERENCE_PREPARATION_TIME = "timer_preparation_seconds";
 
 }

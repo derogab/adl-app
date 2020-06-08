@@ -1,16 +1,30 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/settings_server_category_title">
 
-        <EditTextPreference
+        <com.takisoft.preferencex.EditTextPreference
             app:key="server_destination"
             app:title="@string/settings_server_destination_title"
             app:useSimpleSummaryProvider="true" />
 
-        <EditTextPreference
+        <com.takisoft.preferencex.EditTextPreference
             app:key="server_port"
             app:title="@string/settings_server_port_title"
-            app:useSimpleSummaryProvider="true" />
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"
+            android:digits="0123456789" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/settings_timer_category_title">
+
+        <com.takisoft.preferencex.EditTextPreference
+            app:key="timer_preparation_seconds"
+            app:title="@string/settings_timer_preparation_seconds_title"
+            app:useSimpleSummaryProvider="true"
+            android:inputType="numberDecimal"
+            android:digits="0123456789" />
 
     </PreferenceCategory>
 

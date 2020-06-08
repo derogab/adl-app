@@ -185,11 +185,17 @@ public class LearningFragment extends Fragment {
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, getSelectedActivity().getActivity());
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER, getSelectedActivity().getTime());
+                // Settings info
+                learningIntent.putExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
+                        Integer.parseInt(preferences.getString(Constants.PREFERENCE_PREPARATION_TIME,
+                                ""+Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT)));
                 // Destination server info
                 learningIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
-                        preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
+                        preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION,
+                                Constants.SERVER_HOST_DEFAULT));
                 learningIntent.putExtra(Constants.PREFERENCE_SERVER_PORT,
-                        Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT, "8080")));
+                        Integer.parseInt(preferences.getString(Constants.PREFERENCE_SERVER_PORT,
+                                ""+Constants.SERVER_HOST_PORT)));
                 // Sensors status
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER,
                         getSelectedActivity().isSensorActive(Constants.SENSOR_ACCELEROMETER));
@@ -292,7 +298,11 @@ public class LearningFragment extends Fragment {
 
                     case "GET_SERVICE_START":
 
-                        alert(getView(), "Starting in 10 seconds");
+                        long preparationTime =
+                                intent.getLongExtra("PREPARATION_TIME",
+                                        Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+
+                        alert(getView(), "Starting in " + preparationTime +" seconds");
 
                         binding.fragmentLearningCancelButton.show();
 
