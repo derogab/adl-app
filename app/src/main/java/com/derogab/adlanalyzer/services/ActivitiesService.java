@@ -7,7 +7,7 @@ import retrofit2.http.GET;
 
 public interface ActivitiesService {
 
-    @GET("bs6RK1Wv")
+    @GET("activities")
     Call<ActivitiesApiResponse> getActivitiesResponse();
 
 }

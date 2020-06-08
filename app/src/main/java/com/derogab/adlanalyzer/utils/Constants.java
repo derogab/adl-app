@@ -12,7 +12,7 @@ public class Constants {
     public static final String SENSOR_ACCELEROMETER = "accelerometer";
     public static final String SENSOR_GYROSCOPE = "gyroscope";
 
-    public static final String API_BASE_URL = "https://pastebin.com/raw/";
+    public static final String API_BASE_URL = "http://api.adl.derogab.com/";
 
     public static final String LEARNING_SERVICE_ARCHIVE = "learning_service_archive";
     public static final String LEARNING_SERVICE_ACTIVITY = "learning_service_activity";

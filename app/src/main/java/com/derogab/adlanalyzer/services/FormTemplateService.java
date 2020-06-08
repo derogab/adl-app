@@ -7,7 +7,7 @@ import retrofit2.http.GET;
 
 public interface FormTemplateService {
 
-    @GET("xGFK8TvB")
+    @GET("form")
     Call<FormTemplateApiResponse> getFormTemplateResponse();
 
 }
