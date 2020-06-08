@@ -252,7 +252,7 @@ public class AnalyzerFragment extends Fragment {
 
             if (intent.getAction() != null) switch (intent.getAction()) {
 
-                case "GET_SERVICE_START":
+                case "ANALYZER_SERVICE_START":
                     long preparationTime =
                             intent.getLongExtra("PREPARATION_TIME",
                                     Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
@@ -261,7 +261,7 @@ public class AnalyzerFragment extends Fragment {
 
                     break;
 
-                case "GET_CONNECTION_ERROR":
+                case "ANALYZER_CONNECTION_ERROR":
                     String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
 
                     if (errorMessage != null)
@@ -278,8 +278,8 @@ public class AnalyzerFragment extends Fragment {
         };
 
         // Init receiver
-        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("GET_SERVICE_START"));
-        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("GET_CONNECTION_ERROR"));
+        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_SERVICE_START"));
+        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_CONNECTION_ERROR"));
 
         // Set sensors status on UI
         checkSensor(binding.fragmentAnalyzerSensorsAccelerometerValue, PackageManager.FEATURE_SENSOR_ACCELEROMETER);

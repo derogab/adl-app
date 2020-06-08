@@ -296,7 +296,7 @@ public class LearningFragment extends Fragment {
 
                 if (intent.getAction() != null) switch (intent.getAction()) {
 
-                    case "GET_SERVICE_START":
+                    case "LEARNING_SERVICE_START":
 
                         long preparationTime =
                                 intent.getLongExtra("PREPARATION_TIME",
@@ -308,13 +308,13 @@ public class LearningFragment extends Fragment {
 
                         break;
 
-                    case "GET_ACTIVITY_START":
+                    case "LEARNING_ACTIVITY_START":
 
                         speak("Activity started.");
                         alert(getView(), "Activity started.");
                         break;
 
-                    case "GET_ACTIVITY_COUNTDOWN":
+                    case "LEARNING_ACTIVITY_COUNTDOWN":
 
                         long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN", 0);
 
@@ -326,7 +326,7 @@ public class LearningFragment extends Fragment {
 
                         break;
 
-                    case "GET_PREPARATION_COUNTDOWN":
+                    case "LEARNING_PREPARATION_COUNTDOWN":
 
                         long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN", 0);
 
@@ -338,7 +338,7 @@ public class LearningFragment extends Fragment {
 
                         break;
 
-                    case "GET_ACTIVITY_END":
+                    case "LEARNING_ACTIVITY_END":
 
                         speak("done!");
                         alert(getView(), "Done.");
@@ -351,7 +351,7 @@ public class LearningFragment extends Fragment {
 
                         break;
 
-                    case "GET_CONNECTION_ERROR":
+                    case "LEARNING_CONNECTION_ERROR":
 
                         String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
 
@@ -373,12 +373,12 @@ public class LearningFragment extends Fragment {
 
 
         // Init receiver
-        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_SERVICE_START"));
-        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_COUNTDOWN"));
-        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_PREPARATION_COUNTDOWN"));
-        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_START"));
-        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_ACTIVITY_END"));
-        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("GET_CONNECTION_ERROR"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_SERVICE_START"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_ACTIVITY_COUNTDOWN"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_PREPARATION_COUNTDOWN"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_ACTIVITY_START"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_ACTIVITY_END"));
+        mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_CONNECTION_ERROR"));
 
     }
 

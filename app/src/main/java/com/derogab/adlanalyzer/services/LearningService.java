@@ -317,7 +317,7 @@ public class LearningService extends Service implements SensorEventListener {
                 Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
 
                 Intent sendTime = new Intent();
-                    sendTime.setAction("GET_PREPARATION_COUNTDOWN");
+                    sendTime.setAction("LEARNING_PREPARATION_COUNTDOWN");
                     sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
@@ -335,7 +335,7 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Send data
                 Intent sendTime = new Intent();
-                    sendTime.setAction("GET_ACTIVITY_START");
+                    sendTime.setAction("LEARNING_ACTIVITY_START");
                     sendTime.putExtra( "ACTIVITY_START", true);
                 sendBroadcast(sendTime);
 
@@ -354,7 +354,7 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Send countdown data to UI
                 Intent sendTime = new Intent();
-                    sendTime.setAction("GET_ACTIVITY_COUNTDOWN");
+                    sendTime.setAction("LEARNING_ACTIVITY_COUNTDOWN");
                     sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
@@ -386,7 +386,7 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Send end to UI
                 Intent sendTime = new Intent();
-                    sendTime.setAction("GET_ACTIVITY_END");
+                    sendTime.setAction("LEARNING_ACTIVITY_END");
                     sendTime.putExtra( "ACTIVITY_END", true);
                 sendBroadcast(sendTime);
 
@@ -414,7 +414,7 @@ public class LearningService extends Service implements SensorEventListener {
 
                 // Send connection error to UI
                 Intent sendTime = new Intent();
-                    sendTime.setAction("GET_CONNECTION_ERROR");
+                    sendTime.setAction("LEARNING_CONNECTION_ERROR");
                     sendTime.putExtra( "CONNECTION_ERROR", "Error to connect to database.");
                 sendBroadcast(sendTime);
 
@@ -430,7 +430,7 @@ public class LearningService extends Service implements SensorEventListener {
                 preparationTimer.start();
                 // and communicate to UI that it is started
                 Intent sendTime = new Intent();
-                    sendTime.setAction("GET_SERVICE_START");
+                    sendTime.setAction("LEARNING_SERVICE_START");
                     sendTime.putExtra( "SERVICE_START", true);
                     sendTime.putExtra( "PREPARATION_TIME", preparationTime);
                 sendBroadcast(sendTime);
