@@ -210,6 +210,10 @@ public class AnalyzerFragment extends Fragment {
                 // Set current information
                 analyzerIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
                 analyzerIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
+                // Set settings info
+                analyzerIntent.putExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
+                        Integer.parseInt(preferences.getString(Constants.PREFERENCE_PREPARATION_TIME,
+                                ""+Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT)));
                 // Set server information
                 analyzerIntent.putExtra(Constants.PREFERENCE_SERVER_DESTINATION,
                         preferences.getString(Constants.PREFERENCE_SERVER_DESTINATION, "localhost"));
@@ -249,7 +253,22 @@ public class AnalyzerFragment extends Fragment {
             if (intent.getAction() != null) switch (intent.getAction()) {
 
                 case "GET_SERVICE_START":
-                    alert(getView(), "Analyzing...");
+                    long preparationTime =
+                            intent.getLongExtra("PREPARATION_TIME",
+                                    Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+
+                    alert(getView(), "Starting in " + preparationTime +" seconds");
+
+                    break;
+
+                case "GET_CONNECTION_ERROR":
+                    String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
+
+                    if (errorMessage != null)
+                        alert(getView(), errorMessage);
+
+                    binding.fragmentAnalyzerCancelButton.hide();
+                    binding.fragmentAnalyzerStartButton.show();
 
                     break;
 
@@ -260,11 +279,11 @@ public class AnalyzerFragment extends Fragment {
 
         // Init receiver
         mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("GET_SERVICE_START"));
+        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("GET_CONNECTION_ERROR"));
 
         // Set sensors status on UI
         checkSensor(binding.fragmentAnalyzerSensorsAccelerometerValue, PackageManager.FEATURE_SENSOR_ACCELEROMETER);
         checkSensor(binding.fragmentAnalyzerSensorsGyroscopeValue, PackageManager.FEATURE_SENSOR_GYROSCOPE);
-
 
     }
 

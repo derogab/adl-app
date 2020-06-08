@@ -28,6 +28,8 @@
     <string name="personal_fragment_saved">Data saved successfully.</string>
     <string name="personal_fragment_not_saved">Error: data not saved.</string>
     <string name="personal_fragment_loader">Loading…</string>
+    <!-- ERRORS -->
+    <string name="error_server_connection">Error to connect to database.</string>
     <!-- OTHERS / ALL -->
     <string name="start_button">Start</string>
     <string name="cancel_button">Cancel</string>
