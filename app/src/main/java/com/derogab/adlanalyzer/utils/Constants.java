@@ -12,7 +12,7 @@ public class Constants {
     public static final String SENSOR_ACCELEROMETER = "accelerometer";
     public static final String SENSOR_GYROSCOPE = "gyroscope";
 
-    public static final String API_BASE_URL = "http://api.adl.derogab.com/";
+    public static final String API_BASE_URL = "https://api.adl.derogab.com/";
 
     public static final String LEARNING_SERVICE_ARCHIVE = "learning_service_archive";
     public static final String LEARNING_SERVICE_ACTIVITY = "learning_service_activity";
@@ -32,5 +32,8 @@ public class Constants {
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";
     public static final String PREFERENCE_PREPARATION_TIME = "timer_preparation_seconds";
+
+    public static final String SERVER_REQUEST_MODE_LEARNING = "learning";
+    public static final String SERVER_REQUEST_MODE_ANALYZER = "analyzer";
 
 }
