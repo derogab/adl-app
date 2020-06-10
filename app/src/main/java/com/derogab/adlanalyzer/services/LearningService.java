@@ -22,7 +22,6 @@ import com.derogab.adlanalyzer.connections.Connection;
 import com.derogab.adlanalyzer.ui.learning.LearningFragment;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.CountDown;
-import com.takisoft.preferencex.EditTextPreference;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,12 +86,16 @@ public class LearningService extends Service implements SensorEventListener {
 
         if (response.getString("status").equals("OK")) {
 
-            if (response.getString("type").equals("close")) {
+            // Close the connection and so the service
+            if (response.getString("type").equals("close")
+                    || response.getString("type").equals("goodbye")) {
 
+                Log.d(TAG, "Closed received.");
                 stopSelf();
 
             }
 
+            // Receive confirmations
             else if (response.getString("type").equals("ack")) {
 
                 Log.d(TAG, "Ack received.");
@@ -131,8 +134,8 @@ public class LearningService extends Service implements SensorEventListener {
 
             jsonData = new JSONObject()
                     .put("status", "OK")
-                    .put("error", false)
-                    .put("response", new JSONObject()
+                    .put("mode", Constants.SERVER_REQUEST_MODE_LEARNING)
+                    .put("data", new JSONObject()
                             .put("archive", archive)
                             .put("type", "close")).toString();
 
@@ -174,7 +177,8 @@ public class LearningService extends Service implements SensorEventListener {
 
             jsonData = new JSONObject()
                     .put("status", "OK")
-                    .put("response", new JSONObject()
+                    .put("mode", Constants.SERVER_REQUEST_MODE_LEARNING)
+                    .put("data", new JSONObject()
                             .put("archive", archive)
                             .put("type", "data")
                             .put("info", new JSONObject()
@@ -182,7 +186,7 @@ public class LearningService extends Service implements SensorEventListener {
                                     .put("activity", activity)
                                     .put("sensor", sensor)
                                     .put("position", phonePosition))
-                            .put("data", new JSONObject()
+                            .put("values", new JSONObject()
                                     .put("x", x)
                                     .put("y", y)
                                     .put("z", z))).toString();
@@ -282,7 +286,7 @@ public class LearningService extends Service implements SensorEventListener {
             .build();
 
         // Start foreground notification
-        startForeground(1, notification);
+        startForeground(Constants.LEARNING_NOTIFICATION_ID, notification);
 
         // Get input data from fragment: task data
         sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
@@ -374,7 +378,7 @@ public class LearningService extends Service implements SensorEventListener {
                             (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 // Push notification updated
                 if (notificationManager != null)
-                    notificationManager.notify(1, notification);
+                    notificationManager.notify(Constants.LEARNING_NOTIFICATION_ID, notification);
 
             }
 
@@ -415,7 +419,7 @@ public class LearningService extends Service implements SensorEventListener {
                 // Send connection error to UI
                 Intent sendTime = new Intent();
                     sendTime.setAction("LEARNING_CONNECTION_ERROR");
-                    sendTime.putExtra( "CONNECTION_ERROR", "Error to connect to database.");
+                    sendTime.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
                 sendBroadcast(sendTime);
 
                 // Just close the service

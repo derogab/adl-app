@@ -18,6 +18,8 @@
     <string name="analyzer_service_channel_description">Analyzing in progress…</string>
     <string name="analyzer_service_channel_name">Analyzer Service</string>
     <string name="analyzer_fragment_activity_label">Analyzed activity…</string>
+    <string name="analyzer_service_start">Analyzing…</string>
+    <string name="analyzer_service_preparation_countdown">Starting in %1$d seconds.</string>
     <!-- LEARNING -->
     <string name="learning_fragment_activity_selector_textview">Select an activity…</string>
     <string name="learning_fragment_selected_configuration_textview">Selected configuration</string>
@@ -29,7 +31,7 @@
     <string name="personal_fragment_not_saved">Error: data not saved.</string>
     <string name="personal_fragment_loader">Loading…</string>
     <!-- ERRORS -->
-    <string name="error_server_connection">Error to connect to database.</string>
+    <string name="error_server_connection">Error to connect to the server.</string>
     <!-- OTHERS / ALL -->
     <string name="start_button">Start</string>
     <string name="cancel_button">Cancel</string>

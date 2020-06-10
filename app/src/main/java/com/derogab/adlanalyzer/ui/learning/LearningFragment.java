@@ -321,7 +321,7 @@ public class LearningFragment extends Fragment {
                         if (activityCountdown % 5 == 0)
                             speak("" + activityCountdown);
 
-                        binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorPrimary));
+                        binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorPrimary));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(activityCountdown));
 
                         break;
@@ -333,7 +333,7 @@ public class LearningFragment extends Fragment {
                         if (preparationCountdown == 3)
                             speak("The activity is about to begin");
 
-                        binding.fragmentLearningCountdownTimer.setTextColor(ContextCompat.getColor(context, R.color.colorAccent));
+                        binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorAccent));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
 
                         break;

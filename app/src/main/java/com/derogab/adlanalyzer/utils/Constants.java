@@ -25,9 +25,12 @@ public class Constants {
     public static final int SERVER_HOST_PORT = 8080;
     public static final String LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER = "learning_service_sensor_status_accelerometer";
     public static final String LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE = "learning_service_sensor_status_gyroscope";
-    public static final String LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID = "learning_notification_channel_id";
 
+    public static final String LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID = "learning_notification_channel_id";
     public static final String ANALYZER_SERVICE_NOTIFICATION_CHANNEL_ID = "analyzer_notification_channel_id";
+
+    public static final int LEARNING_NOTIFICATION_ID = 1;
+    public static final int ANALYZER_NOTIFICATION_ID = 2;
 
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";

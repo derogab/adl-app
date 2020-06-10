@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
@@ -242,6 +243,10 @@ public class AnalyzerFragment extends Fragment {
                 binding.fragmentAnalyzerCancelButton.hide();
                 binding.fragmentAnalyzerStartButton.show();
 
+                // Output re-init
+                binding.fragmentAnalyzerOutput.setTextColor(Color.GRAY);
+                binding.fragmentAnalyzerOutput.setText("?");
+
             }
         });
 
@@ -250,36 +255,85 @@ public class AnalyzerFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
 
-            if (intent.getAction() != null) switch (intent.getAction()) {
+                if (intent.getAction() != null) switch (intent.getAction()) {
 
-                case "ANALYZER_SERVICE_START":
-                    long preparationTime =
-                            intent.getLongExtra("PREPARATION_TIME",
-                                    Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+                    case "ANALYZER_PREPARATION_COUNTDOWN":
+                        long preparationCountdown =
+                                intent.getLongExtra("PREPARATION_COUNTDOWN", -1);
 
-                    alert(getView(), "Starting in " + preparationTime +" seconds");
+                        if (preparationCountdown != -1) {
 
-                    break;
+                            // Output the countdown
+                            binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorAccent));
+                            binding.fragmentAnalyzerOutput.setText(CountDown.get(preparationCountdown));
 
-                case "ANALYZER_CONNECTION_ERROR":
-                    String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
+                        }
 
-                    if (errorMessage != null)
-                        alert(getView(), errorMessage);
+                        break;
 
-                    binding.fragmentAnalyzerCancelButton.hide();
-                    binding.fragmentAnalyzerStartButton.show();
+                    case "ANALYZER_ACTIVITY_START":
 
-                    break;
+                        // Show alert
+                        alert(getView(), getString(R.string.analyzer_service_start));
 
-            }
+                        // Output null
+                        binding.fragmentAnalyzerOutput.setTextColor(Color.GRAY);
+                        binding.fragmentAnalyzerOutput.setText("...");
+
+                        break;
+
+                    case "ANALYZER_SERVICE_START":
+                        long preparationTime =
+                                intent.getLongExtra("PREPARATION_TIME",
+                                        Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+
+                        // Show alert
+                        alert(getView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime));
+
+                        // Output the countdown
+                        binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorAccent));
+                        binding.fragmentAnalyzerOutput.setText(CountDown.get(preparationTime));
+
+                        break;
+
+                    case "ANALYZER_CONNECTION_ERROR":
+                        String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
+
+                        // Show alert
+                        if (errorMessage != null)
+                            alert(getView(), errorMessage);
+
+                        // Change button
+                        binding.fragmentAnalyzerCancelButton.hide();
+                        binding.fragmentAnalyzerStartButton.show();
+
+                        break;
+
+                    case "ANALYZER_PREDICTION":
+
+                        String prediction = intent.getStringExtra("PREDICTION");
+
+                        if (prediction != null) {
+
+                            // Output prediction
+                            binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
+                            binding.fragmentAnalyzerOutput.setText(prediction);
+
+                        }
+
+                        break;
+
+                }
 
             }
         };
 
         // Init receiver
+        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_PREPARATION_COUNTDOWN"));
         mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_SERVICE_START"));
+        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_ACTIVITY_START"));
         mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_CONNECTION_ERROR"));
+        mContext.registerReceiver(analyzerServiceReceiver, new IntentFilter("ANALYZER_PREDICTION"));
 
         // Set sensors status on UI
         checkSensor(binding.fragmentAnalyzerSensorsAccelerometerValue, PackageManager.FEATURE_SENSOR_ACCELEROMETER);

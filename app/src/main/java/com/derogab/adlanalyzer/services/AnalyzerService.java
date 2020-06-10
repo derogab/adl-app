@@ -69,6 +69,82 @@ public class AnalyzerService extends Service implements SensorEventListener {
     }
 
     /**
+     * Create the data message json
+     *
+     * @param archive archive to close
+     * @param sensor the sensor data
+     * @param phonePosition the phone position
+     * @param x the x axis value
+     * @param y the y axis value
+     * @param z the z axis value
+     *
+     * @return the data message json
+     * */
+    private String getCollectionDataMessage(String archive,
+                                            String phonePosition,
+                                            String sensor,
+                                            float x,
+                                            float y,
+                                            float z){
+
+        index++;
+
+        // Create data
+        String jsonData = null;
+        try {
+
+            jsonData = new JSONObject()
+                    .put("status", "OK")
+                    .put("mode", Constants.SERVER_REQUEST_MODE_ANALYZER)
+                    .put("data", new JSONObject()
+                            .put("archive", archive)
+                            .put("type", "data")
+                            .put("info", new JSONObject()
+                                    .put("index", index)
+                                    .put("sensor", sensor)
+                                    .put("position", phonePosition))
+                            .put("values", new JSONObject()
+                                    .put("x", x)
+                                    .put("y", y)
+                                    .put("z", z))).toString();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonData;
+
+    }
+
+    /**
+     * Create the closing message json
+     *
+     * @param archive archive to close
+     *
+     * @return the closing message json
+     * */
+    private String getClosingMessage(String archive) {
+
+        String jsonData = null;
+        try {
+
+            jsonData = new JSONObject()
+                    .put("status", "OK")
+                    .put("mode", Constants.SERVER_REQUEST_MODE_ANALYZER)
+                    .put("data", new JSONObject()
+                            .put("archive", archive)
+                            .put("type", "close")).toString();
+
+        }
+        catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonData;
+
+    }
+
+    /**
      * Receive data from Server
      *
      * @param dataReceived data received from the server
@@ -79,12 +155,16 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
         if (response.getString("status").equals("OK")) {
 
-            if (response.getString("type").equals("close")) {
+            // Close the connection and so the service
+            if (response.getString("type").equals("close")
+                    || response.getString("type").equals("goodbye")) {
 
+                Log.d(TAG, "Closed received.");
                 stopSelf();
 
             }
 
+            // Receive confirmations
             else if (response.getString("type").equals("ack")) {
 
                 Log.d(TAG, "Ack received.");
@@ -109,12 +189,21 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
     }
 
+    /**
+     * onBind() the service
+     * */
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
 
+    /**
+     * On Sensor changed
+     * When receive a sensor data
+     *
+     * @param event the sensor change event
+     * */
     @Override
     public void onSensorChanged(SensorEvent event) {
 
@@ -126,7 +215,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
             Log.d(TAG, "[GYROSCOPE] ID: "+archive+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            // @TODO Send data to server
+            sendData(getCollectionDataMessage(archive, phonePosition, Constants.SENSOR_GYROSCOPE, x, y, z));
 
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -137,32 +226,53 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
             Log.d(TAG, "[ACCELEROMETER] ID: "+archive+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            // @TODO Send data to server
+            sendData(getCollectionDataMessage(archive, phonePosition, Constants.SENSOR_ACCELEROMETER, x, y, z));
 
         }
 
     }
 
+    /**
+     * On Accuracy changed
+     * When change the accuracy
+     *
+     * @param sensor the sensor
+     * @param accuracy the updated value
+     * */
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-    }
-
+    /**
+     * On Destroy
+     * When the service is stopped
+     * */
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
+        // Send close
+        sendData(getClosingMessage(archive));
 
         // Cancel the countdown timer
         if (preparationTimer != null) preparationTimer.cancel();
 
+        // Close connection
+        if (conn != null) conn.close();
+
         // Stop Sensors listener
         sensorManager.unregisterListener(sensorEventListener);
+
+        // And then
+        super.onDestroy();
     }
 
+    /**
+     * On Start Command
+     * All service task
+     *
+     * @param intent the current intent w/ extras
+     * @param flags other flags
+     * @param startId  the started id
+     * */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
@@ -185,7 +295,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 .build();
 
         // Start foreground notification
-        startForeground(2, notification);
+        startForeground(Constants.ANALYZER_NOTIFICATION_ID, notification);
 
         // Get input data from fragment: task data
         archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
