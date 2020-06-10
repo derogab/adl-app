@@ -68,8 +68,16 @@ public class Connection {
             @Override
             public void run() {
                 if (bufferOut != null) {
-                    bufferOut.println(message);
-                    bufferOut.flush();
+                    try {
+                        bufferOut.println(message);
+                        bufferOut.flush();
+                    }
+                    catch (NullPointerException e) {
+                        Log.e(TAG, "Send message error: connection already closed.");
+                    }
+                    catch (Exception e) {
+                        Log.e(TAG, "Error: " + e);
+                    }
                 }
             }
         };
@@ -89,6 +97,8 @@ public class Connection {
             bufferOut.close();
         }
 
+        socket = null;
+
         onMessageReceivedListener = null;
         onConnectionSuccessListener = null;
         onConnectionErrorListener = null;
@@ -97,7 +107,6 @@ public class Connection {
         serverMessage = null;
         destination = null;
         port = 0;
-        socket = null;
     }
 
     /**
@@ -159,7 +168,7 @@ public class Connection {
                     } catch (Exception e) {
 
                         // Error communicating with the server
-                        Log.e(TAG, "Error", e);
+                        Log.e(TAG, "Receiving message error: probably connection already closed.");
 
                     } finally {
 
