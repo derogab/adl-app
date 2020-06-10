@@ -1,15 +1,19 @@
 package com.derogab.adlanalyzer.models;
 
+import com.derogab.adlanalyzer.utils.CurrentLang;
+
 import java.util.List;
 
 public class Activity {
 
     private String activity;
+    private Translation translations;
     private int time;
     private List<Sensor> sensors;
 
-    public Activity(String activity, int time, List<Sensor> sensors) {
+    public Activity(String activity, Translation translations, int time, List<Sensor> sensors) {
         this.activity = activity;
+        this.translations = translations;
         this.time = time;
         this.sensors = sensors;
     }
@@ -20,6 +24,14 @@ public class Activity {
 
     public void setActivity(String activity) {
         this.activity = activity;
+    }
+
+    public Translation getTranslations() {
+        return translations;
+    }
+
+    public void setTranslations(Translation translations) {
+        this.translations = translations;
     }
 
     public int getTime() {
@@ -50,7 +62,16 @@ public class Activity {
 
     @Override
     public String toString() {
-        return getActivity();
+
+        // Get current language
+        String lang = CurrentLang.getInstance().getLang();
+
+        // Find activity in current language
+        if (translations.getLang(lang) != null)
+            return translations.getLang(lang);
+
+        // Otherwise return default name
+        return activity;
     }
 
 }

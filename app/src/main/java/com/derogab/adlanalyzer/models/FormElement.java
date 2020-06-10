@@ -6,12 +6,16 @@ public class FormElement {
 
     private String id;
     private String type;
+    private String text;
+    private Translation translations;
     private List<FormSubElement> contents;
     private List<Option> options;
 
-    public FormElement(String id, String type, List<FormSubElement> contents, List<Option> options) {
+    public FormElement(String id, String type, String text, Translation translations, List<FormSubElement> contents, List<Option> options) {
         this.id = id;
         this.type = type;
+        this.text = text;
+        this.translations = translations;
         this.contents = contents;
         this.options = options;
     }
@@ -32,6 +36,18 @@ public class FormElement {
         this.type = type;
     }
 
+    public String getText() { return text; }
+
+    public void setText(String text) { this.text = text; }
+
+    public Translation getTranslations() {
+        return translations;
+    }
+
+    public void setTranslations(Translation translations) {
+        this.translations = translations;
+    }
+
     public List<FormSubElement> getContents() {
         return contents;
     }
@@ -46,11 +62,10 @@ public class FormElement {
 
     public String getOption(String attribute) {
 
-        List<Option> options = getOptions();
-
-        for (int i = 0; i < options.size(); i++)
-            if (options.get(i).getAttribute().equals(attribute))
-                return options.get(i).getValue();
+        if (options != null)
+            for (int i = 0; i < options.size(); i++)
+                if (options.get(i).getAttribute().equals(attribute))
+                    return options.get(i).getValue();
 
         return null;
 
@@ -65,8 +80,11 @@ public class FormElement {
         return "FormElement{" +
                 "id='" + id + '\'' +
                 ", type='" + type + '\'' +
+                ", text='" + text + '\'' +
+                ", translations=" + translations +
                 ", contents=" + contents +
                 ", options=" + options +
                 '}';
     }
+
 }

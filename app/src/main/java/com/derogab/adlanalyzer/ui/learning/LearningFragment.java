@@ -214,7 +214,7 @@ public class LearningFragment extends Fragment {
                 binding.fragmentLearningCancelButton.hide();
 
                 mContext.stopService(learningIntent);
-                alert(v, "Activity stopped.");
+                alert(v, getString(R.string.alert_stop));
 
                 binding.fragmentLearningStartButton.show();
             }
@@ -302,7 +302,7 @@ public class LearningFragment extends Fragment {
                                 intent.getLongExtra("PREPARATION_TIME",
                                         Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
 
-                        alert(getView(), "Starting in " + preparationTime +" seconds");
+                        alert(getView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime));
 
                         binding.fragmentLearningCancelButton.show();
 
@@ -310,8 +310,8 @@ public class LearningFragment extends Fragment {
 
                     case "LEARNING_ACTIVITY_START":
 
-                        speak("Activity started.");
-                        alert(getView(), "Activity started.");
+                        speak(getString(R.string.alert_start));
+                        alert(getView(), getString(R.string.alert_start));
                         break;
 
                     case "LEARNING_ACTIVITY_COUNTDOWN":
@@ -331,7 +331,7 @@ public class LearningFragment extends Fragment {
                         long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN", 0);
 
                         if (preparationCountdown == 3)
-                            speak("The activity is about to begin");
+                            speak(getString(R.string.alert_almost_started));
 
                         binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorAccent));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
@@ -340,8 +340,8 @@ public class LearningFragment extends Fragment {
 
                     case "LEARNING_ACTIVITY_END":
 
-                        speak("done!");
-                        alert(getView(), "Done.");
+                        speak(getString(R.string.alert_done));
+                        alert(getView(), getString(R.string.alert_done));
 
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
                         binding.fragmentLearningCancelButton.hide();

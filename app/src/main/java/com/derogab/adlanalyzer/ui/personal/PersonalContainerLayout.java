@@ -22,8 +22,10 @@ import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.models.FormElement;
 import com.derogab.adlanalyzer.models.FormGroup;
 import com.derogab.adlanalyzer.models.FormSubElement;
+import com.derogab.adlanalyzer.models.Translation;
 import com.derogab.adlanalyzer.utils.Constants;
 
+import com.derogab.adlanalyzer.utils.CurrentLang;
 import com.derogab.adlanalyzer.utils.MyR;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -44,17 +46,24 @@ public class PersonalContainerLayout extends LinearLayout {
     private static final String TAG = "PersonalContainerLayout";
 
     private JSONArray contents;
+    private String lang;
 
     public PersonalContainerLayout(Context context) {
         super(context);
+        // Set current lang
+        this.lang = CurrentLang.getInstance().getLang();
     }
 
     public PersonalContainerLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        // Set current lang
+        this.lang = CurrentLang.getInstance().getLang();
     }
 
     public PersonalContainerLayout(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        // Set current lang
+        this.lang = CurrentLang.getInstance().getLang();
     }
 
    /**
@@ -122,10 +131,14 @@ public class PersonalContainerLayout extends LinearLayout {
                         // Set the id
                         customView.setId(viewId++);
 
-                        // Set attributes
-                        if (element.getOption("text") != null)
-                            ((TextView)customView).setText(element.getOption("text"));
+                        // Set label text
+                        if (element.getTranslations() != null
+                                && element.getTranslations().getLang(lang) != null)
+                            ((TextView)customView).setText(element.getTranslations().getLang(lang));
+                        else if (element.getText() != null)
+                            ((TextView)customView).setText(element.getText());
 
+                        // Set attributes
                         if (element.getOption("size") != null)
                             ((TextView)customView)
                                     .setTextSize(TypedValue.COMPLEX_UNIT_SP,
@@ -181,9 +194,12 @@ public class PersonalContainerLayout extends LinearLayout {
                         if (element.getOption("size") != null)
                             input_text.setTextSize(Integer.parseInt(element.getOption("size")));
 
-                        // Set label
-                        if (element.getOption("label") != null)
-                            input_text.setHint(element.getOption("label"));
+                        // Set label text
+                        if (element.getTranslations() != null
+                                && element.getTranslations().getLang(lang) != null)
+                            input_text.setHint(element.getTranslations().getLang(lang));
+                        else if (element.getText() != null)
+                            input_text.setHint(element.getText());
 
                         // Add TextInputEditText in TextInputLayout
                         ((TextInputLayout)customView).addView(input_text);
@@ -205,12 +221,20 @@ public class PersonalContainerLayout extends LinearLayout {
                         if (checkboxes.size() > 2)
                             ((LinearLayout)customView).setOrientation(LinearLayout.VERTICAL);
 
-                        // Add label
-                        if (element.getOption("label") != null) {
+                        // Add label text
+                        if (element.getTranslations() != null
+                                && element.getTranslations().getLang(lang) != null) {
 
                             TextView label = new TextView(getContext());
+                                label.setText(element.getTranslations().getLang(lang));
 
-                            label.setText(element.getOption("label"));
+                            ((LinearLayout)customView).addView(label);
+
+                        }
+                        else if (element.getText() != null) {
+
+                            TextView label = new TextView(getContext());
+                            label.setText(element.getText());
 
                             ((LinearLayout)customView).addView(label);
 
@@ -270,7 +294,10 @@ public class PersonalContainerLayout extends LinearLayout {
 
                             }
 
-                            if(checkbox.getText() != null)
+                            if (checkbox.getTranslations() != null
+                                    && checkbox.getTranslations().getLang(lang) != null)
+                                c.setText(checkbox.getTranslations().getLang(lang));
+                            else if(checkbox.getText() != null)
                                 c.setText(checkbox.getText());
 
                             // Add checkbox to the container
@@ -295,12 +322,20 @@ public class PersonalContainerLayout extends LinearLayout {
                         if (radios.size() < 3)
                             ((RadioGroup)customView).setOrientation(RadioGroup.HORIZONTAL);
 
-                        // Add label
-                        if (element.getOption("label") != null) {
+                        // Add label text
+                        if (element.getTranslations() != null
+                                && element.getTranslations().getLang(lang) != null) {
 
                             TextView label = new TextView(getContext());
+                                label.setText(element.getTranslations().getLang(lang));
 
-                            label.setText(element.getOption("label"));
+                            ((RadioGroup)customView).addView(label);
+
+                        }
+                        else if (element.getText() != null) {
+
+                            TextView label = new TextView(getContext());
+                                label.setText(element.getText());
 
                             ((RadioGroup)customView).addView(label);
 
@@ -351,7 +386,11 @@ public class PersonalContainerLayout extends LinearLayout {
 
                             }
 
-                            if(radio.getText() != null)
+                            if(radio.getTranslations() != null
+                                    && radio.getTranslations().getLang(lang) != null) {
+                                r.setText(radio.getTranslations().getLang(lang));
+                            }
+                            else if(radio.getText() != null)
                                 r.setText(radio.getText());
 
                             // Add radio to the container

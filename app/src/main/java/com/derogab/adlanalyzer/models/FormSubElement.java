@@ -4,6 +4,7 @@ public class FormSubElement {
 
     private String id;
     private String text;
+    private Translation translations;
 
     public FormSubElement(String id, String text) {
         this.id = id;
@@ -26,11 +27,20 @@ public class FormSubElement {
         this.text = text;
     }
 
+    public Translation getTranslations() {
+        return translations;
+    }
+
+    public void setTranslations(Translation translations) {
+        this.translations = translations;
+    }
+
     @Override
     public String toString() {
-        return "SubFormElement{" +
+        return "FormSubElement{" +
                 "id='" + id + '\'' +
                 ", text='" + text + '\'' +
+                ", translations=" + translations +
                 '}';
     }
 }
