@@ -161,7 +161,7 @@ public class AnalyzerFragment extends Fragment {
 
                 // Set current information
                 analyzerIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
-                analyzerIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getPosition());
+                analyzerIntent.putExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, getSelectedPosition().getId());
                 // Set settings info
                 analyzerIntent.putExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                         Integer.parseInt(preferences.getString(Constants.PREFERENCE_PREPARATION_TIME,
