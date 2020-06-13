@@ -43,4 +43,6 @@ public class Constants {
     public static final String SERVER_REQUEST_MODE_LEARNING = "learning";
     public static final String SERVER_REQUEST_MODE_ANALYZER = "analyzer";
 
+    public static final long NO_INTEGER_DATA_RECEIVED = -1;
+
 }

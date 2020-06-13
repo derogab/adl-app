@@ -45,8 +45,8 @@ public class LearningService extends Service implements SensorEventListener {
     // Connection to a socket
     private Connection conn;
     // Current activity information
-    private String sendingArchive;
-    private String activityToAnalyze;
+    private String archive;
+    private long activity;
     private String phonePosition;
     private long activityTime;
     private long preparationTime;
@@ -167,7 +167,7 @@ public class LearningService extends Service implements SensorEventListener {
      * @return the data message json
      * */
     private String getCollectionDataMessage(String archive,
-                                   String activity,
+                                   long activity,
                                    String sensor,
                                    String phonePosition,
                                    float x,
@@ -240,9 +240,9 @@ public class LearningService extends Service implements SensorEventListener {
             float y = event.values[1];
             float z = event.values[2];
 
-            Log.d(TAG, "[GYROSCOPE] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
+            Log.d(TAG, "[GYROSCOPE] ID: "+ archive +", ACTIVITY: "+ activity +", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            sendData(getCollectionDataMessage(sendingArchive, activityToAnalyze, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z));
+            sendData(getCollectionDataMessage(archive, activity, Constants.SENSOR_GYROSCOPE, phonePosition, x, y, z));
 
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -251,9 +251,9 @@ public class LearningService extends Service implements SensorEventListener {
             float y = event.values[1];
             float z = event.values[2];
 
-            Log.d(TAG, "[ACCELEROMETER] ID: "+sendingArchive+", ACTIVITY: "+activityToAnalyze+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
+            Log.d(TAG, "[ACCELEROMETER] ID: "+ archive +", ACTIVITY: "+ activity +", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            sendData(getCollectionDataMessage(sendingArchive, activityToAnalyze, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z));
+            sendData(getCollectionDataMessage(archive, activity, Constants.SENSOR_ACCELEROMETER, phonePosition, x, y, z));
 
         }
 
@@ -277,7 +277,7 @@ public class LearningService extends Service implements SensorEventListener {
     public void onDestroy() {
 
         // Send close to server
-        sendData(getClosingMessage(sendingArchive));
+        sendData(getClosingMessage(archive));
 
         // Cancel the countdown timers
         if (preparationTimer != null) {
@@ -374,8 +374,8 @@ public class LearningService extends Service implements SensorEventListener {
         startForeground(Constants.LEARNING_NOTIFICATION_ID, notification);
 
         // Get input data from fragment: task data
-        sendingArchive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-        activityToAnalyze = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
+        archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
+        activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA_RECEIVED);
         phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
         preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                 Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);

@@ -6,17 +6,23 @@ import java.util.List;
 
 public class Activity {
 
+    private long id;
     private String activity;
     private Translation translations;
     private int time;
     private List<Sensor> sensors;
 
-    public Activity(String activity, Translation translations, int time, List<Sensor> sensors) {
+    public Activity(long id, String activity, Translation translations, int time, List<Sensor> sensors) {
+        this.id = id;
         this.activity = activity;
         this.translations = translations;
         this.time = time;
         this.sensors = sensors;
     }
+
+    public long getId() { return id; }
+
+    public void setId(long id) { this.id = id; }
 
     public String getActivity() {
         return activity;
