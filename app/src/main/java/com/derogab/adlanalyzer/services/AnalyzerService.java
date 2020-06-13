@@ -29,6 +29,7 @@ import com.derogab.adlanalyzer.utils.Constants;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.Locale;
 
 public class AnalyzerService extends Service implements SensorEventListener {
@@ -91,7 +92,8 @@ public class AnalyzerService extends Service implements SensorEventListener {
                                             String sensor,
                                             float x,
                                             float y,
-                                            float z){
+                                            float z,
+                                            long t){
 
         index++;
 
@@ -112,7 +114,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
                             .put("values", new JSONObject()
                                     .put("x", x)
                                     .put("y", y)
-                                    .put("z", z))).toString();
+                                    .put("z", z)
+                                    .put("t", t)
+                                )).toString();
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -229,7 +233,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
             Log.d(TAG, "[GYROSCOPE] ID: "+archive+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            sendData(getCollectionDataMessage(archive, phonePosition, Constants.SENSOR_GYROSCOPE, x, y, z));
+            sendData(getCollectionDataMessage(archive, phonePosition, Constants.SENSOR_GYROSCOPE, x, y, z, new Date().getTime()));
 
         }
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
@@ -240,7 +244,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
             Log.d(TAG, "[ACCELEROMETER] ID: "+archive+", POS: "+phonePosition+", X: "+x+", Y: "+y+", Z: "+z);
 
-            sendData(getCollectionDataMessage(archive, phonePosition, Constants.SENSOR_ACCELEROMETER, x, y, z));
+            sendData(getCollectionDataMessage(archive, phonePosition, Constants.SENSOR_ACCELEROMETER, x, y, z, new Date().getTime()));
 
         }
 
