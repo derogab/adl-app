@@ -24,6 +24,7 @@
     <string name="learning_fragment_activity_selector_textview">Select an activity…</string>
     <string name="learning_fragment_selected_configuration_textview">Selected configuration</string>
     <string name="learning_fragment_tts_activity_started">Activity just started</string>
+    <string name="learning_fragment_countdown_textview">Learning Countdown</string>
     <string name="learning_service_channel_description">Learning in progress…</string>
     <string name="learning_service_channel_name">Learning Service</string>
     <!-- PERSONAL -->
@@ -32,6 +33,12 @@
     <string name="personal_fragment_loader">Loading…</string>
     <!-- ERRORS -->
     <string name="error_server_connection">Error to connect to the server.</string>
+    <!-- TTS -->
+    <string name="tts_analysis_almost_started">Analysis is about to begin.</string>
+    <string name="tts_analysis_started">Analysis just started.</string>
+    <string name="tts_learning_almost_started">Learning is about to begin.</string>
+    <string name="tts_learning_started">Learning just started.</string>
+    <string name="tts_prediction">Activity predicted is %1$s.</string>
     <!-- OTHERS / ALL -->
     <string name="start_button">Start</string>
     <string name="cancel_button">Cancel</string>

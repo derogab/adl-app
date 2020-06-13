@@ -27,7 +27,7 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Activity learning timer"
+                android:text="@string/learning_fragment_countdown_textview"
                 android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -253,6 +253,7 @@
         android:layout_alignParentEnd="true"
         android:visibility="gone"
         app:fabSize="normal"
+        app:backgroundTint="@android:color/darker_gray"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

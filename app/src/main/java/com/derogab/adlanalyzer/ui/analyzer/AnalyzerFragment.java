@@ -1,6 +1,6 @@
 package com.derogab.adlanalyzer.ui.analyzer;
 
-import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +18,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -27,7 +25,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.databinding.FragmentAnalyzerBinding;
-import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.models.PhonePosition;
 import com.derogab.adlanalyzer.services.AnalyzerService;
 import com.derogab.adlanalyzer.utils.Constants;
@@ -36,7 +33,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import java.util.List;
-import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 public class AnalyzerFragment extends Fragment {
@@ -46,10 +43,7 @@ public class AnalyzerFragment extends Fragment {
     private FragmentActivity mContext;
     private FragmentAnalyzerBinding binding;
     private AnalyzerViewModel analyzerViewModel;
-    private Intent analyzerIntent;
     private BroadcastReceiver analyzerServiceReceiver;
-
-    private TextToSpeech textToSpeech;
 
     private void checkSensor(TextView v, String featureSensor) {
         if (mContext != null){
@@ -76,36 +70,14 @@ public class AnalyzerFragment extends Fragment {
 
     }
 
-    private boolean speak(String tts) {
-
-        if (textToSpeech == null) return false;
-
-        int speechStatus = textToSpeech.speak(tts, TextToSpeech.QUEUE_FLUSH, null);
-
-        if (speechStatus == TextToSpeech.ERROR) {
-            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-            return false;
+    private boolean isMyServiceRunning(Class serviceClass) {
+        ActivityManager manager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true; // Package name matches, our service is running
+            }
         }
-
-        return true;
-    }
-
-    private boolean alert(View view, String text) {
-        return alert(view, text, Snackbar.LENGTH_SHORT);
-    }
-
-    private boolean alert(View view, String text, int duration) {
-        if (view == null) return false;
-
-        try {
-            Snackbar.make(view, text, duration).show();
-        }
-        catch (Exception e) {
-            Log.d(TAG, "[Error] No alert showed.");
-            return false;
-        }
-
-        return true;
+        return false; // No matching package name found => Our service is not running
     }
 
     @Override
@@ -115,35 +87,12 @@ public class AnalyzerFragment extends Fragment {
         // Get main context
         mContext = this.getActivity();
 
-        // Set TTS object
-        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    Log.d(TAG, "Current Locale: "+getString(R.string.current_lang));
-
-                    int ttsLang = textToSpeech.setLanguage(new Locale(getString(R.string.current_lang)));
-
-                    if (ttsLang == TextToSpeech.LANG_MISSING_DATA
-                            || ttsLang == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e(TAG, "[TTS] The Language is not supported!");
-                    } else {
-                        Log.i(TAG, "[TTS] Language Supported.");
-                    }
-                    Log.i(TAG, "[TTS] Initialization success.");
-                } else {
-
-                    Log.e(TAG, "[TTS] Initialization failed!");
-                }
-            }
-        });
-
-        // Create service
-        analyzerIntent = new Intent(mContext, AnalyzerService.class);
-
         // Create ViewModel
         analyzerViewModel = new ViewModelProvider(requireActivity()).get(AnalyzerViewModel.class);
 
+        // Check if service is running
+        if (isMyServiceRunning(AnalyzerService.class))
+            analyzerViewModel.setAnalyzingInProgress(true);
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -196,7 +145,6 @@ public class AnalyzerFragment extends Fragment {
         binding.fragmentAnalyzerStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Starting...");
 
                 // Update progress status
                 analyzerViewModel.setAnalyzingInProgress(true);
@@ -207,6 +155,9 @@ public class AnalyzerFragment extends Fragment {
 
                 // Get SharedPreferences file for settings preferences
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+
+                // Get service
+                Intent analyzerIntent = analyzerViewModel.getService(getContext());
 
                 // Set current information
                 analyzerIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
@@ -231,10 +182,9 @@ public class AnalyzerFragment extends Fragment {
         binding.fragmentAnalyzerCancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Cancelling...");
 
                 // Stop the service
-                mContext.stopService(analyzerIntent);
+                mContext.stopService(analyzerViewModel.getService(getContext()));
 
                 // Update progress status
                 analyzerViewModel.setAnalyzingInProgress(false);
@@ -274,7 +224,7 @@ public class AnalyzerFragment extends Fragment {
                     case "ANALYZER_ACTIVITY_START":
 
                         // Show alert
-                        alert(getView(), getString(R.string.analyzer_service_start));
+                        Snackbar.make(requireView(), getString(R.string.analyzer_service_start), Snackbar.LENGTH_SHORT).show();
 
                         // Output null
                         binding.fragmentAnalyzerOutput.setTextColor(Color.GRAY);
@@ -288,7 +238,7 @@ public class AnalyzerFragment extends Fragment {
                                         Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
 
                         // Show alert
-                        alert(getView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime));
+                        Snackbar.make(requireView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime), Snackbar.LENGTH_SHORT).show();
 
                         // Output the countdown
                         binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorAccent));
@@ -301,7 +251,8 @@ public class AnalyzerFragment extends Fragment {
 
                         // Show alert
                         if (errorMessage != null)
-                            alert(getView(), errorMessage);
+                            Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_SHORT).show();
+
 
                         // Change button
                         binding.fragmentAnalyzerCancelButton.hide();
@@ -349,13 +300,4 @@ public class AnalyzerFragment extends Fragment {
         mContext.unregisterReceiver(analyzerServiceReceiver);
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        // Destroy TTS
-        textToSpeech.stop();
-        textToSpeech.shutdown();
-        textToSpeech = null;
-    }
 }

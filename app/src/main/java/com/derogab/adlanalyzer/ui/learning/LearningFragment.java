@@ -1,5 +1,6 @@
 package com.derogab.adlanalyzer.ui.learning;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +19,6 @@ import com.derogab.adlanalyzer.utils.CountDown;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.Observer;
@@ -37,7 +36,6 @@ import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 
@@ -45,19 +43,10 @@ public class LearningFragment extends Fragment {
 
     private static final String TAG = "LearningFragment";
 
+    private FragmentActivity mContext;
     private FragmentLearningBinding binding;
     private LearningViewModel learningViewModel;
-
-    private TextToSpeech textToSpeech;
-
     private BroadcastReceiver learningServiceReceiver;
-
-    private FragmentActivity mContext;
-
-    private Intent learningIntent;
-
-
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,34 +55,12 @@ public class LearningFragment extends Fragment {
         // Get main context
         mContext = this.getActivity();
 
-        // Set TTS object
-        textToSpeech = new TextToSpeech(getActivity(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    Log.d(TAG, "Current Locale: "+getString(R.string.current_lang));
-
-                    int ttsLang = textToSpeech.setLanguage(new Locale(getString(R.string.current_lang)));
-
-                    if (ttsLang == TextToSpeech.LANG_MISSING_DATA
-                            || ttsLang == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e(TAG, "[TTS] The Language is not supported!");
-                    } else {
-                        Log.i(TAG, "[TTS] Language Supported.");
-                    }
-                    Log.i(TAG, "[TTS] Initialization success.");
-                } else {
-
-                    Log.e(TAG, "[TTS] Initialization failed!");
-                }
-            }
-        });
-
-        // Create service
-        learningIntent = new Intent(mContext, LearningService.class);
-
         // Create ViewModel
         learningViewModel = new ViewModelProvider(requireActivity()).get(LearningViewModel.class);
+
+        // Check if service is running
+        if (isMyServiceRunning(LearningService.class))
+            learningViewModel.setLearningInProgress(true);
 
     }
 
@@ -180,6 +147,9 @@ public class LearningFragment extends Fragment {
                 // Get SharedPreferences file for settings preferences
                 SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
 
+                // Get service
+                Intent learningIntent = learningViewModel.getService(getContext());
+
                 // Activity info
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ARCHIVE, UUID.randomUUID().toString());
                 learningIntent.putExtra(Constants.LEARNING_SERVICE_ACTIVITY, getSelectedActivity().getActivity());
@@ -213,8 +183,10 @@ public class LearningFragment extends Fragment {
             public void onClick(View v) {
                 binding.fragmentLearningCancelButton.hide();
 
-                mContext.stopService(learningIntent);
-                alert(v, getString(R.string.alert_stop));
+                mContext.stopService(learningViewModel.getService(getContext()));
+
+                // Show alert
+                Snackbar.make(requireView(), getString(R.string.alert_stop), Snackbar.LENGTH_SHORT).show();
 
                 binding.fragmentLearningStartButton.show();
             }
@@ -230,6 +202,16 @@ public class LearningFragment extends Fragment {
         // Get the selected activity
         return (Activity) binding.activitySelector.getItems().get(index);
 
+    }
+
+    private boolean isMyServiceRunning(Class serviceClass) {
+        ActivityManager manager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true; // Package name matches, our service is running
+            }
+        }
+        return false; // No matching package name found => Our service is not running
     }
 
     private PhonePosition getSelectedPosition() {
@@ -302,7 +284,10 @@ public class LearningFragment extends Fragment {
                                 intent.getLongExtra("PREPARATION_TIME",
                                         Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
 
-                        alert(getView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime));
+                        // Show alert
+                        Snackbar.make(requireView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime), Snackbar.LENGTH_SHORT).show();
+
+
 
                         binding.fragmentLearningCancelButton.show();
 
@@ -310,16 +295,14 @@ public class LearningFragment extends Fragment {
 
                     case "LEARNING_ACTIVITY_START":
 
-                        speak(getString(R.string.alert_start));
-                        alert(getView(), getString(R.string.alert_start));
+                        // Show alert
+                        Snackbar.make(requireView(), getString(R.string.alert_start), Snackbar.LENGTH_SHORT).show();
+
                         break;
 
                     case "LEARNING_ACTIVITY_COUNTDOWN":
 
                         long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN", 0);
-
-                        if (activityCountdown % 5 == 0)
-                            speak("" + activityCountdown);
 
                         binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorPrimary));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(activityCountdown));
@@ -330,9 +313,6 @@ public class LearningFragment extends Fragment {
 
                         long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN", 0);
 
-                        if (preparationCountdown == 3)
-                            speak(getString(R.string.alert_almost_started));
-
                         binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorAccent));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
 
@@ -340,8 +320,8 @@ public class LearningFragment extends Fragment {
 
                     case "LEARNING_ACTIVITY_END":
 
-                        speak(getString(R.string.alert_done));
-                        alert(getView(), getString(R.string.alert_done));
+                        // Show alert
+                        Snackbar.make(requireView(), getString(R.string.alert_done), Snackbar.LENGTH_SHORT).show();
 
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
                         binding.fragmentLearningCancelButton.hide();
@@ -355,8 +335,10 @@ public class LearningFragment extends Fragment {
 
                         String errorMessage = intent.getStringExtra("CONNECTION_ERROR");
 
+                        // Show alert
                         if (errorMessage != null)
-                            alert(getView(), errorMessage);
+                            Snackbar.make(requireView(), errorMessage, Snackbar.LENGTH_SHORT).show();
+
 
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(getSelectedActivity().getTime()));
                         binding.fragmentLearningCancelButton.hide();
@@ -370,7 +352,6 @@ public class LearningFragment extends Fragment {
 
             }
         };
-
 
         // Init receiver
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_SERVICE_START"));
@@ -390,49 +371,5 @@ public class LearningFragment extends Fragment {
         // Destroy the broadcast receiver
         mContext.unregisterReceiver(learningServiceReceiver);
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "Destroying...");
-
-        // Destroy TTS
-        textToSpeech.stop();
-        textToSpeech.shutdown();
-        textToSpeech = null;
-    }
-
-    private boolean speak(String tts) {
-
-        if (textToSpeech == null) return false;
-
-        int speechStatus = textToSpeech.speak(tts, TextToSpeech.QUEUE_FLUSH, null);
-
-        if (speechStatus == TextToSpeech.ERROR) {
-            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean alert(View view, String text) {
-        return alert(view, text, Snackbar.LENGTH_SHORT);
-    }
-
-    private boolean alert(View view, String text, int duration) {
-        if (view == null) return false;
-
-        try {
-            Snackbar.make(view, text, duration).show();
-        }
-        catch (Exception e) {
-            Log.d(TAG, "[Error] No alert showed.");
-            return false;
-        }
-
-        return true;
-    }
-
 
 }

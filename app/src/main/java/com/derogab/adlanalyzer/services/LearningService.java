@@ -15,11 +15,12 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
+import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.connections.Connection;
-import com.derogab.adlanalyzer.ui.learning.LearningFragment;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.CountDown;
 
@@ -28,6 +29,8 @@ import org.json.JSONObject;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+
+import java.util.Locale;
 
 public class LearningService extends Service implements SensorEventListener {
 
@@ -52,6 +55,8 @@ public class LearningService extends Service implements SensorEventListener {
     private boolean isSensorGyroscopeActive;
     // Data counter
     private int index;
+    // TTS
+    private TextToSpeech textToSpeech;
 
     /**
      * Notification channel creation
@@ -90,7 +95,7 @@ public class LearningService extends Service implements SensorEventListener {
             if (response.getString("type").equals("close")
                     || response.getString("type").equals("goodbye")) {
 
-                Log.d(TAG, "Closed received.");
+                // Close this service
                 stopSelf();
 
             }
@@ -200,6 +205,27 @@ public class LearningService extends Service implements SensorEventListener {
     }
 
     /**
+     * Speak with tech to speech
+     *
+     * @param tts text to speak
+     *
+     * @return the boolean result
+     * */
+    private boolean speak(String tts) {
+
+        if (textToSpeech == null) return false;
+
+        int speechStatus = textToSpeech.speak(tts, TextToSpeech.QUEUE_FLUSH, null);
+
+        if (speechStatus == TextToSpeech.ERROR) {
+            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Sensor callback
      * Triggered on sensor change
      *
@@ -249,11 +275,70 @@ public class LearningService extends Service implements SensorEventListener {
      * */
     @Override
     public void onDestroy() {
-        super.onDestroy();
 
-        if (conn != null) conn.close();
+        // Send close to server
+        sendData(getClosingMessage(sendingArchive));
 
+        // Cancel the countdown timers
+        if (preparationTimer != null) {
+            preparationTimer.cancel();
+            preparationTimer = null;
+        }
+        if (activityTimer != null) {
+            activityTimer.cancel();
+            activityTimer = null;
+        }
+
+        // Close the connection
+        if (conn != null) {
+            conn.close();
+            conn = null;
+        }
+
+        // Destroy TTS
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech = null;
+        }
+
+        // Destroy notification
         stopForeground(true);
+
+        // And then
+        super.onDestroy();
+    }
+
+    /**
+     * onCreate callback
+     * Triggered on service destroy
+     * */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // Set TTS object
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    Log.d(TAG, "Current Locale: "+getString(R.string.current_lang));
+
+                    int ttsLang = textToSpeech.setLanguage(new Locale(getString(R.string.current_lang)));
+
+                    if (ttsLang == TextToSpeech.LANG_MISSING_DATA
+                            || ttsLang == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "[TTS] The Language is not supported!");
+                    } else {
+                        Log.i(TAG, "[TTS] Language Supported.");
+                    }
+                    Log.i(TAG, "[TTS] Initialization success.");
+                } else {
+
+                    Log.e(TAG, "[TTS] Initialization failed!");
+                }
+            }
+        });
     }
 
     /**
@@ -271,7 +356,7 @@ public class LearningService extends Service implements SensorEventListener {
         sensorEventListener = this;
 
         // Create notification intent
-        Intent notificationIntent = new Intent(getApplicationContext(), LearningFragment.class);
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
 
@@ -279,8 +364,8 @@ public class LearningService extends Service implements SensorEventListener {
 
         // Create notification
         Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Learning Service")
-            .setContentText("Learning in progress...")
+            .setContentTitle(getString(R.string.learning_service_channel_name))
+            .setContentText(getString(R.string.learning_service_channel_description))
             .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
             .setContentIntent(pendingIntent)
             .build();
@@ -320,6 +405,10 @@ public class LearningService extends Service implements SensorEventListener {
 
                 Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
 
+                // Voice alert
+                if (secondsUntilFinished == 3)
+                    speak(getString(R.string.alert_almost_started));
+
                 Intent sendTime = new Intent();
                     sendTime.setAction("LEARNING_PREPARATION_COUNTDOWN");
                     sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
@@ -336,6 +425,9 @@ public class LearningService extends Service implements SensorEventListener {
                     sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
                 if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
                     sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+
+                // Voice alert
+                speak(getString(R.string.alert_start));
 
                 // Send data
                 Intent sendTime = new Intent();
@@ -362,10 +454,14 @@ public class LearningService extends Service implements SensorEventListener {
                     sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
+                // Voice alert
+                if (secondsUntilFinished % 5 == 0)
+                    speak("" + secondsUntilFinished);
+
                 // Update notification countdown
                 Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
-                        .setContentTitle("Learning Service")
-                        .setContentText("Learning in progress... " + CountDown.get(secondsUntilFinished))
+                        .setContentTitle(getString(R.string.learning_service_channel_name))
+                        .setContentText(getString(R.string.learning_service_channel_description) + CountDown.get(secondsUntilFinished))
                         .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
                         .setContentIntent(pendingIntent)
                         .build();
@@ -388,14 +484,17 @@ public class LearningService extends Service implements SensorEventListener {
                 // Stop Sensors listener
                 sensorManager.unregisterListener(sensorEventListener);
 
+                // Voice alert
+                speak(getString(R.string.alert_done));
+
                 // Send end to UI
                 Intent sendTime = new Intent();
                     sendTime.setAction("LEARNING_ACTIVITY_END");
                     sendTime.putExtra( "ACTIVITY_END", true);
                 sendBroadcast(sendTime);
 
-                // Send close to server
-                sendData(getClosingMessage(sendingArchive));
+                // And Close this service
+                stopSelf();
 
             }
         };

@@ -15,18 +15,21 @@ import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
+import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.connections.Connection;
-import com.derogab.adlanalyzer.ui.analyzer.AnalyzerFragment;
 import com.derogab.adlanalyzer.utils.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Locale;
 
 public class AnalyzerService extends Service implements SensorEventListener {
 
@@ -45,6 +48,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
     private CountDownTimer preparationTimer;
     // Data counter
     private int index;
+    // TTS
+    private TextToSpeech textToSpeech;
+
 
     /**
      * Notification channel creation
@@ -171,6 +177,13 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
             }
 
+            // Receive predictions
+            else if (response.getString("type").equals("prediction")) {
+
+                Log.d(TAG, "Prediction received.");
+
+            }
+
         }
 
     }
@@ -207,6 +220,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
 
+        // Filter and send
         if(event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
 
             float x = event.values[0];
@@ -243,23 +257,67 @@ public class AnalyzerService extends Service implements SensorEventListener {
     public void onAccuracyChanged(Sensor sensor, int accuracy) { }
 
     /**
+     * On Create
+     * When the service is created
+     * */
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    Log.d(TAG, "Current Locale: "+getString(R.string.current_lang));
+
+                    int ttsLang = textToSpeech.setLanguage(new Locale(getString(R.string.current_lang)));
+
+                    if (ttsLang == TextToSpeech.LANG_MISSING_DATA
+                            || ttsLang == TextToSpeech.LANG_NOT_SUPPORTED) {
+                        Log.e(TAG, "[TTS] The Language is not supported!");
+                    } else {
+                        Log.i(TAG, "[TTS] Language Supported.");
+                    }
+                    Log.i(TAG, "[TTS] Initialization success.");
+                } else {
+
+                    Log.e(TAG, "[TTS] Initialization failed!");
+                }
+            }
+        });
+    }
+
+    /**
      * On Destroy
      * When the service is stopped
      * */
     @Override
     public void onDestroy() {
 
-        // Send close
+        // Send close to server
         sendData(getClosingMessage(archive));
 
         // Cancel the countdown timer
-        if (preparationTimer != null) preparationTimer.cancel();
+        if (preparationTimer != null) {
+            preparationTimer.cancel();
+            preparationTimer = null;
+        }
 
         // Close connection
-        if (conn != null) conn.close();
+        if (conn != null) {
+            conn.close();
+            conn = null;
+        }
 
         // Stop Sensors listener
         sensorManager.unregisterListener(sensorEventListener);
+
+        // Destroy TTS
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+            textToSpeech = null;
+        }
 
         // And then
         super.onDestroy();
@@ -280,7 +338,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
         sensorEventListener = this;
 
         // Create notification intent
-        Intent notificationIntent = new Intent(this, AnalyzerFragment.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent =
                 PendingIntent.getActivity(getApplicationContext(), 0, notificationIntent, 0);
 
@@ -328,6 +386,10 @@ public class AnalyzerService extends Service implements SensorEventListener {
                     sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
                 sendBroadcast(sendTime);
 
+                // Voice alert
+                if (secondsUntilFinished == 3)
+                    speak(getString(R.string.tts_analysis_almost_started));
+
             }
 
             @Override
@@ -340,11 +402,14 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
                     sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
-                // Send data
+                // Send data to UI
                 Intent sendTime = new Intent();
                     sendTime.setAction("ANALYZER_ACTIVITY_START");
                     sendTime.putExtra( "ACTIVITY_START", true);
                 sendBroadcast(sendTime);
+
+                // Voice alert
+                speak(getString(R.string.tts_analysis_started));
 
             }
         };
@@ -396,5 +461,20 @@ public class AnalyzerService extends Service implements SensorEventListener {
         return super.onStartCommand(intent, flags, startId);
     }
 
+
+
+    private boolean speak(String tts) {
+
+        if (textToSpeech == null) return false;
+
+        int speechStatus = textToSpeech.speak(tts, TextToSpeech.QUEUE_FLUSH, null);
+
+        if (speechStatus == TextToSpeech.ERROR) {
+            Log.e(TAG, "[TTS] Error in converting Text to Speech!");
+            return false;
+        }
+
+        return true;
+    }
 
 }

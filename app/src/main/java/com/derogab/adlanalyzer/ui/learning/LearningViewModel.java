@@ -1,12 +1,14 @@
 package com.derogab.adlanalyzer.ui.learning;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.repositories.ActivitiesRepository;
 import com.derogab.adlanalyzer.models.PhonePosition;
 import com.derogab.adlanalyzer.repositories.PhonePositionsRepository;
+import com.derogab.adlanalyzer.services.LearningService;
 
 import java.util.List;
 
@@ -25,6 +27,8 @@ public class LearningViewModel extends ViewModel {
     private int phonePositionSelectedIndex = 0;
 
     private boolean learningInProgress = false;
+
+    private Intent service = null;
 
     public LiveData<List<Activity>> getActivities() {
 
@@ -77,5 +81,19 @@ public class LearningViewModel extends ViewModel {
 
     public void setLearningInProgress(boolean learningInProgress) {
         this.learningInProgress = learningInProgress;
+    }
+
+    public Intent getService(Context context) {
+
+        if (service == null) {
+            // Create service
+            service = new Intent(context, LearningService.class);
+        }
+
+        return service;
+    }
+
+    public void setService(Intent service) {
+        this.service = service;
     }
 }

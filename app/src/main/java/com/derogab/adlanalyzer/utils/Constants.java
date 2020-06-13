@@ -32,6 +32,10 @@ public class Constants {
     public static final int LEARNING_NOTIFICATION_ID = 1;
     public static final int ANALYZER_NOTIFICATION_ID = 2;
 
+    public static final String NOTIFICATION_INTENT_CLICK_FROM = "notification_click";
+    public static final String NOTIFICATION_INTENT_CLICK_FROM_ANALYZER = "notification_click_analyzer";
+    public static final String NOTIFICATION_INTENT_CLICK_FROM_LEARNING = "notification_click_learning";
+
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";
     public static final String PREFERENCE_PREPARATION_TIME = "timer_preparation_seconds";
