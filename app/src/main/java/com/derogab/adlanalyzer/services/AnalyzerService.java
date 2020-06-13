@@ -310,7 +310,8 @@ public class AnalyzerService extends Service implements SensorEventListener {
         }
 
         // Stop Sensors listener
-        sensorManager.unregisterListener(sensorEventListener);
+        if (sensorManager != null && sensorEventListener != null)
+            sensorManager.unregisterListener(sensorEventListener);
 
         // Destroy TTS
         if (textToSpeech != null) {

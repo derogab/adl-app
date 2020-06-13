@@ -482,7 +482,8 @@ public class LearningService extends Service implements SensorEventListener {
             public void onFinish() {
 
                 // Stop Sensors listener
-                sensorManager.unregisterListener(sensorEventListener);
+                if (sensorManager != null && sensorEventListener != null)
+                    sensorManager.unregisterListener(sensorEventListener);
 
                 // Voice alert
                 speak(getString(R.string.alert_done));
