@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,15 +24,16 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.databinding.FragmentAnalyzerBinding;
+import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.models.PhonePosition;
 import com.derogab.adlanalyzer.services.AnalyzerService;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.CountDown;
+import com.derogab.adlanalyzer.utils.CurrentLang;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class AnalyzerFragment extends Fragment {
@@ -262,13 +262,26 @@ public class AnalyzerFragment extends Fragment {
 
                     case "ANALYZER_PREDICTION":
 
-                        String prediction = intent.getStringExtra("PREDICTION");
+                        long prediction = intent.getLongExtra("PREDICTION", Constants.NO_INTEGER_DATA);
 
-                        if (prediction != null) {
+                        if (prediction != Constants.NO_INTEGER_DATA) {
 
-                            // Output prediction
-                            binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
-                            binding.fragmentAnalyzerOutput.setText(prediction);
+                            List<Activity> activities = analyzerViewModel.getActivities().getValue();
+
+                            String predictionOutput = null;
+
+                            if (activities != null)
+                                for (int i = 0; i < activities.size(); i++)
+                                    if (activities.get(i).getId() == prediction)
+                                        predictionOutput = activities.get(i).getTranslations().getLang(CurrentLang.getInstance().getLang());
+
+                            if (predictionOutput != null) {
+
+                                // Output prediction
+                                binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
+                                binding.fragmentAnalyzerOutput.setText(predictionOutput);
+
+                            }
 
                         }
 

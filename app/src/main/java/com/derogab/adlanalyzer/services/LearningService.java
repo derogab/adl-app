@@ -380,8 +380,8 @@ public class LearningService extends Service implements SensorEventListener {
 
         // Get input data from fragment: task data
         archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-        activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA_RECEIVED);
-        phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA_RECEIVED);
+        activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA);
+        phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
         preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                 Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
         activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER,

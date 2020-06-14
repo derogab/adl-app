@@ -2,11 +2,15 @@ package com.derogab.adlanalyzer.ui.analyzer;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.models.PhonePosition;
+import com.derogab.adlanalyzer.repositories.ActivitiesRepository;
 import com.derogab.adlanalyzer.repositories.PhonePositionsRepository;
 import com.derogab.adlanalyzer.services.AnalyzerService;
 
@@ -16,12 +20,30 @@ public class AnalyzerViewModel extends ViewModel {
 
     private final static String TAG = "AnalyzerViewModel";
 
+    private MutableLiveData<List<Activity>> activities;
+
     private MutableLiveData<List<PhonePosition>> phonePositions;
     private int phonePositionSelectedIndex = 0;
 
     private boolean analyzingInProgress = false;
 
     private Intent service = null;
+
+    public LiveData<List<Activity>> getActivities() {
+
+        if (activities == null) {
+            activities = new MutableLiveData<List<Activity>>();
+
+            Log.d(TAG, "Download activities...");
+
+            ActivitiesRepository.getInstance().getActivities(activities);
+
+        }
+
+        Log.d(TAG, "Get activities...");
+        return activities;
+
+    }
 
     public MutableLiveData<List<PhonePosition>> getPhonePositions(Context context) {
 

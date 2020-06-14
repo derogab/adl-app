@@ -184,7 +184,15 @@ public class AnalyzerService extends Service implements SensorEventListener {
             // Receive predictions
             else if (response.getString("type").equals("prediction")) {
 
-                Log.d(TAG, "Prediction received.");
+                // Get prediction
+                long activity = response.getInt("activity");
+
+                // Send prediction
+                Intent sendPrediction = new Intent();
+                    sendPrediction.setAction("ANALYZER_PREDICTION");
+                    sendPrediction.putExtra( "PREDICTION", activity);
+                sendBroadcast(sendPrediction);
+
 
             }
 
@@ -362,7 +370,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
         // Get input data from fragment: task data
         archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-        phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA_RECEIVED);
+        phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
         preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                 Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
         // Get input data from fragment: server information
