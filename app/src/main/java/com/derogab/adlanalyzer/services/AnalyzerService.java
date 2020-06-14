@@ -306,8 +306,14 @@ public class AnalyzerService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
 
-        // Send close to server
+        // Send close message to server
         sendData(getClosingMessage(archive));
+
+        // Send destroy message to UI
+        Intent sendDestroy = new Intent();
+            sendDestroy.setAction("ANALYZER_SERVICE_DESTROY");
+            sendDestroy.putExtra( "SERVICE_DESTROY", true);
+        sendBroadcast(sendDestroy);
 
         // Cancel the countdown timer
         if (preparationTimer != null) {
@@ -367,6 +373,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
         // Start foreground notification
         startForeground(Constants.ANALYZER_NOTIFICATION_ID, notification);
+
+        // Destroy service if intent is null
+        if (intent == null) stopSelf();
 
         // Get input data from fragment: task data
         archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);

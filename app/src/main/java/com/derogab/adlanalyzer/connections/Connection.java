@@ -93,8 +93,15 @@ public class Connection {
         mRun = false;
 
         if (bufferOut != null) {
-            bufferOut.flush();
-            bufferOut.close();
+            try {
+                bufferOut.flush();
+                bufferOut.close();
+            }
+            catch (Exception e) {
+                Log.e(TAG, "Buffer flush error: probably connection already closed.");
+            }
+
+
         }
 
         socket = null;
@@ -127,11 +134,13 @@ public class Connection {
                     Log.d(TAG, "Port: " + port);
                     socket = new Socket(destination, port);
                     // Exec callback after connection
-                    onConnectionSuccessListener.onConnectionSuccess();
+                    if (onConnectionSuccessListener != null)
+                        onConnectionSuccessListener.onConnectionSuccess();
 
                 } catch (Exception e) {
                     // Exec callback
-                    onConnectionErrorListener.onConnectionError();
+                    if (onConnectionErrorListener != null)
+                        onConnectionErrorListener.onConnectionError();
                 }
 
                 if (socket != null) {
@@ -155,7 +164,8 @@ public class Connection {
                                     @Override
                                     public void run() {
 
-                                        onMessageReceivedListener.messageReceived(serverMessage);
+                                        if (onMessageReceivedListener != null)
+                                            onMessageReceivedListener.messageReceived(serverMessage);
 
                                     }
                                 };
@@ -180,7 +190,7 @@ public class Connection {
                                 // after it is closed, which means a new socket instance has to be created.
                                 socket.close();
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                Log.e(TAG, "Socket close error: probably connection already closed.");
                             }
 
                         }

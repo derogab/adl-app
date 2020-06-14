@@ -284,6 +284,12 @@ public class LearningService extends Service implements SensorEventListener {
         // Send close to server
         sendData(getClosingMessage(archive));
 
+        // Send destroy message to UI
+        Intent sendDestroy = new Intent();
+            sendDestroy.setAction("LEARNING_SERVICE_DESTROY");
+            sendDestroy.putExtra( "SERVICE_DESTROY", true);
+        sendBroadcast(sendDestroy);
+
         // Cancel the countdown timers
         if (preparationTimer != null) {
             preparationTimer.cancel();
@@ -377,6 +383,9 @@ public class LearningService extends Service implements SensorEventListener {
 
         // Start foreground notification
         startForeground(Constants.LEARNING_NOTIFICATION_ID, notification);
+
+        // Destroy service if intent is null
+        if (intent == null) stopSelf();
 
         // Get input data from fragment: task data
         archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
