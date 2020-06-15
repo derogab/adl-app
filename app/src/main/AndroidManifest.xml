@@ -23,14 +23,12 @@
         </activity>
 
         <service
-            android:name=".services.LearningService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:name=".services.LearningService" />
         <service
-            android:name=".services.AnalyzerService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:name=".services.AnalyzerService" />
     </application>
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 

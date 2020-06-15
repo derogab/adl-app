@@ -276,6 +276,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
     public void onCreate() {
         super.onCreate();
 
+        // Set TTS object
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
