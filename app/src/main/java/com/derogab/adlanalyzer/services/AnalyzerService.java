@@ -322,12 +322,6 @@ public class AnalyzerService extends Service implements SensorEventListener {
             preparationTimer = null;
         }
 
-        // Close connection
-        if (conn != null) {
-            conn.close();
-            conn = null;
-        }
-
         // Stop Sensors listener
         if (sensorManager != null && sensorEventListener != null)
             sensorManager.unregisterListener(sensorEventListener);
@@ -337,6 +331,12 @@ public class AnalyzerService extends Service implements SensorEventListener {
             textToSpeech.stop();
             textToSpeech.shutdown();
             textToSpeech = null;
+        }
+
+        // Close connection
+        if (conn != null) {
+            conn.close();
+            conn = null;
         }
 
         // And then
