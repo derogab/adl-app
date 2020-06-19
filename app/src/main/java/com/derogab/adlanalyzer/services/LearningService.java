@@ -284,6 +284,10 @@ public class LearningService extends Service implements SensorEventListener {
         // Send close to server
         sendData(getClosingMessage(archive));
 
+        // Stop Sensors listener
+        if (sensorManager != null && sensorEventListener != null)
+            sensorManager.unregisterListener(sensorEventListener);
+
         // Send destroy message to UI
         Intent sendDestroy = new Intent();
             sendDestroy.setAction("LEARNING_SERVICE_DESTROY");
@@ -300,12 +304,6 @@ public class LearningService extends Service implements SensorEventListener {
             activityTimer = null;
         }
 
-        // Close the connection
-        if (conn != null) {
-            conn.close();
-            conn = null;
-        }
-
         // Destroy TTS
         if (textToSpeech != null) {
             textToSpeech.stop();
@@ -315,6 +313,12 @@ public class LearningService extends Service implements SensorEventListener {
 
         // Destroy notification
         stopForeground(true);
+
+        // Close the connection
+        if (conn != null) {
+            conn.close();
+            conn = null;
+        }
 
         // And then
         super.onDestroy();
@@ -384,178 +388,181 @@ public class LearningService extends Service implements SensorEventListener {
         // Start foreground notification
         startForeground(Constants.LEARNING_NOTIFICATION_ID, notification);
 
-        // Destroy service if intent is null
-        if (intent == null) stopSelf();
+        // Destroy or continue...
+        if (intent == null) {
+            // Destroy service if intent is null
+            stopSelf();
+        }
+        else{
+            // Start all service tasks
 
-        // Get input data from fragment: task data
-        archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-        activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA);
-        phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
-        preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
-                Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
-        activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER,
-                Constants.LEARNING_COUNTDOWN_ACTIVITY_SECONDS_DEFAULT);
-        // Get input data from fragment: sensor activation status
-        isSensorAccelerometerActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER, true);
-        isSensorGyroscopeActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE, true);
-        // Get input data from fragment: server information
-        String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
-        int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
+            // Get input data from fragment: task data
+            archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
+            activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA);
+            phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
+            preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
+                    Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+            activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER,
+                    Constants.LEARNING_COUNTDOWN_ACTIVITY_SECONDS_DEFAULT);
+            // Get input data from fragment: sensor activation status
+            isSensorAccelerometerActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER, true);
+            isSensorGyroscopeActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE, true);
+            // Get input data from fragment: server information
+            String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
+            int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
 
-        // Init sensor manager
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            // Init sensor manager
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-        // Init PackageManager
-        PackageManager packageManager = getPackageManager();
+            // Init PackageManager
+            PackageManager packageManager = getPackageManager();
 
-        // Init counter value
-        index = 0;
+            // Init counter value
+            index = 0;
 
-        // Set preparation timer
-        preparationTimer = new CountDownTimer(preparationTime * 1000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                long secondsUntilFinished = millisUntilFinished / 1000;
+            // Set preparation timer
+            preparationTimer = new CountDownTimer(preparationTime * 1000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    long secondsUntilFinished = millisUntilFinished / 1000;
 
-                Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
+                    Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
 
-                // Voice alert
-                if (secondsUntilFinished == 3)
-                    speak(getString(R.string.alert_almost_started));
+                    // Voice alert
+                    if (secondsUntilFinished == 3)
+                        speak(getString(R.string.alert_almost_started));
 
-                Intent sendTime = new Intent();
-                    sendTime.setAction("LEARNING_PREPARATION_COUNTDOWN");
-                    sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
-                sendBroadcast(sendTime);
+                    Intent sendTime = new Intent();
+                        sendTime.setAction("LEARNING_PREPARATION_COUNTDOWN");
+                        sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
+                    sendBroadcast(sendTime);
 
-            }
-
-            @Override
-            public void onFinish() {
-                Log.d(TAG, "preparation timer done!");
-
-                // Start sensors
-                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && isSensorAccelerometerActive)
-                    sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
-                    sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-
-                // Voice alert
-                speak(getString(R.string.alert_start));
-
-                // Send data
-                Intent sendTime = new Intent();
-                    sendTime.setAction("LEARNING_ACTIVITY_START");
-                    sendTime.putExtra( "ACTIVITY_START", true);
-                sendBroadcast(sendTime);
-
-                // Start activity timer
-                activityTimer.start();
-            }
-        };
-
-        // Set activity timer
-        activityTimer = new CountDownTimer(activityTime * 1000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                long secondsUntilFinished = millisUntilFinished / 1000;
-
-                Log.d(TAG, "seconds remaining: " + secondsUntilFinished);
-
-                // Send countdown data to UI
-                Intent sendTime = new Intent();
-                    sendTime.setAction("LEARNING_ACTIVITY_COUNTDOWN");
-                    sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
-                sendBroadcast(sendTime);
-
-                // Voice alert
-                if (secondsUntilFinished % 5 == 0)
-                    speak("" + secondsUntilFinished);
-
-                // Update notification countdown
-                Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
-                        .setContentTitle(getString(R.string.learning_service_channel_name))
-                        .setContentText(getString(R.string.learning_service_channel_description) + CountDown.get(secondsUntilFinished))
-                        .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
-                        .setContentIntent(pendingIntent)
-                        .build();
-                // Get notification manager
-                NotificationManager notificationManager = null;
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
-                    notificationManager = getSystemService(NotificationManager.class);
-                else
-                    notificationManager =
-                            (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                // Push notification updated
-                if (notificationManager != null)
-                    notificationManager.notify(Constants.LEARNING_NOTIFICATION_ID, notification);
-
-            }
-
-            @Override
-            public void onFinish() {
-
-                // Stop Sensors listener
-                if (sensorManager != null && sensorEventListener != null)
-                    sensorManager.unregisterListener(sensorEventListener);
-
-                // Voice alert
-                speak(getString(R.string.alert_done));
-
-                // Send end to UI
-                Intent sendTime = new Intent();
-                    sendTime.setAction("LEARNING_ACTIVITY_END");
-                    sendTime.putExtra( "ACTIVITY_END", true);
-                sendBroadcast(sendTime);
-
-                // And Close this service
-                stopSelf();
-
-            }
-        };
-
-        // Connect to the server & set callbacks
-        conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
-            @Override
-            public void messageReceived(String message) {
-
-                try {
-                    readReceivedData(message);
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
 
-            }
-        }, new Connection.OnConnectionErrorListener() {
-            @Override
-            public void onConnectionError() {
+                @Override
+                public void onFinish() {
+                    Log.d(TAG, "preparation timer done!");
 
-                // Send connection error to UI
-                Intent sendTime = new Intent();
-                    sendTime.setAction("LEARNING_CONNECTION_ERROR");
-                    sendTime.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
-                sendBroadcast(sendTime);
+                    // Start sensors
+                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && isSensorAccelerometerActive)
+                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
+                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
-                // Just close the service
-                stopSelf();
+                    // Voice alert
+                    speak(getString(R.string.alert_start));
 
-            }
-        }, new Connection.OnConnectionSuccessListener() {
-            @Override
-            public void onConnectionSuccess() {
+                    // Send data
+                    Intent sendStart = new Intent();
+                        sendStart.setAction("LEARNING_ACTIVITY_START");
+                        sendStart.putExtra( "ACTIVITY_START", true);
+                    sendBroadcast(sendStart);
 
-                // Start service task
-                preparationTimer.start();
-                // and communicate to UI that it is started
-                Intent sendTime = new Intent();
-                    sendTime.setAction("LEARNING_SERVICE_START");
-                    sendTime.putExtra( "SERVICE_START", true);
-                    sendTime.putExtra( "PREPARATION_TIME", preparationTime);
-                sendBroadcast(sendTime);
+                    // Start activity timer
+                    activityTimer.start();
+                }
+            };
 
-            }
-        });
-        conn.run();
+            // Set activity timer
+            activityTimer = new CountDownTimer(activityTime * 1000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    long secondsUntilFinished = millisUntilFinished / 1000;
+
+                    Log.d(TAG, "seconds remaining: " + secondsUntilFinished);
+
+                    // Send countdown data to UI
+                    Intent sendTime = new Intent();
+                        sendTime.setAction("LEARNING_ACTIVITY_COUNTDOWN");
+                        sendTime.putExtra( "ACTIVITY_COUNTDOWN", secondsUntilFinished);
+                    sendBroadcast(sendTime);
+
+                    // Voice alert
+                    if (secondsUntilFinished % 5 == 0)
+                        speak("" + secondsUntilFinished);
+
+                    // Update notification countdown
+                    Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
+                            .setContentTitle(getString(R.string.learning_service_channel_name))
+                            .setContentText(getString(R.string.learning_service_channel_description) + " " + CountDown.get(secondsUntilFinished))
+                            .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
+                            .setContentIntent(pendingIntent)
+                            .build();
+                    // Get notification manager
+                    NotificationManager notificationManager = null;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M)
+                        notificationManager = getSystemService(NotificationManager.class);
+                    else
+                        notificationManager =
+                                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                    // Push notification updated
+                    if (notificationManager != null)
+                        notificationManager.notify(Constants.LEARNING_NOTIFICATION_ID, notification);
+
+                }
+
+                @Override
+                public void onFinish() {
+
+                    // Voice alert
+                    speak(getString(R.string.alert_done));
+
+                    // Send end to UI
+                    Intent sendEnd = new Intent();
+                        sendEnd.setAction("LEARNING_ACTIVITY_END");
+                        sendEnd.putExtra( "ACTIVITY_END", true);
+                    sendBroadcast(sendEnd);
+
+                    // And Close this service
+                    stopSelf();
+
+                }
+            };
+
+            // Connect to the server & set callbacks
+            conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
+                @Override
+                public void messageReceived(String message) {
+
+                    try {
+                        readReceivedData(message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Connection.OnConnectionErrorListener() {
+                @Override
+                public void onConnectionError() {
+
+                    // Send connection error to UI
+                    Intent sendError = new Intent();
+                        sendError.setAction("LEARNING_CONNECTION_ERROR");
+                        sendError.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
+                    sendBroadcast(sendError);
+
+                    // Just close the service
+                    stopSelf();
+
+                }
+            }, new Connection.OnConnectionSuccessListener() {
+                @Override
+                public void onConnectionSuccess() {
+
+                    // Start service task
+                    preparationTimer.start();
+                    // and communicate to UI that it is started
+                    Intent sendStart = new Intent();
+                        sendStart.setAction("LEARNING_SERVICE_START");
+                        sendStart.putExtra( "SERVICE_START", true);
+                        sendStart.putExtra( "PREPARATION_TIME", preparationTime);
+                    sendBroadcast(sendStart);
+
+                }
+            });
+            conn.run();
+
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }

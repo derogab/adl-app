@@ -192,83 +192,6 @@ public class LearningFragment extends Fragment {
             }
         });
 
-    }
-
-    private Activity getSelectedActivity() {
-
-        // Get the selected activity index
-        int index = binding.activitySelector.getSelectedIndex();
-
-        // Get the selected activity
-        return (Activity) binding.activitySelector.getItems().get(index);
-
-    }
-
-    private boolean isMyServiceRunning(Class serviceClass) {
-        ActivityManager manager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true; // Package name matches, our service is running
-            }
-        }
-        return false; // No matching package name found => Our service is not running
-    }
-
-    private PhonePosition getSelectedPosition() {
-
-        // Get the selected activity index
-        int index = binding.phonePositionSelector.getSelectedIndex();
-
-        // Get the selected activity
-        return (PhonePosition) binding.phonePositionSelector.getItems().get(index);
-
-    }
-
-    private void checkSensor(TextView v, String featureSensor, boolean isEnabled) {
-        if (mContext != null){
-
-            if (!mContext.getPackageManager().hasSystemFeature(featureSensor)) {
-                v.setText(R.string.sensor_status_not_present);
-                v.setTextColor(getResources().getColor(R.color.colorDisabled));
-            }
-            else if (!isEnabled) {
-                v.setText(R.string.sensor_status_disabled);
-                v.setTextColor(getResources().getColor(R.color.colorDisabled));
-            }
-            else {
-                v.setText(R.string.sensor_status_enabled);
-                v.setTextColor(getResources().getColor(R.color.colorEnabled));
-            }
-
-        }
-    }
-
-    private void updateInfo() {
-        Log.d(TAG, "Updating info...");
-
-        Activity as = getSelectedActivity();
-
-        if (as != null) {
-
-            // Write time in the countdown
-            binding.fragmentLearningCountdownTimer.setText(CountDown.get(as.getTime()));
-
-            // Write sensors status
-            checkSensor(binding.fragmentLearningSensorsAccelerometerValue,
-                    PackageManager.FEATURE_SENSOR_ACCELEROMETER,
-                    as.isSensorActive(Constants.SENSOR_ACCELEROMETER));
-            checkSensor(binding.fragmentLearningSensorsGyroscopeValue,
-                    PackageManager.FEATURE_SENSOR_GYROSCOPE,
-                    as.isSensorActive(Constants.SENSOR_GYROSCOPE));
-
-        }
-
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
         // Set information receiver from service
         learningServiceReceiver = new BroadcastReceiver() {
             @Override
@@ -286,8 +209,6 @@ public class LearningFragment extends Fragment {
 
                         // Show alert
                         Snackbar.make(requireView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime), Snackbar.LENGTH_SHORT).show();
-
-
 
                         binding.fragmentLearningCancelButton.show();
 
@@ -360,6 +281,77 @@ public class LearningFragment extends Fragment {
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_ACTIVITY_START"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_ACTIVITY_END"));
         mContext.registerReceiver(learningServiceReceiver, new IntentFilter("LEARNING_CONNECTION_ERROR"));
+
+    }
+
+    private Activity getSelectedActivity() {
+
+        // Get the selected activity index
+        int index = binding.activitySelector.getSelectedIndex();
+
+        // Get the selected activity
+        return (Activity) binding.activitySelector.getItems().get(index);
+
+    }
+
+    private boolean isMyServiceRunning(Class serviceClass) {
+        ActivityManager manager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true; // Package name matches, our service is running
+            }
+        }
+        return false; // No matching package name found => Our service is not running
+    }
+
+    private PhonePosition getSelectedPosition() {
+
+        // Get the selected activity index
+        int index = binding.phonePositionSelector.getSelectedIndex();
+
+        // Get the selected activity
+        return (PhonePosition) binding.phonePositionSelector.getItems().get(index);
+
+    }
+
+    private void checkSensor(TextView v, String featureSensor, boolean isEnabled) {
+        if (mContext != null){
+
+            if (!mContext.getPackageManager().hasSystemFeature(featureSensor)) {
+                v.setText(R.string.sensor_status_not_present);
+                v.setTextColor(getResources().getColor(R.color.colorDisabled));
+            }
+            else if (!isEnabled) {
+                v.setText(R.string.sensor_status_disabled);
+                v.setTextColor(getResources().getColor(R.color.colorDisabled));
+            }
+            else {
+                v.setText(R.string.sensor_status_enabled);
+                v.setTextColor(getResources().getColor(R.color.colorEnabled));
+            }
+
+        }
+    }
+
+    private void updateInfo() {
+        Log.d(TAG, "Updating info...");
+
+        Activity as = getSelectedActivity();
+
+        if (as != null) {
+
+            // Write time in the countdown
+            binding.fragmentLearningCountdownTimer.setText(CountDown.get(as.getTime()));
+
+            // Write sensors status
+            checkSensor(binding.fragmentLearningSensorsAccelerometerValue,
+                    PackageManager.FEATURE_SENSOR_ACCELEROMETER,
+                    as.isSensorActive(Constants.SENSOR_ACCELEROMETER));
+            checkSensor(binding.fragmentLearningSensorsGyroscopeValue,
+                    PackageManager.FEATURE_SENSOR_GYROSCOPE,
+                    as.isSensorActive(Constants.SENSOR_GYROSCOPE));
+
+        }
 
     }
 

@@ -375,111 +375,118 @@ public class AnalyzerService extends Service implements SensorEventListener {
         // Start foreground notification
         startForeground(Constants.ANALYZER_NOTIFICATION_ID, notification);
 
-        // Destroy service if intent is null
-        if (intent == null) stopSelf();
+        // Destroy or continue...
+        if (intent == null) {
+            // Destroy service if intent is null
+            stopSelf();
+        }
+        else{
+            // Start all service tasks
 
-        // Get input data from fragment: task data
-        archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-        phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
-        preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
-                Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
-        // Get input data from fragment: server information
-        String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
-        int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, Constants.SERVER_HOST_PORT);
+            // Get input data from fragment: task data
+            archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
+            phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
+            preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
+                    Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
+            // Get input data from fragment: server information
+            String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
+            int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, Constants.SERVER_HOST_PORT);
 
-        // Init sensor manager
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+            // Init sensor manager
+            sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-        // Init PackageManager
-        PackageManager packageManager = getPackageManager();
+            // Init PackageManager
+            PackageManager packageManager = getPackageManager();
 
-        // Init counter value
-        index = 0;
+            // Init counter value
+            index = 0;
 
-        // Set the countdown
-        preparationTimer = new CountDownTimer(preparationTime * 1000, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                long secondsUntilFinished = millisUntilFinished / 1000;
+            // Set the countdown
+            preparationTimer = new CountDownTimer(preparationTime * 1000, 1000) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    long secondsUntilFinished = millisUntilFinished / 1000;
 
-                Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
+                    Log.d(TAG, "seconds remaining before start: " + secondsUntilFinished);
 
-                Intent sendTime = new Intent();
-                    sendTime.setAction("ANALYZER_PREPARATION_COUNTDOWN");
-                    sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
-                sendBroadcast(sendTime);
+                    Intent sendTime = new Intent();
+                        sendTime.setAction("ANALYZER_PREPARATION_COUNTDOWN");
+                        sendTime.putExtra( "PREPARATION_COUNTDOWN", secondsUntilFinished);
+                    sendBroadcast(sendTime);
 
-                // Voice alert
-                if (secondsUntilFinished == 3)
-                    speak(getString(R.string.tts_analysis_almost_started));
+                    // Voice alert
+                    if (secondsUntilFinished == 3)
+                        speak(getString(R.string.tts_analysis_almost_started));
 
-            }
-
-            @Override
-            public void onFinish() {
-                Log.d(TAG, "preparation timer done!");
-
-                // Start sensors
-                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER))
-                    sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-                if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
-                    sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
-
-                // Send data to UI
-                Intent sendTime = new Intent();
-                    sendTime.setAction("ANALYZER_ACTIVITY_START");
-                    sendTime.putExtra( "ACTIVITY_START", true);
-                sendBroadcast(sendTime);
-
-                // Voice alert
-                speak(getString(R.string.tts_analysis_started));
-
-            }
-        };
-
-        // Connect to the server & set callbacks
-        conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
-            @Override
-            public void messageReceived(String message) {
-
-                try {
-                    readReceivedData(message);
-                } catch (JSONException e) {
-                    e.printStackTrace();
                 }
 
-            }
-        }, new Connection.OnConnectionErrorListener() {
-            @Override
-            public void onConnectionError() {
+                @Override
+                public void onFinish() {
+                    Log.d(TAG, "preparation timer done!");
 
-                // Send connection error to UI
-                Intent sendTime = new Intent();
-                    sendTime.setAction("ANALYZER_CONNECTION_ERROR");
-                    sendTime.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
-                sendBroadcast(sendTime);
+                    // Start sensors
+                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER))
+                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
+                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
-                // Just close the service
-                stopSelf();
+                    // Send data to UI
+                    Intent sendStart = new Intent();
+                        sendStart.setAction("ANALYZER_ACTIVITY_START");
+                        sendStart.putExtra( "ACTIVITY_START", true);
+                    sendBroadcast(sendStart);
 
-            }
-        }, new Connection.OnConnectionSuccessListener() {
-            @Override
-            public void onConnectionSuccess() {
+                    // Voice alert
+                    speak(getString(R.string.tts_analysis_started));
 
-                // start the timer before start
-                preparationTimer.start();
+                }
+            };
 
-                // and communicate to UI that it is started
-                Intent sendTime = new Intent();
-                    sendTime.setAction("ANALYZER_SERVICE_START");
-                    sendTime.putExtra( "SERVICE_START", true);
-                    sendTime.putExtra( "PREPARATION_TIME", preparationTime);
-                sendBroadcast(sendTime);
+            // Connect to the server & set callbacks
+            conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
+                @Override
+                public void messageReceived(String message) {
 
-            }
-        });
-        conn.run();
+                    try {
+                        readReceivedData(message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Connection.OnConnectionErrorListener() {
+                @Override
+                public void onConnectionError() {
+
+                    // Send connection error to UI
+                    Intent sendError = new Intent();
+                        sendError.setAction("ANALYZER_CONNECTION_ERROR");
+                        sendError.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
+                    sendBroadcast(sendError);
+
+                    // Just close the service
+                    stopSelf();
+
+                }
+            }, new Connection.OnConnectionSuccessListener() {
+                @Override
+                public void onConnectionSuccess() {
+
+                    // start the timer before start
+                    preparationTimer.start();
+
+                    // and communicate to UI that it is started
+                    Intent sendStart = new Intent();
+                        sendStart.setAction("ANALYZER_SERVICE_START");
+                        sendStart.putExtra( "SERVICE_START", true);
+                        sendStart.putExtra( "PREPARATION_TIME", preparationTime);
+                    sendBroadcast(sendStart);
+
+                }
+            });
+            conn.run();
+
+        }
 
         return super.onStartCommand(intent, flags, startId);
     }
