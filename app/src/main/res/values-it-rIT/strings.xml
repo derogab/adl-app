@@ -48,7 +48,7 @@
     <string name="alert_stop">Attività fermata.</string>
     <string name="tts_analysis_started">Analisi iniziata.</string>
     <string name="tts_learning_started">Apprendimento iniziato.</string>
-    <string name="tts_prediction">L\'attività predetta è %1$s.</string>
+    <string name="tts_prediction">L\'attività ipotizzata è %1$s.</string>
     <string name="tts_analysis_almost_started">L\'analisi sta per iniziare.</string>
     <string name="tts_learning_almost_started">L\'apprendimento sta per iniziare.</string>
     <string name="learning_fragment_countdown_textview">Tempo di apprendimento</string>
