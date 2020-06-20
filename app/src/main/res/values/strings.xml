@@ -14,6 +14,8 @@
     <string name="settings_server_category_title">Server</string>
     <string name="settings_timer_category_title">Timers</string>
     <string name="settings_timer_preparation_seconds_title">Preparation seconds</string>
+    <string name="settings_theme_category_title">Theme and colors</string>
+    <string name="settings_theme_dark_mode_title">Dark mode</string>
     <!-- ANALYZER -->
     <string name="analyzer_service_channel_description">Analyzing in progress…</string>
     <string name="analyzer_service_channel_name">Analyzer Service</string>

@@ -52,4 +52,6 @@
     <string name="tts_analysis_almost_started">L\'analisi sta per iniziare.</string>
     <string name="tts_learning_almost_started">L\'apprendimento sta per iniziare.</string>
     <string name="learning_fragment_countdown_textview">Tempo di apprendimento</string>
+    <string name="settings_theme_category_title">Tema e colori</string>
+    <string name="settings_theme_dark_mode_title">Modalità scura</string>
 </resources>

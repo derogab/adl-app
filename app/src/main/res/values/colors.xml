@@ -12,29 +12,37 @@
     <color name="colorOnBackground">#000000</color>
     <color name="colorSurface">#FFFFFF</color>
     <color name="colorOnSurface">#000000</color>
-    <color name="colorText">#000000</color>
+    <color name="colorText">@android:color/primary_text_light</color>
     <color name="colorError">#F44336</color>
     <color name="colorOnError">#FAFAFA</color>
 
     <color name="colorEnabled">#27ae60</color>
     <color name="colorDisabled">#c0392b</color>
 
+    <color name="colorStop">@android:color/darker_gray</color>
+
+    <color name="colorStatusBar">@color/colorPrimaryVariant</color>
+
     <!-- Dark -->
-    <color name="colorPrimaryDark">#d84315</color>
-    <color name="colorPrimaryVariantDark">#9f0000</color>
+    <color name="colorPrimaryDark">#ecf0f1</color>
+    <color name="colorPrimaryVariantDark">#babebe</color>
     <color name="colorOnPrimaryDark">#FFFFFF</color>
-    <color name="colorAccentDark">#ffab00</color>
-    <color name="colorAccentVariantDark">#c67c00</color>
+    <color name="colorAccentDark">#2ecc71</color>
+    <color name="colorAccentVariantDark">#009a44</color>
     <color name="colorOnAccentDark">#FFFFFF</color>
-    <color name="colorBackgroundDark">#212121</color>
+    <color name="colorBackgroundDark">#000000</color>
     <color name="colorOnBackgroundDark">#FFFFFF</color>
     <color name="colorSurfaceDark">#212121</color>
     <color name="colorOnSurfaceDark">#FFFFFF</color>
-    <color name="colorTextDark">#FFFFFF</color>
+    <color name="colorTextDark">@android:color/primary_text_dark</color>
     <color name="colorErrorDark">#F44336</color>
     <color name="colorOnErrorDark">#FFFFFF</color>
 
     <color name="colorEnabledDark">#2ecc71</color>
     <color name="colorDisabledDark">#e74c3c</color>
+
+    <color name="colorStopDark">@android:color/darker_gray</color>
+
+    <color name="colorStatusBarDark">@color/colorBackgroundDark</color>
 
 </resources>

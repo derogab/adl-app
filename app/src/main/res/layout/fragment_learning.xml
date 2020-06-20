@@ -83,20 +83,40 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_learning_countdown_card" />
 
-            <com.jaredrummler.materialspinner.MaterialSpinner
-                android:id="@+id/activity_selector"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/activity_selector_cardview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginTop="8dp"
-                android:textSize="18sp"
-                android:elevation="1dp"
+                android:layout_marginBottom="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_learning_activity_selector_textview" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_learning_activity_selector_textview">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <com.jaredrummler.materialspinner.MaterialSpinner
+                        android:id="@+id/activity_selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        app:ms_arrow_tint="?attr/colorText"
+                        app:ms_text_color="?attr/colorText"
+                        app:ms_background_color="?attr/colorSurface"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:id="@+id/fragment_learning_phone_position_selector_textview"
@@ -108,23 +128,42 @@
                 android:text="@string/phone_position_selector_label"
                 android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/activity_selector" />
+                app:layout_constraintTop_toBottomOf="@+id/activity_selector_cardview" />
 
-            <com.jaredrummler.materialspinner.MaterialSpinner
-                android:id="@+id/phone_position_selector"
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/phone_position_selector_cardview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
                 android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
                 android:layout_marginStart="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginTop="8dp"
-                android:textSize="18sp"
-                android:elevation="1dp"
+                android:layout_marginBottom="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_learning_phone_position_selector_textview" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_learning_phone_position_selector_textview" >
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <com.jaredrummler.materialspinner.MaterialSpinner
+                        android:id="@+id/phone_position_selector"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="18sp"
+                        app:ms_arrow_tint="?attr/colorText"
+                        app:ms_text_color="?attr/colorText"
+                        app:ms_background_color="?attr/colorSurface"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
             <TextView
                 android:id="@+id/fragment_learning_sensors_textview"
@@ -133,10 +172,10 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:text="Sensors"
+                android:text="@string/sensor_label"
                 android:textSize="18sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/phone_position_selector" />
+                app:layout_constraintTop_toBottomOf="@id/phone_position_selector_cardview" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/fragment_learning_sensors"
@@ -253,7 +292,7 @@
         android:layout_alignParentEnd="true"
         android:visibility="gone"
         app:fabSize="normal"
-        app:backgroundTint="@android:color/darker_gray"
+        app:backgroundTint="?attr/colorStop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />

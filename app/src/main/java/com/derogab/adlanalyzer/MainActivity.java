@@ -1,7 +1,9 @@
 package com.derogab.adlanalyzer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,7 +26,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        // Get current theme preference
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        // Set correct theme
+        if (preferences.getBoolean(Constants.PREFERENCE_DARK_MODE, false))
+            setTheme(R.style.AppTheme_Dark);
+        else
+            setTheme(R.style.AppTheme_Light);
+
+        // Create all
         super.onCreate(savedInstanceState);
+
+        // Set current language
+        CurrentLang.getInstance().setLang(getString(R.string.current_lang));
+
         setContentView(R.layout.activity_main);
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
@@ -35,9 +51,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        // Set current language
-        CurrentLang.getInstance().setLang(getString(R.string.current_lang));
-
     }
 
     @Override

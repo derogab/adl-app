@@ -39,6 +39,7 @@ public class Constants {
     public static final String PREFERENCE_SERVER_DESTINATION = "server_destination";
     public static final String PREFERENCE_SERVER_PORT = "server_port";
     public static final String PREFERENCE_PREPARATION_TIME = "timer_preparation_seconds";
+    public static final String PREFERENCE_DARK_MODE = "dark_mode";
 
     public static final String SERVER_REQUEST_MODE_LEARNING = "learning";
     public static final String SERVER_REQUEST_MODE_ANALYZER = "analyzer";
