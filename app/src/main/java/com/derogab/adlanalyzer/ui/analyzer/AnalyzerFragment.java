@@ -24,12 +24,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.databinding.FragmentAnalyzerBinding;
-import com.derogab.adlanalyzer.models.Activity;
 import com.derogab.adlanalyzer.models.PhonePosition;
 import com.derogab.adlanalyzer.services.AnalyzerService;
 import com.derogab.adlanalyzer.utils.Constants;
 import com.derogab.adlanalyzer.utils.CountDown;
-import com.derogab.adlanalyzer.utils.CurrentLang;
 import com.google.android.material.snackbar.Snackbar;
 import com.jaredrummler.materialspinner.MaterialSpinner;
 
@@ -119,6 +117,14 @@ public class AnalyzerFragment extends Fragment {
                 // Select the previously selected phone position
                 if (binding.phonePositionSelector.getItems().size() > analyzerViewModel.getPhonePositionSelectedIndex())
                     binding.phonePositionSelector.setSelectedIndex(analyzerViewModel.getPhonePositionSelectedIndex());
+
+                // Insert previously predicted activity, if there is
+                if (analyzerViewModel.getPredictedActivity() != null) {
+                    // Write previously predicted activity
+                    binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
+                    binding.fragmentAnalyzerOutput.setText(analyzerViewModel.getPredictedActivity());
+
+                }
 
                 // Display the correct fab
                 if(!analyzerViewModel.isAnalyzingInProgress())
@@ -262,26 +268,16 @@ public class AnalyzerFragment extends Fragment {
 
                     case "ANALYZER_PREDICTION":
 
-                        long prediction = intent.getLongExtra("PREDICTION", Constants.NO_INTEGER_DATA);
+                        String prediction = intent.getStringExtra("PREDICTION");
 
-                        if (prediction != Constants.NO_INTEGER_DATA) {
+                        if (prediction != null) {
 
-                            List<Activity> activities = analyzerViewModel.getActivities().getValue();
+                            // Save predicted activity
+                            analyzerViewModel.setPredictedActivity(prediction);
 
-                            String predictionOutput = null;
-
-                            if (activities != null)
-                                for (int i = 0; i < activities.size(); i++)
-                                    if (activities.get(i).getId() == prediction)
-                                        predictionOutput = activities.get(i).getTranslations().getLang(CurrentLang.getInstance().getLang());
-
-                            if (predictionOutput != null) {
-
-                                // Output prediction
-                                binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
-                                binding.fragmentAnalyzerOutput.setText(predictionOutput);
-
-                            }
+                            // Output prediction
+                            binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
+                            binding.fragmentAnalyzerOutput.setText(prediction);
 
                         }
 

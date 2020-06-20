@@ -27,6 +27,8 @@ public class AnalyzerViewModel extends ViewModel {
 
     private boolean analyzingInProgress = false;
 
+    private String predictedActivity = null;
+
     private Intent service = null;
 
     public LiveData<List<Activity>> getActivities() {
@@ -72,6 +74,12 @@ public class AnalyzerViewModel extends ViewModel {
 
     public void setAnalyzingInProgress(boolean analyzingInProgress) {
         this.analyzingInProgress = analyzingInProgress;
+    }
+
+    public String getPredictedActivity() { return predictedActivity; }
+
+    public void setPredictedActivity(String predictedActivity) {
+        this.predictedActivity = predictedActivity;
     }
 
     public Intent getService(Context context) {

@@ -20,16 +20,22 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.connections.Connection;
+import com.derogab.adlanalyzer.models.Activity;
+import com.derogab.adlanalyzer.repositories.ActivitiesRepository;
 import com.derogab.adlanalyzer.utils.Constants;
+import com.derogab.adlanalyzer.utils.CurrentLang;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class AnalyzerService extends Service implements SensorEventListener {
@@ -51,6 +57,8 @@ public class AnalyzerService extends Service implements SensorEventListener {
     private int index;
     // TTS
     private TextToSpeech textToSpeech;
+    // Activities List
+    private MutableLiveData<List<Activity>> activities;
 
 
     /**
@@ -72,6 +80,22 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 notificationManager.createNotificationChannel(channel);
             }
         }
+
+    }
+
+    public LiveData<List<Activity>> getActivities() {
+
+        if (activities == null) {
+            activities = new MutableLiveData<List<Activity>>();
+
+            Log.d(TAG, "Download activities...");
+
+            ActivitiesRepository.getInstance().getActivities(activities);
+
+        }
+
+        Log.d(TAG, "Get activities...");
+        return activities;
 
     }
 
@@ -187,11 +211,28 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 // Get prediction
                 long activity = response.getInt("activity");
 
-                // Send prediction
-                Intent sendPrediction = new Intent();
-                    sendPrediction.setAction("ANALYZER_PREDICTION");
-                    sendPrediction.putExtra( "PREDICTION", activity);
-                sendBroadcast(sendPrediction);
+                String predictionOutput = null;
+                List<Activity> activities = getActivities().getValue();
+
+                // Search predicted activity name
+                if (activities != null)
+                    for (int i = 0; i < activities.size(); i++)
+                        if (activities.get(i).getId() == activity)
+                            predictionOutput = activities.get(i).getTranslations().getLang(CurrentLang.getInstance().getLang());
+
+                // Speak result
+                if (predictionOutput != null) {
+
+                    // TTS Prediction
+                    speak(getString(R.string.tts_prediction, predictionOutput));
+
+                    // Send prediction to UI
+                    Intent sendPrediction = new Intent();
+                        sendPrediction.setAction("ANALYZER_PREDICTION");
+                        sendPrediction.putExtra( "PREDICTION", predictionOutput);
+                    sendBroadcast(sendPrediction);
+
+                }
 
 
             }
