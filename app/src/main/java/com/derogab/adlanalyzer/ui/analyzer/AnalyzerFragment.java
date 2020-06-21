@@ -118,16 +118,6 @@ public class AnalyzerFragment extends Fragment {
                 if (binding.phonePositionSelector.getItems().size() > analyzerViewModel.getPhonePositionSelectedIndex())
                     binding.phonePositionSelector.setSelectedIndex(analyzerViewModel.getPhonePositionSelectedIndex());
 
-                // Insert previously predicted activity, if there is
-                if (analyzerViewModel.getPredictedActivity() != null) {
-                    // Write previously predicted activity
-                    binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
-                    binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
-                    binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
-                    binding.fragmentAnalyzerOutput.setText(analyzerViewModel.getPredictedActivity());
-
-                }
-
                 // Display the correct init status
                 if(!analyzerViewModel.isAnalyzingInProgress()) {
 
@@ -141,6 +131,16 @@ public class AnalyzerFragment extends Fragment {
                     binding.fragmentAnalyzerCancelButton.show();
                     binding.fragmentAnalyzerSpinLoader.setVisibility(View.VISIBLE);
                     binding.fragmentAnalyzerOutput.setVisibility(View.GONE);
+
+                }
+
+                // Insert previously predicted activity, if there is
+                if (analyzerViewModel.getPredictedActivity() != null) {
+                    // Write previously predicted activity
+                    binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                    binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
+                    binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
+                    binding.fragmentAnalyzerOutput.setText(analyzerViewModel.getPredictedActivity());
 
                 }
 
