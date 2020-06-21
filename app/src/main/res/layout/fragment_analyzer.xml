@@ -60,6 +60,7 @@
                         android:layout_height="wrap_content"
                         android:text=""
                         android:textSize="38sp"
+                        android:textColor="?attr/colorAccent"
                         android:gravity="center_horizontal" />
 
                     <com.github.ybq.android.spinkit.SpinKitView
