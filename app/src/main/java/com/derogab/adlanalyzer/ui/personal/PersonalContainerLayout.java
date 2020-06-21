@@ -103,10 +103,8 @@ public class PersonalContainerLayout extends LinearLayout {
             );
             layoutParams.setMargins(0,0,0,16);
             groupCard.setLayoutParams(layoutParams);
-            // Set CardView corner radius
-            groupCard.setRadius(4);
             // Set cardView content padding
-            groupCard.setContentPadding(0, 0, 0, 0);
+            groupCard.setContentPadding(8,8,8,8);
 
             LinearLayout groupCardLayout = new LinearLayout(getContext());
                 groupCardLayout.setOrientation(LinearLayout.VERTICAL);
@@ -156,6 +154,9 @@ public class PersonalContainerLayout extends LinearLayout {
 
                         // Create TextInputEditText
                         TextInputEditText input_text = new TextInputEditText(getContext());
+
+                        // Set padding
+                        input_text.setPadding(0,16,0,16);
 
                         // Set the id
                         setElementId(input_text, viewId++, element.getId());
