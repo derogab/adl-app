@@ -59,7 +59,8 @@ public class AnalyzerService extends Service implements SensorEventListener {
     private TextToSpeech textToSpeech;
     // Activities List
     private MutableLiveData<List<Activity>> activities;
-
+    // Previously predicted activity
+    private long previouslyPredictedActivity = Constants.NO_INTEGER_DATA;
 
     /**
      * Notification channel creation
@@ -211,29 +212,35 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 // Get prediction
                 long activity = response.getInt("activity");
 
-                String predictionOutput = null;
-                List<Activity> activities = getActivities().getValue();
+                if (activity != previouslyPredictedActivity) {
 
-                // Search predicted activity name
-                if (activities != null)
-                    for (int i = 0; i < activities.size(); i++)
-                        if (activities.get(i).getId() == activity)
-                            predictionOutput = activities.get(i).getTranslations().getLang(CurrentLang.getInstance().getLang());
+                    String predictionOutput = null;
+                    List<Activity> activities = getActivities().getValue();
 
-                // Speak result
-                if (predictionOutput != null) {
+                    // Search predicted activity name
+                    if (activities != null)
+                        for (int i = 0; i < activities.size(); i++)
+                            if (activities.get(i).getId() == activity)
+                                predictionOutput = activities.get(i).getTranslations().getLang(CurrentLang.getInstance().getLang());
 
-                    // TTS Prediction
-                    speak(getString(R.string.tts_prediction, predictionOutput));
+                    // Speak result
+                    if (predictionOutput != null) {
 
-                    // Send prediction to UI
-                    Intent sendPrediction = new Intent();
-                        sendPrediction.setAction("ANALYZER_PREDICTION");
-                        sendPrediction.putExtra( "PREDICTION", predictionOutput);
-                    sendBroadcast(sendPrediction);
+                        // TTS Prediction
+                        speak(getString(R.string.tts_prediction, predictionOutput));
+
+                        // Send prediction to UI
+                        Intent sendPrediction = new Intent();
+                            sendPrediction.setAction("ANALYZER_PREDICTION");
+                            sendPrediction.putExtra( "PREDICTION", predictionOutput);
+                        sendBroadcast(sendPrediction);
+
+                        // Save previously selected
+                        previouslyPredictedActivity = activity;
+
+                    }
 
                 }
-
 
             }
 
