@@ -8,9 +8,11 @@ import android.view.MenuItem;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import com.derogab.adlanalyzer.utils.Constants;
+import com.google.android.material.snackbar.Snackbar;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -55,6 +57,19 @@ public class SettingsActivity extends AppCompatActivity {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey);
+
+            // Set preference on change listeners
+            Preference themePreference = findPreference(Constants.PREFERENCE_DARK_MODE);
+
+            if (themePreference != null) themePreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+
+                        Snackbar.make(requireView(), R.string.settings_theme_changed_alert, Snackbar.LENGTH_LONG).show();
+
+                        return false;
+                    }
+                });
         }
     }
 }
