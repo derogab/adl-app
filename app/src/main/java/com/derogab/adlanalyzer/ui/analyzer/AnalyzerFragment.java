@@ -121,16 +121,28 @@ public class AnalyzerFragment extends Fragment {
                 // Insert previously predicted activity, if there is
                 if (analyzerViewModel.getPredictedActivity() != null) {
                     // Write previously predicted activity
+                    binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                    binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
                     binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
                     binding.fragmentAnalyzerOutput.setText(analyzerViewModel.getPredictedActivity());
 
                 }
 
-                // Display the correct fab
-                if(!analyzerViewModel.isAnalyzingInProgress())
+                // Display the correct init status
+                if(!analyzerViewModel.isAnalyzingInProgress()) {
+
                     binding.fragmentAnalyzerStartButton.show();
-                else
+                    binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                    binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
+
+                }
+                else { // In progress
+
                     binding.fragmentAnalyzerCancelButton.show();
+                    binding.fragmentAnalyzerSpinLoader.setVisibility(View.VISIBLE);
+                    binding.fragmentAnalyzerOutput.setVisibility(View.GONE);
+
+                }
 
             }
         });
@@ -199,9 +211,14 @@ public class AnalyzerFragment extends Fragment {
                 binding.fragmentAnalyzerCancelButton.hide();
                 binding.fragmentAnalyzerStartButton.show();
 
+                // Cancel predicted activity
+                analyzerViewModel.setPredictedActivity(null);
+
                 // Output re-init
+                binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
                 binding.fragmentAnalyzerOutput.setTextColor(Color.GRAY);
-                binding.fragmentAnalyzerOutput.setText("?");
+                binding.fragmentAnalyzerOutput.setText("");
 
             }
         });
@@ -220,6 +237,8 @@ public class AnalyzerFragment extends Fragment {
                         if (preparationCountdown != -1) {
 
                             // Output the countdown
+                            binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                            binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
                             binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorAccent));
                             binding.fragmentAnalyzerOutput.setText(CountDown.get(preparationCountdown));
 
@@ -233,8 +252,8 @@ public class AnalyzerFragment extends Fragment {
                         Snackbar.make(requireView(), getString(R.string.analyzer_service_start), Snackbar.LENGTH_SHORT).show();
 
                         // Output null
-                        binding.fragmentAnalyzerOutput.setTextColor(Color.GRAY);
-                        binding.fragmentAnalyzerOutput.setText("...");
+                        binding.fragmentAnalyzerOutput.setVisibility(View.GONE);
+                        binding.fragmentAnalyzerSpinLoader.setVisibility(View.VISIBLE);
 
                         break;
 
@@ -247,6 +266,8 @@ public class AnalyzerFragment extends Fragment {
                         Snackbar.make(requireView(), getString(R.string.analyzer_service_preparation_countdown, preparationTime), Snackbar.LENGTH_SHORT).show();
 
                         // Output the countdown
+                        binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                        binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
                         binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorAccent));
                         binding.fragmentAnalyzerOutput.setText(CountDown.get(preparationTime));
 
@@ -276,6 +297,8 @@ public class AnalyzerFragment extends Fragment {
                             analyzerViewModel.setPredictedActivity(prediction);
 
                             // Output prediction
+                            binding.fragmentAnalyzerSpinLoader.setVisibility(View.GONE);
+                            binding.fragmentAnalyzerOutput.setVisibility(View.VISIBLE);
                             binding.fragmentAnalyzerOutput.setTextColor(getResources().getColor(R.color.colorPrimary));
                             binding.fragmentAnalyzerOutput.setText(prediction);
 
