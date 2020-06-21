@@ -20,6 +20,7 @@
     <color name="colorDisabled">#c0392b</color>
 
     <color name="colorStop">@android:color/darker_gray</color>
+    <color name="colorDirty">#eceff1</color>
 
     <color name="colorStatusBar">@color/colorPrimaryVariant</color>
 
@@ -42,6 +43,7 @@
     <color name="colorDisabledDark">#e74c3c</color>
 
     <color name="colorStopDark">@android:color/darker_gray</color>
+    <color name="colorDirtyDark">#484848</color>
 
     <color name="colorStatusBarDark">@color/colorBackgroundDark</color>
 

@@ -17,6 +17,7 @@
 
         <item name="colorStop" format="color">@color/colorStop</item>
         <item name="colorText" format="color">@color/colorText</item>
+        <item name="colorDirty" format="color">@color/colorDirty</item>
 
         <item name="android:colorBackground">@color/colorBackground</item>
         <item name="android:textColor">@color/colorText</item>
@@ -40,6 +41,7 @@
 
         <item name="colorStop" format="color">@color/colorStopDark</item>
         <item name="colorText" format="color">@color/colorTextDark</item>
+        <item name="colorDirty" format="color">@color/colorDirtyDark</item>
 
         <item name="android:colorBackground">@color/colorBackgroundDark</item>
         <item name="android:textColor">@color/colorTextDark</item>

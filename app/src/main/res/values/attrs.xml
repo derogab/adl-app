@@ -2,4 +2,5 @@
 <resources>
     <attr name="colorText" format="color" />
     <attr name="colorStop" format="color" />
+    <attr name="colorDirty" format="color" />
 </resources>

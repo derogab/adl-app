@@ -38,6 +38,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
@@ -155,11 +156,16 @@ public class PersonalContainerLayout extends LinearLayout {
                         // Create TextInputEditText
                         TextInputEditText input_text = new TextInputEditText(getContext());
 
-                        // Set padding
-                        input_text.setPadding(0,16,0,16);
-
                         // Set the id
                         setElementId(input_text, viewId++, element.getId());
+
+                        // Set padding
+                        input_text.setPadding(8,24,8,16);
+
+                        // Set background color
+                        TypedValue typedValue = new TypedValue();
+                        getContext().getTheme().resolveAttribute(R.attr.colorDirty, typedValue, true);
+                        input_text.setBackgroundColor(typedValue.data);
 
                         // Listener onChange
                         input_text.addTextChangedListener(new TextWatcher() {
