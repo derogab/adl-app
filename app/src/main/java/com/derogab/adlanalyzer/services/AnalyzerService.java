@@ -259,10 +259,19 @@ public class AnalyzerService extends Service implements SensorEventListener {
      * */
     private void sendData(String data) {
 
-        // if connected
-        if (conn != null && data != null)
-            // send the data to the server
-            conn.sendMessage(data);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                // if connected
+                if (conn != null && data != null)
+                    // send the data to the server
+                    conn.sendMessage(data);
+
+            }
+
+        }).start();
 
     }
 
@@ -474,6 +483,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 .setContentText(getString(R.string.analyzer_service_channel_description))
                 .setSmallIcon(R.drawable.ic_search_black_24dp)
                 .setContentIntent(pendingIntent)
+                .setProgress(0,0,true) // indeterminate progress
                 .build();
 
         // Start foreground notification
@@ -496,9 +506,6 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
             // Init sensor manager
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-            // Init PackageManager
-            PackageManager packageManager = getPackageManager();
 
             // Init counter value
             index = 0;
@@ -527,9 +534,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
                     Log.d(TAG, "preparation timer done!");
 
                     // Start sensors
-                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER))
+                    if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER))
                         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
+                    if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
                         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
                     // Send data to UI

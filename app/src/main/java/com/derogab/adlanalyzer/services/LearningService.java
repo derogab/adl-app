@@ -122,10 +122,19 @@ public class LearningService extends Service implements SensorEventListener {
      * */
     private void sendData(String data) {
 
-        // if connected
-        if (conn != null && data != null)
-            // send the data to the server
-            conn.sendMessage(data);
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                // if connected
+                if (conn != null && data != null)
+                    // send the data to the server
+                    conn.sendMessage(data);
+
+            }
+
+        }).start();
 
     }
 
@@ -437,6 +446,7 @@ public class LearningService extends Service implements SensorEventListener {
             .setContentText(getString(R.string.learning_service_channel_description))
             .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
             .setContentIntent(pendingIntent)
+            .setProgress(0,0,true) // indeterminate progress
             .build();
 
         // Start foreground notification
@@ -466,9 +476,6 @@ public class LearningService extends Service implements SensorEventListener {
             // Init sensor manager
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
 
-            // Init PackageManager
-            PackageManager packageManager = getPackageManager();
-
             // Init counter value
             index = 0;
 
@@ -496,9 +503,9 @@ public class LearningService extends Service implements SensorEventListener {
                     Log.d(TAG, "preparation timer done!");
 
                     // Start sensors
-                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && isSensorAccelerometerActive)
+                    if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER) && isSensorAccelerometerActive)
                         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-                    if (packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
+                    if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE) && isSensorGyroscopeActive)
                         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
 
                     // Voice alert
@@ -533,12 +540,17 @@ public class LearningService extends Service implements SensorEventListener {
                     if (secondsUntilFinished % 5 == 0)
                         speak("" + secondsUntilFinished);
 
+                    // Get progress status
+                    int maxProgress = (int) activityTime;
+                    int currentProgress = (int) (activityTime - secondsUntilFinished);
+
                     // Update notification countdown
                     Notification notification = new NotificationCompat.Builder(getApplicationContext(), Constants.LEARNING_SERVICE_NOTIFICATION_CHANNEL_ID)
                             .setContentTitle(getString(R.string.learning_service_channel_name))
-                            .setContentText(getString(R.string.learning_service_channel_description) + " " + CountDown.get(secondsUntilFinished))
+                            .setContentText(getString(R.string.learning_service_channel_description))
                             .setSmallIcon(R.drawable.ic_directions_run_black_24dp)
                             .setContentIntent(pendingIntent)
+                            .setProgress(maxProgress, currentProgress,false)
                             .build();
                     // Get notification manager
                     NotificationManager notificationManager = null;
