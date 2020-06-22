@@ -225,7 +225,6 @@ public class LearningFragment extends Fragment {
 
                         long activityCountdown = intent.getLongExtra("ACTIVITY_COUNTDOWN", 0);
 
-                        binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorPrimary));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(activityCountdown));
 
                         break;
@@ -234,7 +233,6 @@ public class LearningFragment extends Fragment {
 
                         long preparationCountdown = intent.getLongExtra("PREPARATION_COUNTDOWN", 0);
 
-                        binding.fragmentLearningCountdownTimer.setTextColor(getResources().getColor(R.color.colorAccent));
                         binding.fragmentLearningCountdownTimer.setText(CountDown.get(preparationCountdown));
 
                         break;
