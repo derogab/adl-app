@@ -47,6 +47,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
     private SensorEventListener sensorEventListener;
     // Connection to a socket
     private Connection conn;
+    // Server info
+    private String host;
+    private int port;
     // Current data information
     private String archive;
     private long phonePosition;
@@ -391,6 +394,57 @@ public class AnalyzerService extends Service implements SensorEventListener {
         super.onDestroy();
     }
 
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+
+            // Connect to the server & set callbacks
+            conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
+                @Override
+                public void messageReceived(String message) {
+
+                    try {
+                        readReceivedData(message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Connection.OnConnectionErrorListener() {
+                @Override
+                public void onConnectionError() {
+
+                    // Send connection error to UI
+                    Intent sendError = new Intent();
+                        sendError.setAction("ANALYZER_CONNECTION_ERROR");
+                        sendError.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
+                    sendBroadcast(sendError);
+
+                    // Just close the service
+                    stopSelf();
+
+                }
+            }, new Connection.OnConnectionSuccessListener() {
+                @Override
+                public void onConnectionSuccess() {
+
+                    // start the timer before start
+                    preparationTimer.start();
+
+                    // and communicate to UI that it is started
+                    Intent sendStart = new Intent();
+                        sendStart.setAction("ANALYZER_SERVICE_START");
+                        sendStart.putExtra( "SERVICE_START", true);
+                        sendStart.putExtra( "PREPARATION_TIME", preparationTime);
+                    sendBroadcast(sendStart);
+
+                }
+            });
+            conn.run();
+
+        }
+    };
+
     /**
      * On Start Command
      * All service task
@@ -429,16 +483,14 @@ public class AnalyzerService extends Service implements SensorEventListener {
             stopSelf();
         }
         else{
-            // Start all service tasks
-
             // Get input data from fragment: task data
             archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
             phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
             preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                     Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
             // Get input data from fragment: server information
-            String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
-            int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, Constants.SERVER_HOST_PORT);
+            host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
+            port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, Constants.SERVER_HOST_PORT);
 
             // Init sensor manager
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -490,49 +542,8 @@ public class AnalyzerService extends Service implements SensorEventListener {
                 }
             };
 
-            // Connect to the server & set callbacks
-            conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
-                @Override
-                public void messageReceived(String message) {
-
-                    try {
-                        readReceivedData(message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }, new Connection.OnConnectionErrorListener() {
-                @Override
-                public void onConnectionError() {
-
-                    // Send connection error to UI
-                    Intent sendError = new Intent();
-                        sendError.setAction("ANALYZER_CONNECTION_ERROR");
-                        sendError.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
-                    sendBroadcast(sendError);
-
-                    // Just close the service
-                    stopSelf();
-
-                }
-            }, new Connection.OnConnectionSuccessListener() {
-                @Override
-                public void onConnectionSuccess() {
-
-                    // start the timer before start
-                    preparationTimer.start();
-
-                    // and communicate to UI that it is started
-                    Intent sendStart = new Intent();
-                        sendStart.setAction("ANALYZER_SERVICE_START");
-                        sendStart.putExtra( "SERVICE_START", true);
-                        sendStart.putExtra( "PREPARATION_TIME", preparationTime);
-                    sendBroadcast(sendStart);
-
-                }
-            });
-            conn.run();
+            // Start all service tasks
+            new Thread(runnable).start();
 
         }
 

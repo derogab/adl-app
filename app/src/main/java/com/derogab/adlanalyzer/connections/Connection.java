@@ -64,25 +64,20 @@ public class Connection {
      * @param message text entered by client
      */
     public void sendMessage(String message) {
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                if (bufferOut != null) {
-                    try {
-                        bufferOut.println(message);
-                        bufferOut.flush();
-                    }
-                    catch (NullPointerException e) {
-                        Log.e(TAG, "Send message error: connection already closed.");
-                    }
-                    catch (Exception e) {
-                        Log.e(TAG, "Error: " + e);
-                    }
-                }
+
+        if (bufferOut != null) {
+            try {
+                bufferOut.println(message);
+                bufferOut.flush();
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+            catch (NullPointerException e) {
+                Log.e(TAG, "Send message error: connection already closed.");
+            }
+            catch (Exception e) {
+                Log.e(TAG, "Error: " + e);
+            }
+        }
+
     }
 
     /**
@@ -123,86 +118,69 @@ public class Connection {
 
         mRun = true;
 
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
+        try {
+            Log.d(TAG, "Connecting to server...");
+            // Create a socket to make the connection with the server
+            Log.d(TAG, "Host: " + destination);
+            Log.d(TAG, "Port: " + port);
+            socket = new Socket(destination, port);
+            // Exec callback after connection
+            if (onConnectionSuccessListener != null)
+                onConnectionSuccessListener.onConnectionSuccess();
 
-                try {
-                    Log.d(TAG, "Connecting to server...");
-                    // Create a socket to make the connection with the server
-                    Log.d(TAG, "Host: " + destination);
-                    Log.d(TAG, "Port: " + port);
-                    socket = new Socket(destination, port);
-                    // Exec callback after connection
-                    if (onConnectionSuccessListener != null)
-                        onConnectionSuccessListener.onConnectionSuccess();
+        } catch (Exception e) {
+            // Exec callback
+            if (onConnectionErrorListener != null)
+                onConnectionErrorListener.onConnectionError();
+        }
 
-                } catch (Exception e) {
-                    // Exec callback
-                    if (onConnectionErrorListener != null)
-                        onConnectionErrorListener.onConnectionError();
-                }
+        if (socket != null) {
 
-                if (socket != null) {
+            try {
 
-                    try {
+                // Sends the message to the server
+                bufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 
-                        // Sends the message to the server
-                        bufferOut = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                // Receives the message which the server sends back
+                bufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-                        // Receives the message which the server sends back
-                        bufferIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                // In this while the client listens for the messages sent by the server
+                while (mRun) {
 
-                        // In this while the client listens for the messages sent by the server
-                        while (mRun) {
+                    serverMessage = bufferIn.readLine();
 
-                            serverMessage = bufferIn.readLine();
+                    if (serverMessage != null && onMessageReceivedListener != null) {
 
-                            if (serverMessage != null && onMessageReceivedListener != null) {
-
-                                Runnable runnable = new Runnable() {
-                                    @Override
-                                    public void run() {
-
-                                        if (onMessageReceivedListener != null)
-                                            onMessageReceivedListener.messageReceived(serverMessage);
-
-                                    }
-                                };
-                                new Thread(runnable).start();
-
-                            }
-
-                        }
-
-                    } catch (Exception e) {
-
-                        // Error communicating with the server
-                        Log.e(TAG, "Receiving message error: probably connection already closed.");
-
-                    } finally {
-
-                        if (socket != null) {
-
-                            try {
-                                // The socket must be closed.
-                                // It is not possible to reconnect to this socket
-                                // after it is closed, which means a new socket instance has to be created.
-                                socket.close();
-                            } catch (IOException e) {
-                                Log.e(TAG, "Socket close error: probably connection already closed.");
-                            }
-
-                        }
+                        if (onMessageReceivedListener != null)
+                            onMessageReceivedListener.messageReceived(serverMessage);
 
                     }
 
                 }
 
+            } catch (Exception e) {
+
+                // Error communicating with the server
+                Log.e(TAG, "Receiving message error: probably connection already closed.");
+
+            } finally {
+
+                if (socket != null) {
+
+                    try {
+                        // The socket must be closed.
+                        // It is not possible to reconnect to this socket
+                        // after it is closed, which means a new socket instance has to be created.
+                        socket.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, "Socket close error: probably connection already closed.");
+                    }
+
+                }
+
             }
-        };
-        Thread thread = new Thread(runnable);
-        thread.start();
+
+        }
 
     }
 

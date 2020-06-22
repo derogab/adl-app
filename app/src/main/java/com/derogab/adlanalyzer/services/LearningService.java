@@ -45,6 +45,9 @@ public class LearningService extends Service implements SensorEventListener {
     private SensorEventListener sensorEventListener;
     // Connection to a socket
     private Connection conn;
+    // Server info
+    private String host;
+    private int port;
     // Current activity information
     private String archive;
     private long activity;
@@ -356,6 +359,56 @@ public class LearningService extends Service implements SensorEventListener {
         });
     }
 
+    private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+
+            // Connect to the server & set callbacks
+            conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
+                @Override
+                public void messageReceived(String message) {
+
+                    try {
+                        readReceivedData(message);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            }, new Connection.OnConnectionErrorListener() {
+                @Override
+                public void onConnectionError() {
+
+                    // Send connection error to UI
+                    Intent sendError = new Intent();
+                        sendError.setAction("LEARNING_CONNECTION_ERROR");
+                        sendError.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
+                    sendBroadcast(sendError);
+
+                    // Just close the service
+                    stopSelf();
+
+                }
+            }, new Connection.OnConnectionSuccessListener() {
+                @Override
+                public void onConnectionSuccess() {
+
+                    // Start service task
+                    preparationTimer.start();
+                    // and communicate to UI that it is started
+                    Intent sendStart = new Intent();
+                        sendStart.setAction("LEARNING_SERVICE_START");
+                        sendStart.putExtra( "SERVICE_START", true);
+                        sendStart.putExtra( "PREPARATION_TIME", preparationTime);
+                    sendBroadcast(sendStart);
+
+                }
+            });
+            conn.run();
+
+        }
+    };
+
     /**
      * Sensor callback
      * Triggered on accuracy change
@@ -394,8 +447,6 @@ public class LearningService extends Service implements SensorEventListener {
             stopSelf();
         }
         else{
-            // Start all service tasks
-
             // Get input data from fragment: task data
             archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
             activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA);
@@ -408,8 +459,8 @@ public class LearningService extends Service implements SensorEventListener {
             isSensorAccelerometerActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_ACCELEROMETER, true);
             isSensorGyroscopeActive = intent.getBooleanExtra(Constants.LEARNING_SERVICE_SENSOR_STATUS_GYROSCOPE, true);
             // Get input data from fragment: server information
-            String host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
-            int port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
+            host = intent.getStringExtra(Constants.PREFERENCE_SERVER_DESTINATION);
+            port = intent.getIntExtra(Constants.PREFERENCE_SERVER_PORT, 8080);
 
             // Init sensor manager
             sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -519,48 +570,8 @@ public class LearningService extends Service implements SensorEventListener {
                 }
             };
 
-            // Connect to the server & set callbacks
-            conn = new Connection(host, port, new Connection.OnMessageReceivedListener() {
-                @Override
-                public void messageReceived(String message) {
-
-                    try {
-                        readReceivedData(message);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            }, new Connection.OnConnectionErrorListener() {
-                @Override
-                public void onConnectionError() {
-
-                    // Send connection error to UI
-                    Intent sendError = new Intent();
-                        sendError.setAction("LEARNING_CONNECTION_ERROR");
-                        sendError.putExtra( "CONNECTION_ERROR", getString(R.string.error_server_connection));
-                    sendBroadcast(sendError);
-
-                    // Just close the service
-                    stopSelf();
-
-                }
-            }, new Connection.OnConnectionSuccessListener() {
-                @Override
-                public void onConnectionSuccess() {
-
-                    // Start service task
-                    preparationTimer.start();
-                    // and communicate to UI that it is started
-                    Intent sendStart = new Intent();
-                        sendStart.setAction("LEARNING_SERVICE_START");
-                        sendStart.putExtra( "SERVICE_START", true);
-                        sendStart.putExtra( "PREPARATION_TIME", preparationTime);
-                    sendBroadcast(sendStart);
-
-                }
-            });
-            conn.run();
+            // Start all service tasks
+            new Thread(runnable).start();
 
         }
 
