@@ -130,13 +130,14 @@ public class LearningService extends Service implements SensorEventListener {
     }
 
     /**
-     * Create the closing message json
+     * Create a custom message json
      *
      * @param archive archive to close
+     * @param type message type
      *
-     * @return the closing message json
+     * @return the custom message json
      * */
-    private String getClosingMessage(String archive) {
+    private String getMessage(String archive, String type) {
 
         String jsonData = null;
         try {
@@ -146,7 +147,7 @@ public class LearningService extends Service implements SensorEventListener {
                     .put("mode", Constants.SERVER_REQUEST_MODE_LEARNING)
                     .put("data", new JSONObject()
                             .put("archive", archive)
-                            .put("type", "close")).toString();
+                            .put("type", type)).toString();
 
         }
         catch (JSONException e) {
@@ -285,7 +286,7 @@ public class LearningService extends Service implements SensorEventListener {
     public void onDestroy() {
 
         // Send close to server
-        sendData(getClosingMessage(archive));
+        sendData(getMessage(archive, "destroy"));
 
         // Stop Sensors listener
         if (sensorManager != null && sensorEventListener != null)
@@ -564,8 +565,11 @@ public class LearningService extends Service implements SensorEventListener {
                         sendEnd.putExtra( "ACTIVITY_END", true);
                     sendBroadcast(sendEnd);
 
-                    // And Close this service
-                    stopSelf();
+                    // Send close to server
+                    sendData(getMessage(archive, "close"));
+
+                    // And stop foreground, but still in background
+                    stopForeground(true);
 
                 }
             };

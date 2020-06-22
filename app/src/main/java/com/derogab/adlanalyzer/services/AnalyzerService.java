@@ -155,13 +155,14 @@ public class AnalyzerService extends Service implements SensorEventListener {
     }
 
     /**
-     * Create the closing message json
+     * Create a custom message json
      *
      * @param archive archive to close
+     * @param type message type
      *
-     * @return the closing message json
+     * @return the custom message json
      * */
-    private String getClosingMessage(String archive) {
+    private String getMessage(String archive, String type) {
 
         String jsonData = null;
         try {
@@ -171,7 +172,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
                     .put("mode", Constants.SERVER_REQUEST_MODE_ANALYZER)
                     .put("data", new JSONObject()
                             .put("archive", archive)
-                            .put("type", "close")).toString();
+                            .put("type", type)).toString();
 
         }
         catch (JSONException e) {
@@ -358,8 +359,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
     @Override
     public void onDestroy() {
 
-        // Send close message to server
-        sendData(getClosingMessage(archive));
+        // Send close & destroy message to server
+        sendData(getMessage(archive, "close"));
+        sendData(getMessage(archive, "destroy"));
 
         // Send destroy message to UI
         Intent sendDestroy = new Intent();
