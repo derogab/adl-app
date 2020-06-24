@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -21,17 +22,24 @@ import android.util.Log;
 import com.derogab.adlanalyzer.MainActivity;
 import com.derogab.adlanalyzer.R;
 import com.derogab.adlanalyzer.connections.Connection;
+import com.derogab.adlanalyzer.models.FormElement;
+import com.derogab.adlanalyzer.models.FormGroup;
+import com.derogab.adlanalyzer.repositories.FormTemplateRepository;
 import com.derogab.adlanalyzer.utils.Constants;
-import com.derogab.adlanalyzer.utils.CountDown;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class LearningService extends Service implements SensorEventListener {
 
@@ -61,6 +69,10 @@ public class LearningService extends Service implements SensorEventListener {
     private int index;
     // TTS
     private TextToSpeech textToSpeech;
+    // Headers check
+    private boolean headersHaveBeenSent = false;
+    // Form Template Groups List
+    private MutableLiveData<List<FormGroup>> templateGroups;
 
     /**
      * Notification channel creation
@@ -80,6 +92,122 @@ public class LearningService extends Service implements SensorEventListener {
             if (notificationManager != null) {
                 notificationManager.createNotificationChannel(channel);
             }
+        }
+
+    }
+
+    /**
+     * Get Form Template
+     * Get the object template from online JSON
+     *
+     * */
+    public LiveData<List<FormGroup>> getFormTemplate() {
+
+        if (templateGroups == null) {
+            templateGroups = new MutableLiveData<List<FormGroup>>();
+
+            Log.d(TAG, "Download template...");
+
+            FormTemplateRepository.getInstance().getFormTemplate(templateGroups);
+
+        }
+
+        Log.d(TAG, "Get template...");
+        return templateGroups;
+    }
+
+    /**
+     * Get headers
+     * Generate headers from saved data
+     *
+     * @return the headers JSON string generated
+     *
+     * */
+    private String getHeaders() throws JSONException {
+
+        // Get form template
+        List<FormGroup> groups = getFormTemplate().getValue();
+
+        if (groups != null) {
+
+            JSONObject additionalData = new JSONObject();
+            SharedPreferences sharedPreferences = getSharedPreferences(Constants.PERSONAL_DATA_INFORMATION_FILE_NAME, Context.MODE_PRIVATE);
+
+            for (int g = 0; g < groups.size(); g++) {
+
+                FormGroup group = groups.get(g);
+                List<FormElement> elements = group.getElements();
+
+                for (int i = 0; i < elements.size(); i++) {
+
+                    // Get params
+                    FormElement element = elements.get(i);
+
+                    // Save only data with an ID and that isUploadable
+                    if (element.getId() != null && element.isUploadable()) {
+
+                        String strToSend = null;
+                        JSONArray arrayToSend = null;
+
+                        switch (element.getType()){
+
+                            case Constants.FORM_ELEMENT_TYPE_INPUT_TEXT:
+                            case Constants.FORM_ELEMENT_TYPE_RADIO_GROUP:
+                                strToSend = sharedPreferences.getString(element.getId(), null);
+                                break;
+                            case Constants.FORM_ELEMENT_TYPE_CHECK_GROUP:
+                                Set<String> checkboxSet = sharedPreferences.getStringSet(element.getId(), null);
+                                arrayToSend = new JSONArray();
+
+                                if (checkboxSet != null)
+                                    for (String checkboxSetItem : checkboxSet)
+                                        arrayToSend.put(checkboxSetItem);
+
+                                break;
+
+                        }
+
+                        if (strToSend != null)
+                            additionalData.put(element.getId(), strToSend);
+                        else if (arrayToSend != null)
+                            additionalData.put(element.getId(), arrayToSend);
+
+                    }
+
+                }
+
+            }
+
+            // Headers
+            JSONObject additionalDataPackage = new JSONObject()
+                    .put("status", "OK")
+                    .put("mode", Constants.SERVER_REQUEST_MODE_LEARNING)
+                    .put("data", new JSONObject()
+                            .put("archive", archive)
+                            .put("type", "headers")
+                            .put("values", additionalData));
+
+            return additionalDataPackage.toString();
+
+        }
+        else return null; // form template not downloaded
+
+    }
+
+    /**
+     * Send headers to Server
+     *
+     * */
+    private void sendHeaders() throws JSONException {
+
+        // Get headers
+        String headers = getHeaders();
+        // Headers set
+        if (headers != null) {
+            // Send headers
+            sendData(headers);
+            // Check headers as sent
+            headersHaveBeenSent = true;
         }
 
     }
@@ -108,6 +236,19 @@ public class LearningService extends Service implements SensorEventListener {
             else if (response.getString("type").equals("ack")) {
 
                 Log.d(TAG, "Ack received.");
+
+                // Trigger send headers if not previously sent
+                if (!headersHaveBeenSent) sendHeaders();
+
+            }
+
+            // Receive handshake
+            else if (response.getString("type").equals("handshake")) {
+
+                Log.d(TAG, "Handshake received.");
+
+                // Trigger send headers if not previously sent
+                if (!headersHaveBeenSent) sendHeaders();
 
             }
 

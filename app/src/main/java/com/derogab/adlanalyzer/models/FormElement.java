@@ -7,14 +7,16 @@ public class FormElement {
     private String id;
     private String type;
     private String text;
+    private boolean uploadable;
     private Translation translations;
     private List<FormSubElement> contents;
     private List<Option> options;
 
-    public FormElement(String id, String type, String text, Translation translations, List<FormSubElement> contents, List<Option> options) {
+    public FormElement(String id, String type, String text, boolean uploadable, Translation translations, List<FormSubElement> contents, List<Option> options) {
         this.id = id;
         this.type = type;
         this.text = text;
+        this.uploadable = uploadable;
         this.translations = translations;
         this.contents = contents;
         this.options = options;
@@ -39,6 +41,10 @@ public class FormElement {
     public String getText() { return text; }
 
     public void setText(String text) { this.text = text; }
+
+    public boolean isUploadable() { return uploadable; }
+
+    public void setUploadable(boolean uploadable) { this.uploadable = uploadable; }
 
     public Translation getTranslations() {
         return translations;
@@ -81,10 +87,10 @@ public class FormElement {
                 "id='" + id + '\'' +
                 ", type='" + type + '\'' +
                 ", text='" + text + '\'' +
+                ", uploadable=" + uploadable +
                 ", translations=" + translations +
                 ", contents=" + contents +
                 ", options=" + options +
                 '}';
     }
-
 }
