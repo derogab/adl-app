@@ -102,8 +102,10 @@ public class PersonalContainerLayout extends LinearLayout {
                     LayoutParams.MATCH_PARENT,
                     LayoutParams.WRAP_CONTENT
             );
-            layoutParams.setMargins(0,0,0,16);
+            layoutParams.setMargins(0,0,0,8);
             groupCard.setLayoutParams(layoutParams);
+            // Set cardView compact padding (default true in material)
+            groupCard.setUseCompatPadding(true);
             // Set cardView content padding
             groupCard.setContentPadding(8,8,8,8);
 
