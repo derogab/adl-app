@@ -58,8 +58,8 @@ public class LearningService extends Service implements SensorEventListener {
     private int port;
     // Current activity information
     private String archive;
-    private long activity;
-    private long phonePosition;
+    private String activity;
+    private String phonePosition;
     private long activityTime;
     private long preparationTime;
     // Sensors status
@@ -322,9 +322,9 @@ public class LearningService extends Service implements SensorEventListener {
      * @return the data message json
      * */
     private String getCollectionDataMessage(String archive,
-                                   long activity,
+                                   String activity,
                                    String sensor,
-                                   long phonePosition,
+                                   String phonePosition,
                                    float x,
                                    float y,
                                    float z,
@@ -601,8 +601,8 @@ public class LearningService extends Service implements SensorEventListener {
         else{
             // Get input data from fragment: task data
             archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-            activity = intent.getLongExtra(Constants.LEARNING_SERVICE_ACTIVITY, Constants.NO_INTEGER_DATA);
-            phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
+            activity = intent.getStringExtra(Constants.LEARNING_SERVICE_ACTIVITY);
+            phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
             preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                     Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
             activityTime = intent.getIntExtra(Constants.LEARNING_SERVICE_ACTIVITY_TIMER,

@@ -60,7 +60,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
     private int port;
     // Current data information
     private String archive;
-    private long phonePosition;
+    private String phonePosition;
     // Preparation time and timer
     private long preparationTime;
     private CountDownTimer preparationTimer;
@@ -143,7 +143,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
      * @return the data message json
      * */
     private String getCollectionDataMessage(String archive,
-                                            long phonePosition,
+                                            String phonePosition,
                                             String sensor,
                                             float x,
                                             float y,
@@ -633,7 +633,7 @@ public class AnalyzerService extends Service implements SensorEventListener {
         else{
             // Get input data from fragment: task data
             archive = intent.getStringExtra(Constants.LEARNING_SERVICE_ARCHIVE);
-            phonePosition = intent.getLongExtra(Constants.LEARNING_SERVICE_PHONE_POSITION, Constants.NO_INTEGER_DATA);
+            phonePosition = intent.getStringExtra(Constants.LEARNING_SERVICE_PHONE_POSITION);
             preparationTime = intent.getIntExtra(Constants.LEARNING_SERVICE_PREPARATION_TIMER,
                     Constants.LEARNING_COUNTDOWN_PREPARATION_SECONDS_DEFAULT);
             // Get input data from fragment: server information
