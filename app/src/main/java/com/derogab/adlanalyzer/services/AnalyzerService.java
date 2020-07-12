@@ -671,9 +671,9 @@ public class AnalyzerService extends Service implements SensorEventListener {
 
                     // Start sensors
                     if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER))
-                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
+                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), Constants.SAMPLING_PERIOD);
                     if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE))
-                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), SensorManager.SENSOR_DELAY_NORMAL);
+                        sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE), Constants.SAMPLING_PERIOD);
 
                     // Send data to UI
                     Intent sendStart = new Intent();

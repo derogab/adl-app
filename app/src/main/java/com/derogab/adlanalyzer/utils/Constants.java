@@ -12,6 +12,8 @@ public class Constants {
     public static final String SENSOR_ACCELEROMETER = "accelerometer";
     public static final String SENSOR_GYROSCOPE = "gyroscope";
 
+    public static final int SAMPLING_PERIOD = 50; // (1 / 20 Hz) * 1000
+
     public static final String API_BASE_URL = "https://api.adl.derogab.com/";
 
     public static final String LEARNING_SERVICE_ARCHIVE = "learning_service_archive";
