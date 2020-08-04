@@ -5,7 +5,7 @@ android {
 
 
     defaultConfig {
-        applicationId "com.derogab.adlanalyzer"
+        applicationId "com.derogab.adlapp"
         minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
